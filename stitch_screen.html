@@ -1,0 +1,471 @@
+<!DOCTYPE html><html class="light" lang="fr" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>First Info CI | Expert Sage Solutions</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface": "#1a1c1c",
+                      "surface-container-lowest": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "primary-fixed": "#ffdcbc",
+                      "on-error": "#ffffff",
+                      "on-surface-variant": "#544434",
+                      "background": "#f9f9f9",
+                      "inverse-surface": "#2f3131",
+                      "surface-container-highest": "#e2e2e2",
+                      "on-tertiary": "#ffffff",
+                      "primary-container": "#ff9f1c",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#eeeeee",
+                      "tertiary-fixed-dim": "#fabb65",
+                      "inverse-primary": "#ffb86b",
+                      "error": "#ba1a1a",
+                      "surface-container-high": "#e8e8e8",
+                      "on-secondary-fixed": "#00201d",
+                      "secondary-fixed-dim": "#4fdbcc",
+                      "surface-dim": "#dadada",
+                      "surface-tint": "#895100",
+                      "on-tertiary-fixed-variant": "#643f00",
+                      "surface-container-low": "#f3f3f4",
+                      "on-secondary": "#ffffff",
+                      "on-background": "#1a1c1c",
+                      "inverse-on-surface": "#f0f1f1",
+                      "secondary": "#006a62",
+                      "surface": "#f9f9f9",
+                      "secondary-fixed": "#70f8e8",
+                      "on-secondary-fixed-variant": "#005049",
+                      "surface-variant": "#e2e2e2",
+                      "outline-variant": "#dac2ae",
+                      "on-primary-container": "#683c00",
+                      "primary": "#895100",
+                      "tertiary-container": "#e6a956",
+                      "on-tertiary-container": "#633f00",
+                      "primary-fixed-dim": "#ffb86b",
+                      "on-primary-fixed": "#2c1700",
+                      "surface-bright": "#f9f9f9",
+                      "secondary-container": "#70f8e8",
+                      "tertiary": "#835401",
+                      "tertiary-fixed": "#ffddb5",
+                      "on-primary-fixed-variant": "#683d00",
+                      "on-secondary-container": "#007168",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed": "#2a1800",
+                      "outline": "#877462",
+                      "sage-blue": "#2d3748"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "section-padding": "80px",
+                      "stack-sm": "8px",
+                      "container-max": "1280px",
+                      "stack-lg": "32px",
+                      "margin-mobile": "16px",
+                      "stack-md": "16px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "headline-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "label-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .bento-card {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .bento-card:hover {
+            transform: translateY(-4px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full flex justify-between items-center px-gutter py-4 max-w-container-max mx-auto bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 shadow-sm z-50">
+<div class="flex items-center gap-8">
+<span class="font-headline-md text-headline-md font-bold text-primary">First Info CI</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1" href="#">Expertise</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Solutions</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Support</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Tarifs</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center gap-2 px-3 py-1 bg-surface-container-low rounded-full border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline">search</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Rechercher...</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">help</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+</div>
+<a class="bg-primary hover:bg-primary/90 text-on-primary px-6 py-2 rounded-lg font-label-sm text-label-sm transition-all active:scale-95 shadow-sm" href="#">Se connecter</a>
+</div>
+</header>
+<main class="pt-16 overflow-x-hidden">
+<!-- Hero Section -->
+<section class="w-full bg-surface py-20 px-gutter" style="background: linear-gradient(rgb(249, 249, 249) 0%, rgb(243, 243, 244) 100%);">
+<div class="max-w-4xl mx-auto text-center space-y-8">
+<div class="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-container/10 border border-primary-container/30 font-label-sm text-sm py-2 bg-primary-container/20"><span class="material-symbols-outlined text-sm mr-2">verified</span><div class="flex flex-col items-start leading-tight"><span class="text-on-surface-variant">Partenaire Agréé Sage - Abidjan, Côte d'Ivoire<br></span></div></div>
+<h1 class="text-5xl md:text-6xl font-bold leading-tight text-sage-blue">
+                Un problème avec votre <span class="text-sage-blue">solution Sage ?</span> <span class="text-primary-container">Notre équipe support est là pour vous aider.</span>
+</h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-3xl mx-auto leading-relaxed">
+                Expertise locale reconnue en Afrique de l'Ouest. Taux de satisfaction de 98 % et un temps de réponse garanti inférieur à 24 heures pour nos clients sous contrat.
+            </p>
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+<a class="flex items-center gap-2 bg-primary-container text-on-primary-container px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">lock</span>
+                    Espace Client
+                </a>
+<a class="px-8 py-4 rounded-xl font-bold text-lg border border-outline-variant hover:bg-surface-container transition-all" href="#">
+                    Nous contacter
+                </a>
+</div>
+</div>
+</section>
+<!-- Stats Banner -->
+<section class="bg-surface-container-lowest border-y border-outline-variant/30 py-12">
+<div class="max-w-container-max mx-auto px-gutter">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
+<!-- Stat 1 -->
+<div class="text-center px-4 md:border-r border-outline-variant/30 last:border-r-0">
+<div class="text-4xl md:text-5xl font-bold text-sage-blue mb-2">1 200+</div>
+<div class="text-sm text-on-surface-variant font-medium">clients en Afrique de l'Ouest</div>
+</div>
+<!-- Stat 2 -->
+<div class="text-center px-4 md:border-r border-outline-variant/30 last:border-r-0">
+<div class="text-4xl md:text-5xl font-bold text-sage-blue mb-2">98 %</div>
+<div class="text-sm text-on-surface-variant font-medium">de satisfaction client</div>
+</div>
+<!-- Stat 3 -->
+<div class="text-center px-4 md:border-r border-outline-variant/30 last:border-r-0">
+<div class="text-4xl md:text-5xl font-bold text-sage-blue mb-2">&lt; 4h</div>
+<div class="text-sm text-on-surface-variant font-medium">de résolution moyenne</div>
+</div>
+<!-- Stat 4 -->
+<div class="text-center px-4">
+<div class="text-4xl md:text-5xl font-bold text-sage-blue mb-2">24/7</div>
+<div class="text-sm text-on-surface-variant font-medium">Disponible pour les urgences</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Service Cards Section -->
+<section class="px-gutter py-section-padding bg-surface-container-low/20" id="solutions">
+<div class="max-w-container-max mx-auto">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-bold text-sage-blue mb-4">Nos solutions Sage</h2>
+<p class="text-on-surface-variant max-w-2xl mx-auto">First Info CI maîtrise l'ensemble de l'écosystème Sage. Votre logiciel est entre de bonnes mains.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-white p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow flex flex-col">
+<div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary-container text-3xl">account_balance</span>
+</div>
+<span class="text-[10px] font-bold tracking-widest text-on-surface-variant/60 uppercase mb-2">SAGE 100 COMPTABILITÉ</span>
+<h3 class="text-xl font-bold text-sage-blue mb-3">Sage Comptabilité</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow">
+                        Gestion des écritures, rapprochement bancaire et bilans. Un problème de clôture ? Nos experts vous guident pas à pas.
+                    </p>
+</div>
+<!-- Card 2 -->
+<div class="bg-white p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow flex flex-col">
+<div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-secondary text-3xl">account_balance_wallet</span>
+</div>
+<span class="text-[10px] font-bold tracking-widest text-on-surface-variant/60 uppercase mb-2">IMMOBILISATIONS &amp; TRÉSORERIE</span>
+<h3 class="text-xl font-bold text-sage-blue mb-3">Sage Pool Finances</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow">
+                        Optimisation de la trésorerie, gestion des immobilisations et pilotage des flux financiers de votre entreprise.
+                    </p>
+</div>
+<!-- Card 3 -->
+<div class="bg-white p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow flex flex-col">
+<div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-tertiary text-3xl">inventory_2</span>
+</div>
+<span class="text-[10px] font-bold tracking-widest text-on-surface-variant/60 uppercase mb-2">STOCKS &amp; VENTES</span>
+<h3 class="text-xl font-bold text-sage-blue mb-3">Sage Gestion Commerciale</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow">
+                        Suivi des stocks, cycle de ventes complet (devis, factures) et gestion de la chaîne logistique en temps réel.
+                    </p>
+</div>
+<!-- Card 4 -->
+<div class="bg-white p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow flex flex-col">
+<div class="w-12 h-12 rounded-xl bg-error/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-error text-3xl">groups</span>
+</div>
+<span class="text-[10px] font-bold tracking-widest text-on-surface-variant/60 uppercase mb-2">BULLETINS &amp; DSN</span>
+<h3 class="text-xl font-bold text-sage-blue mb-3">Sage Paie &amp; RH</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow">
+                        Édition des bulletins de paie, déclarations sociales (DSN) et gestion du capital humain en toute conformité.
+                    </p>
+</div>
+<!-- Card 5 -->
+<div class="bg-white p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow flex flex-col">
+<div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-blue-500 text-3xl">handshake</span>
+</div>
+<span class="text-[10px] font-bold tracking-widest text-on-surface-variant/60 uppercase mb-2">RELATION CLIENT &amp; DEVIS</span>
+<h3 class="text-xl font-bold text-sage-blue mb-3">Sage CRM &amp; Multi-devis</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow">
+                        Gestion de la relation client, suivi des opportunités commerciales et chiffrage précis de vos devis d'affaires.
+                    </p>
+</div>
+<!-- Card 6 (Special CTA) -->
+<div class="p-8 rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low flex flex-col justify-center text-center">
+<h3 class="text-xl font-bold text-sage-blue mb-3">Votre logiciel est couvert</h3>
+<p class="text-on-surface-variant text-sm mb-6">
+                        Pas encore client chez First Info CI ? Discutons de vos besoins.
+                    </p>
+<a class="inline-flex items-center justify-center gap-2 text-primary font-bold hover:underline" href="#">
+                        Nous contacter <span class="material-symbols-outlined text-sm">east</span>
+</a>
+</div>
+</div>
+</div>
+</section><section class="px-gutter py-section-padding bg-surface">
+<div class="max-w-4xl mx-auto">
+<div class="text-center mb-12">
+<h2 class="text-4xl font-bold text-sage-blue mb-4">Notre expertise en action</h2>
+<p class="text-on-surface-variant max-w-2xl mx-auto">Solutions rapides aux incidents les plus courants sur Sage, tirées de nos 1 200+ interventions.</p>
+</div>
+<div class="space-y-4">
+<!-- FAQ Item 1 -->
+<div class="border border-outline-variant/20 rounded-xl overflow-hidden bg-surface-container-lowest">
+<button class="w-full flex items-center justify-between p-6 text-left hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.expand-icon').classList.toggle('rotate-180')">
+<span class="font-bold text-sage-blue">Erreur de connexion SQL Server avec Sage 100 Comptabilité</span>
+<span class="material-symbols-outlined expand-icon transition-transform duration-300">expand_more</span>
+</button>
+<div class="hidden px-6 pb-6 text-on-surface-variant text-sm leading-relaxed">
+                    Vérifiez que le service SQL Server est bien démarré et que les ports 1433/1434 ne sont pas bloqués par le pare-feu. Redémarrez le service Sage et reconnectez-vous. Si l'erreur persiste, contrôlez que l'instance (ex : SQLSAGE2019) est bien configurée dans les paramètres réseau du poste client.
+                </div>
+</div>
+<!-- FAQ Item 2 -->
+<div class="border border-outline-variant/20 rounded-xl overflow-hidden bg-surface-container-lowest">
+<button class="w-full flex items-center justify-between p-6 text-left hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.expand-icon').classList.toggle('rotate-180')">
+<span class="font-bold text-sage-blue">Problème de clôture annuelle Sage Paie &amp; RH</span>
+<span class="material-symbols-outlined expand-icon transition-transform duration-300">expand_more</span>
+</button>
+<div class="hidden px-6 pb-6 text-on-surface-variant text-sm leading-relaxed">
+                    Avant toute clôture, sauvegardez votre dossier. Vérifiez que tous les bulletins de décembre sont validés et que la DSN mensuelle a été transmise. Utilisez ensuite l'assistant de clôture dans le menu Gestion. En cas de blocage, contactez notre support — une mauvaise clôture peut impacter l'exercice suivant.
+                </div>
+</div>
+<!-- FAQ Item 3 -->
+<div class="border border-outline-variant/20 rounded-xl overflow-hidden bg-surface-container-lowest">
+<button class="w-full flex items-center justify-between p-6 text-left hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.expand-icon').classList.toggle('rotate-180')">
+<span class="font-bold text-sage-blue">Sage Gestion Commerciale : stock négatif après inventaire</span>
+<span class="material-symbols-outlined expand-icon transition-transform duration-300">expand_more</span>
+</button>
+<div class="hidden px-6 pb-6 text-on-surface-variant text-sm leading-relaxed">
+                    Ce problème survient lorsque des mouvements sont enregistrés pendant l'inventaire. Verrouillez les stocks avant l'inventaire et relancez le calcul des coûts moyens pondérés après validation. Vérifiez également les dates des saisies en attente.
+                </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Contact Section -->
+<section class="px-gutter py-section-padding max-w-container-max mx-auto">
+<div class="bg-inverse-surface rounded-3xl overflow-hidden shadow-2xl relative">
+<div class="grid lg:grid-cols-2 relative z-10">
+<!-- Left: Info -->
+<div class="p-12 lg:p-20 flex flex-col justify-center text-inverse-on-surface">
+<h2 class="text-4xl md:text-5xl font-bold mb-6">Prêt à transformer votre gestion ?</h2>
+<p class="text-lg opacity-80 mb-10">
+                        Discutez avec l'un de nos consultants experts pour définir la solution qui correspond le mieux à vos besoins spécifiques.
+                    </p>
+<div class="space-y-6">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary-fixed">
+<span class="material-symbols-outlined">call</span>
+</div>
+<div>
+<p class="text-xs opacity-60 uppercase font-bold tracking-wider">Téléphone</p>
+<p class="text-lg">+225 00 00 00 00 00</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary-fixed">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<div>
+<p class="text-xs opacity-60 uppercase font-bold tracking-wider">E-mail</p>
+<p class="text-lg">contact@firstinfo.ci</p>
+</div>
+</div>
+</div>
+<div class="mt-12 p-8 bg-white/5 rounded-2xl border border-white/10">
+<h4 class="text-xs text-primary-fixed mb-2 uppercase font-bold tracking-wider">Accès Rapide</h4>
+<p class="mb-6">Déjà client ? Accédez directement à votre espace de support dédié.</p>
+<a class="inline-flex items-center gap-2 bg-white text-inverse-surface px-6 py-3 rounded-xl font-bold hover:bg-primary-fixed transition-colors" href="#">
+                            Portail Client <span class="material-symbols-outlined text-sm">open_in_new</span>
+</a>
+</div>
+</div>
+<!-- Right: Form -->
+<div class="bg-white/5 backdrop-blur-md p-12 lg:p-20 border-l border-white/10">
+<form class="space-y-6" onsubmit="event.preventDefault(); alert('Merci! Votre demande a été envoyée.');">
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="block text-xs text-inverse-on-surface/70 font-bold">Prénom</label>
+<input class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:ring-2 focus:ring-primary-container outline-none transition-all" placeholder="Jean" type="text">
+</div>
+<div class="space-y-2">
+<label class="block text-xs text-inverse-on-surface/70 font-bold">Nom</label>
+<input class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:ring-2 focus:ring-primary-container outline-none transition-all" placeholder="Dupont" type="text">
+</div>
+</div>
+<div class="space-y-2">
+<label class="block text-xs text-inverse-on-surface/70 font-bold">E-mail Professionnel</label>
+<input class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:ring-2 focus:ring-primary-container outline-none transition-all" placeholder="jean.dupont@entreprise.com" type="email">
+</div>
+<div class="space-y-2">
+<label class="block text-xs text-inverse-on-surface/70 font-bold">Message</label>
+<textarea class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:ring-2 focus:ring-primary-container outline-none transition-all" placeholder="Parlez-nous de votre projet..." rows="5"></textarea>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container font-bold py-4 rounded-xl shadow-lg hover:shadow-primary-container/20 transition-all active:scale-[0.98]" type="submit">
+                            Envoyer la demande
+                        </button>
+</form>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-section-padding px-gutter bg-surface-container-highest"><div class="max-w-container-max mx-auto w-full">
+<!-- Top Section -->
+<div class="flex justify-between items-center mb-8">
+<span class="text-2xl font-bold text-primary">First Info CI</span>
+<p class="text-sm text-on-surface-variant">Transformation digitale qui réellement fonctionne.</p>
+</div>
+<!-- Divider -->
+<div class="border-t border-outline-variant/20 mb-12"></div>
+<!-- Middle Section -->
+<div class="grid grid-cols-1 md:grid-cols-5 gap-12 mb-12">
+<!-- Expertise -->
+<div>
+<h4 class="text-xs text-on-surface font-bold uppercase tracking-wider mb-6">Expertise</h4>
+<ul class="space-y-4 text-sm">
+<li class=""><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Sage 100 Gestion</a></li>
+<li class=""><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Sage Paie &amp; RH</a></li>
+<li class=""><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Sage CRM</a></li>
+<li class=""><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Formations</a></li>
+</ul>
+</div>
+<!-- Solutions -->
+<div>
+<h4 class="text-xs text-on-surface font-bold uppercase tracking-wider mb-6">Solutions</h4>
+<ul class="space-y-4 text-sm">
+<li class=""><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Comptabilité</a></li>
+<li class=""><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Finances</a></li>
+<li class=""><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Gestion Commerciale</a></li>
+</ul>
+</div>
+<!-- Support -->
+<div>
+<h4 class="text-xs text-on-surface font-bold uppercase tracking-wider mb-6">Support</h4>
+<ul class="space-y-4 text-sm">
+<li class=""><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Base de connaissances</a></li>
+<li class=""><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Espace Client</a></li>
+<li class=""><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">FAQ</a></li>
+</ul>
+</div>
+<!-- Contact -->
+<div class="md:col-span-1">
+<h4 class="text-xs text-on-surface font-bold uppercase tracking-wider mb-6">Contact</h4>
+<ul class="space-y-4 text-sm">
+<li class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-lg">mail</span>
+<span class="">info@firstinfo.ci</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-lg">call</span>
+<span class="">+225 27 22 44 XX XX</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-lg">location_on</span>
+<span class="">Abidjan, Côte d'Ivoire</span>
+</li>
+</ul>
+</div>
+<!-- Socials -->
+<div class="flex flex-col items-end gap-4">
+<div class="bg-surface-container px-4 py-2 rounded-lg border border-outline-variant/30 inline-flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-sm">language</span>
+<span class="text-xs font-bold text-on-surface-variant">Français</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-primary-container transition-all" href="#"><span class="material-symbols-outlined text-xl">public</span></a>
+<a class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-primary-container transition-all" href="#"><span class="material-symbols-outlined text-xl">groups</span></a>
+</div>
+</div>
+</div>
+<!-- Divider -->
+<div class="border-t border-outline-variant/20 mb-8"></div>
+<!-- Bottom Bar -->
+<div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-on-surface-variant">
+<span class="">© 2024 First Info CI. Tous droits réservés.</span>
+<div class="flex gap-8">
+<a class="hover:text-primary transition-colors" href="#">Mentions Légales</a>
+<a class="hover:text-primary transition-colors" href="#">Confidentialité</a>
+<a class="hover:text-primary transition-colors" href="#">Cookies</a>
+</div>
+</div>
+</div></footer>
+<script>
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (window.scrollY > 20) {
+            header.classList.add('shadow-md', 'py-3');
+            header.classList.remove('shadow-sm', 'py-4');
+        } else {
+            header.classList.remove('shadow-md', 'py-3');
+            header.classList.add('shadow-sm', 'py-4');
+        }
+    });
+</script>
+</body></html>

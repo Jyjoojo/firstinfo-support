@@ -1,0 +1,46 @@
+import Icon from "./Icon";
+
+export default function Hero() {
+  return (
+    <section
+      className="w-full bg-surface py-20 px-gutter"
+      style={{ background: "linear-gradient(#f9f9f9 0%, #f3f3f4 100%)" }}
+    >
+      <div className="max-w-4xl mx-auto text-center space-y-8">
+        <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-container/10 border border-primary-container/30 font-label-sm text-sm py-2 bg-primary-container/20">
+          <Icon name="verified" className="text-sm mr-2" />
+          <div className="flex flex-col items-start leading-tight">
+            <span className="text-on-surface-variant">
+              Partenaire Agréé Sage - Abidjan, Côte d&apos;Ivoire
+            </span>
+          </div>
+        </div>
+        <h1 className="text-5xl md:text-6xl font-bold leading-tight text-sage-blue">
+          Un problème avec votre <span className="text-sage-blue">solution Sage ?</span>{" "}
+          <span className="text-primary-container">
+            Notre équipe support est là pour vous aider.
+          </span>
+        </h1>
+        <p className="text-lg md:text-xl text-on-surface-variant max-w-3xl mx-auto leading-relaxed">
+          Expertise locale reconnue en Afrique de l&apos;Ouest. Taux de satisfaction de 98 % et
+          un temps de réponse garanti inférieur à 24 heures pour nos clients sous contrat.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          <a
+            href="#"
+            className="flex items-center gap-2 bg-primary-container text-on-primary-container px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all active:scale-[0.98]"
+          >
+            <Icon name="lock" />
+            Espace Client
+          </a>
+          <a
+            href="#"
+            className="px-8 py-4 rounded-xl font-bold text-lg border border-outline-variant hover:bg-surface-container transition-all"
+          >
+            Nous contacter
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
