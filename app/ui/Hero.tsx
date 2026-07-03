@@ -23,7 +23,7 @@ export default function Hero() {
             <TypeAnimation
               sequence={[
                 '',
-                500, // Waits 1s
+                1000, // Waits 1s
                 'Notre équipe est là pour vous aider.',
                 2000, // Waits 1s
                 'Nos experts vous accompagnent.',
