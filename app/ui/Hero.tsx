@@ -1,4 +1,6 @@
-import Icon from "./Icon";
+"use client";
+import { BadgeCheck, LockIcon } from "lucide-react";
+import { TypeAnimation } from 'react-type-animation';
 
 export default function Hero() {
   return (
@@ -8,7 +10,7 @@ export default function Hero() {
     >
       <div className="max-w-4xl mx-auto text-center space-y-8">
         <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-container/10 border border-primary-container/30 font-label-sm text-sm py-2 bg-primary-container/20">
-          <Icon name="verified" className="text-sm mr-2" />
+          <BadgeCheck className="text-sm mr-2" size={14}/>
           <div className="flex flex-col items-start leading-tight">
             <span className="text-on-surface-variant">
               Partenaire Agréé Sage - Abidjan, Côte d&apos;Ivoire
@@ -18,7 +20,22 @@ export default function Hero() {
         <h1 className="text-5xl md:text-6xl font-bold leading-tight text-sage-blue">
           Un problème avec votre <span className="text-sage-blue">solution Sage ?</span>{" "}
           <span className="text-primary-container">
-            Notre équipe support est là pour vous aider.
+            <TypeAnimation
+              sequence={[
+                '',
+                500, // Waits 1s
+                'Notre équipe est là pour vous aider.',
+                2000, // Waits 1s
+                'Nos experts vous accompagnent.',
+                () => {
+                  console.log('Sequence completed');
+                },
+              ]}
+              wrapper="span"
+              speed={50}
+              cursor={true}
+            />
+            
           </span>
         </h1>
         <p className="text-lg md:text-xl text-on-surface-variant max-w-3xl mx-auto leading-relaxed">
@@ -30,7 +47,7 @@ export default function Hero() {
             href="#"
             className="flex items-center gap-2 bg-primary-container text-on-primary-container px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all active:scale-[0.98]"
           >
-            <Icon name="lock" />
+            <LockIcon size={14}/>
             Espace Client
           </a>
           <a

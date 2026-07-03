@@ -1,8 +1,16 @@
 import Icon from "./Icon";
+import { 
+  Landmark, 
+  Wallet, 
+  Archive, 
+  FileSpreadsheet, 
+  Handshake, 
+  MoveRight 
+} from "lucide-react";
 
 const services = [
   {
-    icon: "account_balance",
+    icon: Landmark,
     iconBg: "bg-primary-container/10",
     iconColor: "text-primary-container",
     eyebrow: "SAGE 100 COMPTABILITÉ",
@@ -11,16 +19,16 @@ const services = [
       "Gestion des écritures, rapprochement bancaire et bilans. Un problème de clôture ? Nos experts vous guident pas à pas.",
   },
   {
-    icon: "account_balance_wallet",
-    iconBg: "bg-secondary/10",
-    iconColor: "text-secondary",
+    icon: Wallet,
+    iconBg: "bg-error/10",
+    iconColor: "text-on-surface-variant",
     eyebrow: "IMMOBILISATIONS & TRÉSORERIE",
     title: "Sage Pool Finances",
     description:
       "Optimisation de la trésorerie, gestion des immobilisations et pilotage des flux financiers de votre entreprise.",
   },
   {
-    icon: "inventory_2",
+    icon: Archive,
     iconBg: "bg-tertiary/10",
     iconColor: "text-tertiary",
     eyebrow: "STOCKS & VENTES",
@@ -29,7 +37,7 @@ const services = [
       "Suivi des stocks, cycle de ventes complet (devis, factures) et gestion de la chaîne logistique en temps réel.",
   },
   {
-    icon: "groups",
+    icon: FileSpreadsheet,
     iconBg: "bg-error/10",
     iconColor: "text-error",
     eyebrow: "BULLETINS & DSN",
@@ -38,7 +46,7 @@ const services = [
       "Édition des bulletins de paie, déclarations sociales (DSN) et gestion du capital humain en toute conformité.",
   },
   {
-    icon: "handshake",
+    icon: Handshake,
     iconBg: "bg-blue-500/10",
     iconColor: "text-blue-500",
     eyebrow: "RELATION CLIENT & DEVIS",
@@ -60,7 +68,10 @@ export default function ServiceCards() {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {services.map((service) => (
+          {services.map((service) => {
+            const Icon = service.icon;
+
+            return (
             <div
               key={service.title}
               className="bg-white p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow flex flex-col"
@@ -68,7 +79,7 @@ export default function ServiceCards() {
               <div
                 className={`w-12 h-12 rounded-xl ${service.iconBg} flex items-center justify-center mb-6`}
               >
-                <Icon name={service.icon} className={`${service.iconColor} text-3xl`} />
+                <Icon className={`${service.iconColor} text-3xl`} size={30}/>
               </div>
               <span className="text-[10px] font-bold tracking-widest text-on-surface-variant/60 uppercase mb-2">
                 {service.eyebrow}
@@ -78,7 +89,8 @@ export default function ServiceCards() {
                 {service.description}
               </p>
             </div>
-          ))}
+            );
+          })}
 
           {/* Carte CTA */}
           <div className="p-8 rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low flex flex-col justify-center text-center">
