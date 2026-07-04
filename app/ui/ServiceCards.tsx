@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "motion/react";
 import Icon from "./Icon";
 import { 
   Landmark, 
@@ -72,9 +75,11 @@ export default function ServiceCards() {
             const Icon = service.icon;
 
             return (
-            <div
+            <motion.div
               key={service.title}
               className="bg-white p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow flex flex-col"
+              whileHover={{ scale: 1.05, backgroundColor: "#f7efe5" }}
+              whileTap={{ scale: 0.95 }}
             >
               <div
                 className={`w-12 h-12 rounded-xl ${service.iconBg} flex items-center justify-center mb-6`}
@@ -88,7 +93,7 @@ export default function ServiceCards() {
               <p className="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow">
                 {service.description}
               </p>
-            </div>
+            </motion.div>
             );
           })}
 
