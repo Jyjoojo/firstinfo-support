@@ -20,7 +20,7 @@ const faqs = [
 
 export default function FaqSection() {
   return (
-    <section className="px-gutter py-section-padding bg-surface">
+    <section className="px-gutter py-section-padding bg-surface" id="faq">
       <div className="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Colonne gauche */}
         <div className="space-y-6">

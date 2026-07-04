@@ -1,4 +1,7 @@
 import Icon from "./Icon";
+import { Mail, Phone, MapPin, Globe } from "lucide-react";
+import Image from 'next/image';
+import Link from "next/link";
 
 const footerColumns = [
   {
@@ -21,19 +24,22 @@ export default function Footer() {
       <div className="max-w-container-max mx-auto w-full">
         {/* Top Section */}
         <div className="flex justify-between items-center mb-8">
-          <span className="text-2xl font-bold text-primary">First Info CI</span>
+          <div className="flex items-center gap-4">
+            <Image src="/sage-logo.svg" width={100} height={10} alt="Sage Logo" />
+            <span className="text-lg font-bold text-primary">FIRST INFO CI</span>
+          </div>
           <p className="text-sm text-on-surface-variant">
             Transformation digitale qui réellement fonctionne.
           </p>
         </div>
 
-        <div className="border-t border-outline-variant/20 mb-12" />
+        <div className="border-t border-outline-variant/70 mb-12" />
 
         {/* Middle Section */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-12">
           {footerColumns.map((col) => (
             <div key={col.title}>
-              <h4 className="text-xs text-on-surface font-bold uppercase tracking-wider mb-6">
+              <h4 className="text-sm text-on-surface font-bold uppercase tracking-wider mb-6">
                 {col.title}
               </h4>
               <ul className="space-y-4 text-sm">
@@ -53,20 +59,20 @@ export default function Footer() {
 
           {/* Contact */}
           <div className="md:col-span-1">
-            <h4 className="text-xs text-on-surface font-bold uppercase tracking-wider mb-6">
+            <h4 className="text-sm text-on-surface font-bold uppercase tracking-wider mb-6">
               Contact
             </h4>
             <ul className="space-y-4 text-sm">
               <li className="flex items-center gap-3 text-on-surface-variant">
-                <Icon name="mail" className="text-primary text-lg" />
+                <Mail className="text-primary-container text-lg border border-outline-variant/70 rounded-sm p-1" size={25}/>
                 <span>info@firstinfo.ci</span>
               </li>
               <li className="flex items-center gap-3 text-on-surface-variant">
-                <Icon name="call" className="text-primary text-lg" />
-                <span>+225 27 22 44 XX XX</span>
+                <Phone className="text-primary-container text-lg border border-outline-variant/70 rounded-sm p-1" size={25} />
+                <span>+225 07 59 09 98 60</span>
               </li>
               <li className="flex items-center gap-3 text-on-surface-variant">
-                <Icon name="location_on" className="text-primary text-lg" />
+                <MapPin className="text-primary-container text-lg border border-outline-variant/70 rounded-sm p-1" size={25} />
                 <span>Abidjan, Côte d&apos;Ivoire</span>
               </li>
             </ul>
@@ -80,37 +86,25 @@ export default function Footer() {
               <Icon name="expand_more" className="text-sm" />
             </div>
             <div className="flex gap-4">
-              <a
-                className="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-primary-container transition-all"
-                href="#"
-              >
-                <Icon name="public" className="text-xl" />
-              </a>
-              <a
-                className="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-primary-container transition-all"
-                href="#"
-              >
-                <Icon name="groups" className="text-xl" />
-              </a>
+              <Link href="https://firstinfoci.com/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-primary-container transition-all">
+                <Globe className="text-xl text-on-surface border border-outline-variant/70 rounded-sm p-1" size={27}/>
+              </Link>
+              <Link href="https://www.facebook.com/firstinfoci/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-primary-container transition-all">
+                <Image src="/icon-facebook.png" width={30} height={30} alt="Facebook link" className="text-xl text-on-surface border border-outline-variant/70 rounded-sm p-1" />
+              </Link>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-outline-variant/20 mb-8" />
+        <div className="border-t border-outline-variant/70 mb-10" />
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-on-surface-variant">
           <span>© {new Date().getFullYear()} First Info CI. Tous droits réservés.</span>
           <div className="flex gap-8">
-            <a className="hover:text-primary transition-colors" href="#">
-              Mentions Légales
-            </a>
-            <a className="hover:text-primary transition-colors" href="#">
-              Confidentialité
-            </a>
-            <a className="hover:text-primary transition-colors" href="#">
-              Cookies
-            </a>
+            <div className="text-on-surface-variant">Mentions Légales</div>
+            <div className="text-on-surface-variant">Confidentialité</div>
+            <div className="text-on-surface-variant">Cookies</div>
           </div>
         </div>
       </div>

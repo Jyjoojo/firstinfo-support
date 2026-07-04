@@ -1,6 +1,6 @@
 
 import ContactSection from "./ui/ContactSection";
-import FaqSectionShadcn from "./ui/FaqSection";
+import FaqSection from "./ui/FaqSection";
 import Footer from "./ui/Footer";
 import Header from "./ui/Header";
 import Hero from "./ui/Hero";
@@ -15,7 +15,7 @@ export default function HomePage() {
         <Hero />
         <StatsBanner />
         <ServiceCards />
-        <FaqSectionShadcn />
+        <FaqSection />
         <ContactSection />
       </main>
       <Footer />

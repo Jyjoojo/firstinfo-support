@@ -30,7 +30,7 @@ export default function Header() {
           />
           <nav className="hidden md:flex items-center gap-6">
             <a
-              href="#"
+              href="#faq"
               className="font-body-md text-body-md text-on-surface-variant border-primary pb-1"
             >
               Notre Expertise
@@ -42,7 +42,7 @@ export default function Header() {
               Nos Solutions
             </a>
             <a
-              href="#"
+              href="#contact"
               className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
             >
               Contact
@@ -59,7 +59,7 @@ export default function Header() {
           <SearchInput />
           <a
             href="#"
-            className="bg-tertiary hover:bg-primary/90 text-on-primary px-6 py-2 rounded-full font-label-sm text-label-sm transition-all active:scale-95 shadow-sm"
+            className="bg-primary hover:bg-primary/90 text-on-primary px-6 py-2 rounded-full font-label-sm text-label-sm transition-all active:scale-95 shadow-sm"
           >
             Se connecter
           </a>

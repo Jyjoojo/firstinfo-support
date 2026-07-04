@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Icon from "./Icon";
+import { ExternalLink } from "lucide-react";
 
 export default function ContactSection() {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", message: "" });
@@ -19,12 +20,12 @@ export default function ContactSection() {
   };
 
   return (
-    <section className="px-gutter py-section-padding max-w-container-max mx-auto">
+    <section className="px-gutter py-section-padding max-w-container-max mx-auto" id="contact">
       <div className="bg-inverse-surface rounded-3xl overflow-hidden shadow-2xl relative">
         <div className="grid lg:grid-cols-2 relative z-10">
           {/* Left: Info */}
           <div className="p-12 lg:p-20 flex flex-col justify-center text-inverse-on-surface">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
               Prêt à transformer votre gestion ?
             </h2>
             <p className="text-lg opacity-80 mb-10">
@@ -40,7 +41,7 @@ export default function ContactSection() {
                   <p className="text-xs opacity-60 uppercase font-bold tracking-wider">
                     Téléphone
                   </p>
-                  <p className="text-lg">+225 00 00 00 00 00</p>
+                  <p className="text-lg">+225 27 22 43 58 65 / 07 59 09 87 32</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -49,7 +50,7 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <p className="text-xs opacity-60 uppercase font-bold tracking-wider">E-mail</p>
-                  <p className="text-lg">contact@firstinfo.ci</p>
+                  <p className="text-lg">commercial@firstinfoci.com</p>
                 </div>
               </div>
             </div>
@@ -64,7 +65,7 @@ export default function ContactSection() {
                 href="#"
                 className="inline-flex items-center gap-2 bg-white text-inverse-surface px-6 py-3 rounded-xl font-bold hover:bg-primary-fixed transition-colors"
               >
-                Portail Client <Icon name="open_in_new" className="text-sm" />
+                Portail Client <ExternalLink className="text-sm" size={15} />
               </a>
             </div>
           </div>
