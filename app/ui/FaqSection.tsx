@@ -27,7 +27,7 @@ export default function FaqSection() {
           <div className="inline-flex px-6 py-2 rounded-full border border-primary-container text-primary-container font-bold text-sm uppercase tracking-widest">
             FAQ
           </div>
-          <h2 className="text-5xl font-bold text-sage-blue leading-tight">
+          <h2 className="text-4xl font-bold text-sage-blue leading-tight">
             Notre Expertise <br /> en action !
           </h2>
           <p className="text-lg text-on-surface-variant leading-relaxed max-w-md">
