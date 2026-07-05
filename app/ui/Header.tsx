@@ -58,7 +58,7 @@ export default function Header() {
         </div>
         <div className="flex items-center gap-4">
           <SearchInput />
-          <Link href="/login" className="bg-primary hover:bg-primary/90 text-on-primary px-6 py-2 rounded-full font-label-sm text-label-sm transition-all active:scale-95 shadow-sm">
+          <Link href="auth/login" className="bg-primary hover:bg-primary/90 text-on-primary px-6 py-2 rounded-full font-label-sm text-label-sm transition-all active:scale-95 shadow-sm">
             Se connecter
           </Link>
         </div>
