@@ -22,11 +22,11 @@ export default function LoginShowcase() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/0 to-black/10" />
 
       <div className="relative">
-        <h2 className="text-2xl lg:text-3xl font-bold text-white leading-tight">
+        <h2 className="text-xl font-bold text-white leading-tight">
           Votre partenaire Sage,
           <br /> à chaque étape.
         </h2>
-        <p className="mt-4 text-white/90 max-w-md">
+        <p className="mt-4 text-white/90 max-w-md text-xs">
           Connectez-vous pour suivre vos tickets, échanger avec nos experts et garder une vue
           claire sur vos interventions Sage.
         </p>

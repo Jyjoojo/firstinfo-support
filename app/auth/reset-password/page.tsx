@@ -41,14 +41,11 @@ export default function ResetPasswordPage() {
     <div className="flex flex-col justify-between h-full">
       <div className="max-w-sm mx-auto w-full">
         <div className="flex flex-col items-center mb-8 text-center">
-          <h1 className="text-3xl font-bold text-on-surface mb-2">Réinitialisation mot de passe</h1>
-          <p className="text-on-surface-variant">
-            Entrez un nouveau mot de passe.
-          </p>
+          <h1 className="text-2xl font-bold text-on-surface mb-2">Réinitialisation mot de passe</h1>
         </div>
 
         <form className="space-y-5">
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="block text-sm font-medium text-on-surface" htmlFor="password">
               Nouveau mot de passe
             </label>

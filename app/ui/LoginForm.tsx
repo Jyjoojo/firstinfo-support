@@ -17,15 +17,15 @@ export default function LoginForm() {
         <div className="flex flex-col justify-between h-full">
             <div>
                 <div className="max-w-sm mx-auto w-full">
-                    <div className="flex flex-col items-center mb-5 text-center">
-                        <h1 className="text-3xl font-bold text-on-surface mb-2">Bienvenu(e) !</h1>
-                        <p className="text-on-surface-variant mb-8">
+                    <div className="flex flex-col items-center mb-10 text-center">
+                        <h1 className="text-2xl lg:text-3xl font-bold text-on-surface mb-2">Bienvenu(e) !</h1>
+                        <p className="text-sm text-on-surface-variant">
                             Connectez-vous pour accéder à votre espace support.
                         </p>
                     </div>
 
-                    <form className="space-y-5" onSubmit={handleSubmit}>
-                        <div className="space-y-2">
+                    <form className="space-y-4" onSubmit={handleSubmit}>
+                        <div className="space-y-1">
                             <label className="block text-sm font-medium text-on-surface" htmlFor="email">
                                 E-mail
                             </label>
@@ -36,11 +36,11 @@ export default function LoginForm() {
                                 placeholder="vous@entreprise.com"
                                 value={form.email}
                                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                                className="w-full rounded-lg border border-outline-variant/50 px-4 py-3 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary-container/50 focus:border-primary-container transition-all"
+                                className="w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary-container/50 focus:border-primary-container transition-all"
                             />
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                             <label className="block text-sm font-medium text-on-surface" htmlFor="password">
                                 Mot de passe
                             </label>
@@ -52,7 +52,7 @@ export default function LoginForm() {
                                     placeholder="••••••••"
                                     value={form.password}
                                     onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                                    className="w-full rounded-lg border border-outline-variant/50 px-4 py-3 pr-11 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary-container/50 focus:border-primary-container transition-all"
+                                    className="w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 pr-11 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary-container/50 focus:border-primary-container transition-all"
                                 />
                                 <button
                                     type="button"
@@ -82,13 +82,13 @@ export default function LoginForm() {
 
                         <button
                             type="submit"
-                            className="w-full bg-primary-container hover:bg-primary-container/90 text-white font-bold py-3 rounded-lg transition-all active:scale-[0.98] shadow-sm"
+                            className="w-full bg-primary-container hover:bg-primary-container/90 text-white font-bold py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm"
                         >
                             Se connecter
                         </button>
                     </form>
 
-                    <div className="flex items-center gap-3 my-6">
+                    <div className="flex items-center gap-3 my-5">
                         <div className="h-px flex-1 bg-outline-variant/30" />
                         <span className="text-xs text-on-surface-variant/70">Ou continuer avec</span>
                         <div className="h-px flex-1 bg-outline-variant/30" />
@@ -97,21 +97,21 @@ export default function LoginForm() {
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             type="button"
-                            className="flex items-center justify-center gap-2 border border-outline-variant/40 rounded-lg py-2.5 text-sm font-medium text-on-surface hover:bg-surface-container-low transition-colors"
+                            className="flex items-center justify-center gap-2 border border-outline-variant/40 rounded-lg py-2 text-sm font-medium text-on-surface hover:bg-surface-container-low transition-colors"
                         >
                             <GoogleIcon />
                             Google
                         </button>
                         <button
                             type="button"
-                            className="flex items-center justify-center gap-2 border border-outline-variant/40 rounded-lg py-2.5 text-sm font-medium text-on-surface hover:bg-surface-container-low transition-colors"
+                            className="flex items-center justify-center gap-2 border border-outline-variant/40 rounded-lg py-2 text-sm font-medium text-on-surface hover:bg-surface-container-low transition-colors"
                         >
                             <MicrosoftIcon />
                             Microsoft
                         </button>
                     </div>
 
-                    <p className="text-center text-sm text-on-surface-variant mt-6 mb-10">
+                    <p className="text-center text-sm text-on-surface-variant mt-5">
                         Pas encore de compte ?{" "}
                         <a href="#" className="font-medium text-primary-container hover:underline">
                             Contactez-nous
