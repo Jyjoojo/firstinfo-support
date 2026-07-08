@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -24,7 +25,12 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  // TODO: Ajouter un état pour gérer l'ouverture/fermeture du menu sur mobile
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <aside className="hidden lg:flex flex-col h-screen fixed left-0 top-0 border-r border-outline-variant/30 bg-white w-60 z-50">
       <div className="px-5 py-6">
@@ -40,7 +46,7 @@ export default function Sidebar() {
 
         <nav className="space-y-1">
           {navItems.map(({ href, label, icon: Icon }) => {
-            const isActive = pathname === href;
+            const isActive = mounted && pathname === href;
             return (
               <Link
                 key={href}

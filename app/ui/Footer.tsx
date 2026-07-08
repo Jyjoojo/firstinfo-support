@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Icon from "./Icon";
 import { Mail, Phone, MapPin, Globe } from "lucide-react";
 import Image from 'next/image';
@@ -17,6 +20,16 @@ const footerColumns = [
     links: ["Base de connaissances", "Espace Client", "FAQ"],
   },
 ];
+
+function FooterYear() {
+  const [year, setYear] = useState("");
+
+  useEffect(() => {
+    setYear(new Date().getFullYear().toString());
+  }, []);
+
+  return <span>© {year} First Info CI. Tous droits réservés.</span>;
+}
 
 export default function Footer() {
   return (
@@ -100,7 +113,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-on-surface-variant">
-          <span>© {new Date().getFullYear()} First Info CI. Tous droits réservés.</span>
+          <FooterYear />
           <div className="flex gap-8">
             <div className="text-on-surface-variant">Mentions Légales</div>
             <div className="text-on-surface-variant">Confidentialité</div>

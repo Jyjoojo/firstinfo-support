@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Ticket, BookOpen, User } from "lucide-react";
@@ -13,11 +14,16 @@ const items = [
 
 export default function MobileNav() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-outline-variant/20 flex justify-around items-center py-2.5 z-50">
       {items.map(({ href, label, icon: Icon }) => {
-        const isActive = pathname === href;
+        const isActive = mounted && pathname === href;
         return (
           <Link
             key={href}

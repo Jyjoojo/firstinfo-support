@@ -106,7 +106,7 @@ export default function NotificationsBell() {
         {/* Footer Action */}
         <div className="p-6 border-t border-outline-variant/20">
           <Link
-            href="/dashboard/notifications"
+            href="/dashboard/client/notifications"
             onClick={() => setOpen(false)}
             className="block w-full text-center py-3 border-2 border-outline-variant/50 text-on-surface font-bold text-sm rounded-lg hover:bg-surface-container transition-all"
           >
