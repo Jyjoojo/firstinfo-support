@@ -38,6 +38,9 @@ importers:
       react-countup:
         specifier: ^6.5.3
         version: 6.5.3(react@19.2.4)
+      react-data-table-component:
+        specifier: ^8.4.3
+        version: 8.4.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-dom:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
@@ -3200,6 +3203,12 @@ packages:
     resolution: {integrity: sha512-udnqVQitxC7QWADSPDOxVWULkLvKUWrDapn5i53HE4DPRVgs+Y5rr4bo25qEl8jSh+0l2cToJgGMx+clxPM3+w==}
     peerDependencies:
       react: '>= 16.3.0'
+
+  react-data-table-component@8.4.3:
+    resolution: {integrity: sha512-FIFoaZLwFjrTPFtdQPxpDWfsA2Hz5JIE5TxKmELPgpgV1TJeGDAsn2m2IgBfWmeLQxReNxUpMmsIlG5zhXZ+mg==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
 
   react-dom@19.2.4:
     resolution: {integrity: sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==}
@@ -6997,6 +7006,11 @@ snapshots:
     dependencies:
       countup.js: 2.10.0
       react: 19.2.4
+
+  react-data-table-component@8.4.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   react-dom@19.2.4(react@19.2.4):
     dependencies:

@@ -3,6 +3,7 @@ import Sidebar from "@/app/ui/dashboard/Sidebar";
 import MobileNav from "@/app/ui/dashboard/MobileNav";
 import TopBar from "@/app/ui/dashboard/TopBar";
 
+
 export default function PortailLayout({ children }: { children: ReactNode }) {
   return (
     <div className="h-screen flex bg-background text-on-surface overflow-hidden">
