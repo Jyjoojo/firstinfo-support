@@ -1,6 +1,6 @@
 
 export interface Ticket {
-    id: number;
+    id: string;
     titre: string;
     contenu: string;
     statut: 'nouveau' | 'en cours' | 'résolu' | 'fermé';
@@ -13,7 +13,7 @@ export interface Ticket {
 
 export const tickets: Ticket[] = [
     {
-        id: 1,
+        id: "TK-1001",
         titre: "Problème de connexion",
         contenu: "Je rencontre des difficultés pour me connecter à l'application.",
         statut: "nouveau",
@@ -24,7 +24,7 @@ export const tickets: Ticket[] = [
         assigneA: "John Doe"
     },
     {
-        id: 2,
+        id: "TK-1002",
         titre: "Problème d'impression",
         contenu: "Je rencontre des difficultés pour imprimer les documents.",
         statut: "en cours",
@@ -35,7 +35,7 @@ export const tickets: Ticket[] = [
         assigneA: "Jane Smith"
     },
     {
-        id: 3,
+        id: "TK-1003",
         titre: "Demande de mise à jour",
         contenu: "Je souhaite mettre à jour l'application.",
         statut: "nouveau",
@@ -46,7 +46,7 @@ export const tickets: Ticket[] = [
         assigneA: "Bob Johnson"
     },
     {
-        id: 4,
+        id: "TK-1004",
         titre: "Problème de performance",
         contenu: "L'application ralentit considérablement lors de l'utilisation.",
         statut: "nouveau",
@@ -57,7 +57,7 @@ export const tickets: Ticket[] = [
         assigneA: "Alice Brown"
     },
     {
-        id: 5,
+        id: "TK-5005",
         titre: "Erreur lors de l'enregistrement",
         contenu: "Je rencontre une erreur lors de l'enregistrement des données.",
         statut: "nouveau",
@@ -68,7 +68,7 @@ export const tickets: Ticket[] = [
         assigneA: "Charlie Wilson"
     },
     {
-        id: 6,
+        id: "TK-5006",
         titre: "Problème de compatibilité",
         contenu: "L'application ne fonctionne pas correctement sur mon système d'exploitation.",
         statut: "nouveau",
@@ -79,7 +79,7 @@ export const tickets: Ticket[] = [
         assigneA: "David Davis"
     },
     {
-        id: 7,
+        id: "TK-5007",
         titre: "Demande de fonctionnalité",
         contenu: "Je souhaite ajouter une nouvelle fonctionnalité à l'application.",
         statut: "nouveau",
@@ -90,7 +90,7 @@ export const tickets: Ticket[] = [
         assigneA: "Eve Thompson"
     },
     {
-        id: 8,
+        id: "TK-5008",
         titre: "Problème de sécurité",
         contenu: "Je rencontre des problèmes de sécurité avec l'application.",
         statut: "nouveau",
@@ -101,7 +101,7 @@ export const tickets: Ticket[] = [
         assigneA: "Frank Miller"
     },
     {
-        id: 9,
+        id: "TK-5009",
         titre: "Problème de synchronisation",
         contenu: "Je rencontre des difficultés pour synchroniser les données.",
         statut: "nouveau",
@@ -112,7 +112,7 @@ export const tickets: Ticket[] = [
         assigneA: "Grace Lee"
     },
     {
-        id: 10,
+        id: "TK-5010",
         titre: "Problème de notification",
         contenu: "Je ne reçois plus les notifications de l'application.",
         statut: "nouveau",
@@ -123,7 +123,7 @@ export const tickets: Ticket[] = [
         assigneA: "Henry Garcia"
     },
     {
-        id: 11,
+        id: "TK-5011",
         titre: "Problème de connexion",
         contenu: "Je rencontre des difficultés pour me connecter à l'application.",
         statut: "nouveau",

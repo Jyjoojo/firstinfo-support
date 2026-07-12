@@ -5,19 +5,28 @@ import { Eye, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import SelectFilter from './SelectFiltre';
 
 const statusClasses: Record<Ticket['statut'], string> = {
-    nouveau: 'border border-sky-200 bg-sky-50 text-sky-700',
-    'en cours': 'border border-amber-200 bg-amber-50 text-amber-700',
-    'résolu': 'border border-emerald-200 bg-emerald-50 text-emerald-700',
+    nouveau: 'border border-blue-200 bg-blue-50 text-blue-700',
+    'en cours': 'border border-orange-200 bg-orange-50 text-orange-700',
+    'résolu': 'border border-green-200 bg-green-50 text-green-700',
     'fermé': 'border border-slate-200 bg-slate-100 text-slate-700',
 };
 
 const priorityClasses: Record<Ticket['priorite'], string> = {
     basse: 'border border-emerald-200 bg-emerald-50 text-emerald-700',
-    normale: 'border border-blue-200 bg-blue-50 text-blue-700',
-    haute: 'border border-amber-200 bg-amber-50 text-amber-700',
-    urgente: 'border border-rose-200 bg-rose-50 text-rose-700',
+    normale: 'border border-sky-200 bg-sky-50 text-sky-700',
+    haute: 'border border-amber-200 bg-amber-50 text-amber-400',
+    urgente: 'border border-red-200 bg-red-50 text-red-700',
 };
 
 export default function TicketsTable({ tickets }: { tickets: Ticket[] }) {
@@ -60,6 +69,14 @@ export default function TicketsTable({ tickets }: { tickets: Ticket[] }) {
     }, [tickets, searchTerm, statusFilter, priorityFilter, categoryFilter]);
 
     const columns: TableColumn<Ticket>[] = [
+        {
+            id: 'id',
+            name: 'ID Ticket',
+            selector: (row) => row.id,
+            sortable: true,
+            width: '100px',
+            cell: (row) => <div className="text-tertiary">{row.id}</div>,
+        },
         {
             id: 'titre',
             name: 'Titre',
@@ -104,6 +121,30 @@ export default function TicketsTable({ tickets }: { tickets: Ticket[] }) {
         },
     ];
 
+    const statusOptions = [
+        { value: "all", label: "Tous les statuts" },
+        { value: "nouveau", label: "Nouveau" },
+        { value: "en cours", label: "En cours" },
+        { value: "résolu", label: "Résolu" },
+        { value: "fermé", label: "Fermé" },
+    ];
+
+    const priorityOptions = [
+        { value: "all", label: "Toutes priorités" },
+        { value: "basse", label: "Basse" },
+        { value: "normale", label: "Normale" },
+        { value: "haute", label: "Haute" },
+        { value: "urgente", label: "Urgente" },
+    ];
+
+    const categoryOptions = useMemo(() => {
+        return [
+            { value: 'all', label: 'Toutes catégories' },
+            ...categories.map(category => ({ value: category, label: category }))
+        ];
+    }, [categories]);
+
+
     return (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 p-4 lg:flex-row lg:items-center lg:justify-between">
@@ -118,42 +159,27 @@ export default function TicketsTable({ tickets }: { tickets: Ticket[] }) {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                    <select
-                        value={statusFilter}
-                        onChange={(event) => setStatusFilter(event.target.value as 'all' | Ticket['statut'])}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-sky-400"
-                    >
-                        <option value="all">Tous les statuts</option>
-                        <option value="nouveau">Nouveau</option>
-                        <option value="en cours">En cours</option>
-                        <option value="résolu">Résolu</option>
-                        <option value="fermé">Fermé</option>
-                    </select>
-
-                    <select
+                    <SelectFilter 
+                        items={statusOptions} 
+                        value={statusFilter} 
+                        onValueChange={(value) => setStatusFilter(value as 'all' | Ticket['statut'])} 
+                        placeholder="Statut"
+                        className="w-38" 
+                    />
+                    <SelectFilter
+                        items={priorityOptions}
                         value={priorityFilter}
-                        onChange={(event) => setPriorityFilter(event.target.value as 'all' | Ticket['priorite'])}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-sky-400"
-                    >
-                        <option value="all">Toutes priorités</option>
-                        <option value="basse">Basse</option>
-                        <option value="normale">Normale</option>
-                        <option value="haute">Haute</option>
-                        <option value="urgente">Urgente</option>
-                    </select>
-
-                    <select
+                        onValueChange={(value) => setPriorityFilter(value as 'all' | Ticket['priorite'])}
+                        placeholder="Priorité"
+                        className="w-38"
+                    />
+                    <SelectFilter
+                        items={categoryOptions}
                         value={categoryFilter}
-                        onChange={(event) => setCategoryFilter(event.target.value)}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-sky-400"
-                    >
-                        <option value="all">Toutes catégories</option>
-                        {categories.map((category) => (
-                            <option key={category} value={category}>
-                                {category}
-                            </option>
-                        ))}
-                    </select>
+                        onValueChange={setCategoryFilter}
+                        placeholder="Catégorie"
+                        className="w-38"
+                    />
                 </div>
             </div>
 
@@ -163,7 +189,7 @@ export default function TicketsTable({ tickets }: { tickets: Ticket[] }) {
                 defaultSortFieldId="titre"
                 defaultSortAsc
                 pagination
-                paginationPerPage={8}
+                paginationPerPage={5}
                 paginationRowsPerPageOptions={[5, 8, 10, 15]}
                 paginationComponentOptions={{
                     rowsPerPageText: 'Lignes par page',

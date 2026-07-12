@@ -22,7 +22,7 @@ export default function NotificationsBell() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors relative"
+        className="w-9 h-9 flex items-center justify-center cursor-pointer text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors relative"
         aria-label="Notifications"
       >
         <Bell size={19} />
