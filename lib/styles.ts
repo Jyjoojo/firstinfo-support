@@ -3,6 +3,7 @@ import {
   SquareArrowDown,
   DiamondMinus,
   CircleArrowUp,
+  CircleAlert,
   TriangleAlert,
   LucideIcon,
   FilePlus2,
@@ -41,7 +42,7 @@ export const priorityStyles: Record<
   haute: {
     base: "border border-amber-300 bg-amber-50 text-amber-700",
     toggle: "data-[state=on]:bg-amber-50 data-[state=on]:text-amber-700 data-[state=on]:border-amber-200",
-    icon: CircleArrowUp,
+    icon: CircleAlert,
   },
   urgente: {
     base: "border border-red-300 bg-red-50 text-red-700",

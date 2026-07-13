@@ -89,8 +89,8 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
               {StatusIcon && <StatusIcon size={14} />}
               {ticket.statut}
             </span> */}
-            <span className={`px-3 py-1 font-medium rounded-full text-sm flex items-center gap-1 ${priorityStyles[ticket.priorite].base}`}>
-              {PriorityIcon && <PriorityIcon size={14} />}
+            <span className={`px-2 py-1 ms-2 font-medium rounded-full text-xs flex items-center gap-1 ${priorityStyles[ticket.priorite].base}`}>
+              {PriorityIcon && <PriorityIcon size={12} />}
               {ticket.priorite}
             </span>
           </div>
