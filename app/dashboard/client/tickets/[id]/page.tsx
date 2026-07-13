@@ -31,6 +31,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
   const ticket = tickets.find((item) => item.id === id);
 
   const PriorityIcon = ticket ? priorityStyles[ticket.priorite].icon : null;
+  const StatusIcon = ticket ? statusStyles[ticket.statut].icon : null;
 
   if (!ticket) {
     notFound();
@@ -84,8 +85,8 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           </h2>
 
           <div className="flex items-center gap-3">
-            {/* <span className={`px-3 py-1 font-bold rounded-full text-label-sm flex items-center gap-1 ${statusStyles[ticket.statut].base}`}>
-              <span className="material-symbols-outlined text-[16px]">sync</span>
+            {/* <span className={`px-3 py-1 font-medium rounded-full text-sm flex items-center gap-1.5 ${statusStyles[ticket.statut].base}`}>
+              {StatusIcon && <StatusIcon size={14} />}
               {ticket.statut}
             </span> */}
             <span className={`px-3 py-1 font-medium rounded-full text-sm flex items-center gap-1 ${priorityStyles[ticket.priorite].base}`}>
@@ -164,13 +165,11 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
 
           {/* Conversation — nouvelle card scrollable */}
           <TicketConversationCard
-            ticketId="#TK-4029"
-            title="Erreur synchronisation Sage 100 Cloud"
-            productTag="Sage 100 Cloud"
-            badges={[
-              { label: 'En cours', variant: 'en-cours' },
-              { label: 'Urgent', variant: 'urgent' },
-            ]}
+            ticketId={"#" + ticket.id}
+            title={ticket.titre}
+            productTag={ticket.categorie}
+            statut={ticket.statut}
+            priorite={ticket.priorite}
             onSend={(content) => {
               // TODO: POST /api/tickets/{id}/messages
               console.log('Nouveau message :', content);

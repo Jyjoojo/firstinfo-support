@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Paperclip, Send } from 'lucide-react'
+import { priorityStyles, statusStyles, PriorityVariant, StatusVariant } from '@/lib/styles';
 
 // --- Types ---------------------------------------------------------------
 
@@ -16,16 +17,12 @@ export interface TicketMessage {
   date: string; // ex: "12 mai 09:55"
 }
 
-interface StatusBadge {
-  label: string;
-  variant: 'en-cours' | 'resolu' | 'bloquant' | 'urgent';
-}
-
 interface TicketConversationCardProps {
   ticketId: string;
   title: string;
   productTag: string;
-  badges: StatusBadge[];
+  statut: StatusVariant;
+  priorite: PriorityVariant;
   onBack?: () => void;
   onSend?: (content: string) => void;
 }
@@ -51,22 +48,14 @@ const messages: TicketMessage[] = [
   },
 ];
 
-// --- Styles des badges de statut -----------------------------------------
-
-const badgeStyles: Record<StatusBadge['variant'], string> = {
-  'en-cours': 'bg-[#FFBF69]/20 text-[#FF9F1C]',
-  resolu: 'bg-secondary-container text-on-secondary-container',
-  bloquant: 'bg-error-container text-on-error-container',
-  urgent: 'bg-error-container text-on-error-container',
-};
-
 // --- Composant -------------------------------------------------------------
 
 export default function TicketConversationCard({
   ticketId,
   title,
   productTag,
-  badges,
+  statut,
+  priorite,
   onBack,
   onSend,
 }: TicketConversationCardProps) {
@@ -100,15 +89,15 @@ export default function TicketConversationCard({
           )}
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-label-sm text-on-surface-variant">{ticketId}</span>
-              {badges.map((badge) => (
-                <span
-                  key={badge.label}
-                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${badgeStyles[badge.variant]}`}
-                >
-                  {badge.label}
-                </span>
-              ))}
+              <span className="font-light text-sm text-on-surface-variant">{ticketId}</span>
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${statusStyles[statut].base}`}
+              >
+                {statut}
+              </span>
+              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${priorityStyles[priorite].base}`}>
+                {priorite}
+              </span>
             </div>
             <h3 className="font-bold text-on-surface text-body-lg leading-snug">{title}</h3>
           </div>
@@ -132,7 +121,7 @@ export default function TicketConversationCard({
             >
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[12px] font-bold ${isClient
-                    ? 'bg-primary-container text-on-primary-container'
+                    ? 'bg-primary-container text-surface'
                     : 'bg-inverse-surface text-inverse-on-surface'
                   }`}
               >
@@ -141,11 +130,11 @@ export default function TicketConversationCard({
 
               <div className={`flex flex-col max-w-[75%] ${isClient ? 'items-end' : 'items-start'}`}>
                 {!isClient && (
-                  <span className="font-label-sm text-on-surface mb-1 px-1">{message.authorName}</span>
+                  <span className="font-medium text-sm text-on-surface mb-2 px-1">{message.authorName}</span>
                 )}
                 <div
                   className={`px-4 py-3 text-body-md leading-relaxed ${isClient
-                      ? 'bg-primary-container text-on-primary-container rounded-2xl rounded-br-sm'
+                      ? 'bg-primary-container text-surface rounded-2xl rounded-br-sm'
                       : 'bg-surface-container-low text-on-surface rounded-2xl rounded-bl-sm'
                     }`}
                 >

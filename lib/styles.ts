@@ -1,20 +1,27 @@
 import { Ticket } from "./tickets";
 import {
-    SquareArrowDown,
-    DiamondMinus,
-    CircleArrowUp,
-    TriangleAlert,
-    LucideIcon,
+  SquareArrowDown,
+  DiamondMinus,
+  CircleArrowUp,
+  TriangleAlert,
+  LucideIcon,
+  FilePlus2,
+  LoaderCircle,
+  CheckCircle,
+  Archive,
 } from "lucide-react";
 
 export type StatusVariant = Ticket["statut"];
 export type PriorityVariant = Ticket["priorite"];
 
-export const statusStyles: Record<StatusVariant, { base: string; icon?: string }> = {
-  nouveau: { base: "border border-blue-200 bg-blue-50 text-blue-700" },
-  "en cours": { base: "border border-orange-200 bg-orange-50 text-orange-700" },
-  résolu: { base: "border border-green-200 bg-green-50 text-green-700" },
-  fermé: { base: "border border-slate-200 bg-slate-100 text-slate-700" },
+export const statusStyles: Record<StatusVariant, { base: string; icon?: LucideIcon }> = {
+  nouveau: { base: "border border-blue-300 bg-blue-50 text-blue-700", icon: FilePlus2 },
+  "en cours": {
+    base: "border border-orange-300 bg-orange-50 text-orange-700",
+    icon: LoaderCircle,
+  },
+  résolu: { base: "border border-green-300 bg-green-50 text-green-700", icon: CheckCircle },
+  fermé: { base: "border border-slate-300 bg-slate-100 text-slate-700", icon: Archive },
 };
 
 export const priorityStyles: Record<
