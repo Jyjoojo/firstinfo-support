@@ -46,7 +46,13 @@ export default function Sidebar() {
 
         <nav className="space-y-1">
           {navItems.map(({ href, label, icon: Icon }) => {
-            const isActive = mounted && pathname === href;
+            // Le lien est actif si le chemin actuel commence par le href du lien.
+            // Cas spécial pour le tableau de bord qui ne doit être actif que sur sa page exacte.
+            const isActive = mounted && (
+              href === "/dashboard/client"
+                ? pathname === href
+                : pathname.startsWith(href));
+
             return (
               <Link
                 key={href}

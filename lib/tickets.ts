@@ -17,7 +17,7 @@ export const tickets: Ticket[] = [
         titre: "Problème de connexion",
         contenu: "Je rencontre des difficultés pour me connecter à l'application.",
         statut: "nouveau",
-        categorie: "Technique",
+        categorie: "Sage RH & Paie",
         priorite: "haute",
         dateCreation: "2023-10-01",
         dateModification: "2023-10-01",
@@ -28,7 +28,7 @@ export const tickets: Ticket[] = [
         titre: "Problème d'impression",
         contenu: "Je rencontre des difficultés pour imprimer les documents.",
         statut: "en cours",
-        categorie: "Technique",
+        categorie: "Sage 100",
         priorite: "normale",
         dateCreation: "2023-10-02",
         dateModification: "2023-10-02",
@@ -104,7 +104,7 @@ export const tickets: Ticket[] = [
         id: "TK-5009",
         titre: "Problème de synchronisation",
         contenu: "Je rencontre des difficultés pour synchroniser les données.",
-        statut: "nouveau",
+        statut: "résolu",
         categorie: "Technique",
         priorite: "haute",
         dateCreation: "2023-10-09",
@@ -132,5 +132,5 @@ export const tickets: Ticket[] = [
         dateCreation: "2023-10-11",
         dateModification: "2023-10-11",
         assigneA: "Ivy Clark"
-    }
+    },
 ]

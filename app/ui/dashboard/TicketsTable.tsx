@@ -13,21 +13,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { priorityStyles, statusStyles } from '@/lib/styles';
 import SelectFilter from './SelectFiltre';
-
-const statusClasses: Record<Ticket['statut'], string> = {
-    nouveau: 'border border-blue-200 bg-blue-50 text-blue-700',
-    'en cours': 'border border-orange-200 bg-orange-50 text-orange-700',
-    'résolu': 'border border-green-200 bg-green-50 text-green-700',
-    'fermé': 'border border-slate-200 bg-slate-100 text-slate-700',
-};
-
-const priorityClasses: Record<Ticket['priorite'], string> = {
-    basse: 'border border-emerald-200 bg-emerald-50 text-emerald-700',
-    normale: 'border border-sky-200 bg-sky-50 text-sky-700',
-    haute: 'border border-amber-200 bg-amber-50 text-amber-400',
-    urgente: 'border border-red-200 bg-red-50 text-red-700',
-};
 
 export default function TicketsTable({ tickets }: { tickets: Ticket[] }) {
     const [searchTerm, setSearchTerm] = useState('');
@@ -36,13 +23,13 @@ export default function TicketsTable({ tickets }: { tickets: Ticket[] }) {
     const [categoryFilter, setCategoryFilter] = useState('all');
 
     const StatusBadge = ({ statut }: { statut: Ticket['statut'] }) => (
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClasses[statut]}`}>
+        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[statut].base}`}>
             {statut}
         </span>
     );
 
     const PriorityBadge = ({ priorite }: { priorite: Ticket['priorite'] }) => (
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${priorityClasses[priorite]}`}>
+        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${priorityStyles[priorite].base}`}>
             {priorite}
         </span>
     );

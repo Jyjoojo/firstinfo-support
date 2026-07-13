@@ -26,6 +26,7 @@ import {
 import FileUpload from "@/app/ui/FileUpload";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { priorityStyles } from "@/lib/styles";
 
 export default function NewTicketPage() {
     function handleFiles(files: FileList) {
@@ -80,15 +81,15 @@ export default function NewTicketPage() {
                                     <FieldLabel htmlFor="priorite"><CircleAlert size={16} className="inline-block text-tertiary" />Niveau de priorité *</FieldLabel>
                                     <div>
                                         <ToggleGroup variant="outline" type="single" defaultValue="basse" className="flex flex-wrap items-center gap-2">
-                                            <ToggleGroupItem value="basse" aria-label="Toggle basse" className="flex-3 data-[state=on]:bg-emerald-50 data-[state=on]:text-emerald-700 data-[state=on]:border-emerald-200">
+                                            <ToggleGroupItem value="basse" aria-label="Toggle basse" className={`flex-3 ${priorityStyles.basse.toggle}`}>
                                                 Basse
                                             </ToggleGroupItem>
-                                            <ToggleGroupItem value="normale" aria-label="Toggle normale" className="flex-3 data-[state=on]:bg-sky-50 data-[state=on]:text-sky-700 data-[state=on]:border-sky-200">
+                                            <ToggleGroupItem value="normale" aria-label="Toggle normale" className={`flex-3 ${priorityStyles.normale.toggle}`}>
                                                 Normale
                                             </ToggleGroupItem>
-                                            <ToggleGroupItem value="haute" aria-label="Toggle haute" className="flex-3 data-[state=on]:bg-amber-50 data-[state=on]:text-amber-700 data-[state=on]:border-amber-200">
+                                            <ToggleGroupItem value="haute" aria-label="Toggle haute" className={`flex-3 ${priorityStyles.haute.toggle}`}>
                                                 Haute
-                                            </ToggleGroupItem><ToggleGroupItem value="urgente" aria-label="Toggle urgente" className="flex-3 data-[state=on]:bg-red-50 data-[state=on]:text-red-700 data-[state=on]:border-red-200">
+                                            </ToggleGroupItem><ToggleGroupItem value="urgente" aria-label="Toggle urgente" className={`flex-3 ${priorityStyles.urgente.toggle}`}>
                                                 Urgente
                                             </ToggleGroupItem>
                                         </ToggleGroup>

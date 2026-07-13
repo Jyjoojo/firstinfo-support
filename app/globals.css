@@ -129,6 +129,22 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--color-outline-variant, #dac2ae);
+  border-radius: 9999px;
+}
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-outline-variant, #dac2ae) transparent;
+}
+
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
