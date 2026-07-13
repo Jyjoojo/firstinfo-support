@@ -238,7 +238,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           </div>
 
           {/* Contact support rapide */}
-          <div className="bg-primary/5 rounded-xl p-6 border border-primary/20 relative overflow-hidden group">
+          <div className="bg-tertiary/5 rounded-xl p-6 border border-primary/20 relative overflow-hidden group">
             <Image
               src="/support_agent.svg"
               width={100}
