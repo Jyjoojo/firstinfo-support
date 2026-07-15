@@ -1,6 +1,7 @@
 "use client";
 
-import { Camera, PencilLine, BadgeCheck } from "lucide-react"
+import { useId, useMemo, useState } from "react";
+import { Camera, PencilLine, BadgeCheck, EyeOffIcon, EyeIcon, CheckIcon, XIcon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button";
 import {
@@ -16,8 +17,45 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
+
+const requirements = [
+    { regex: /.{8,}/, text: "Au moins 8 caractères" },
+    { regex: /[0-9]/, text: "Au moins 1 chiffre" },
+    { regex: /[a-z]/, text: "Au moins 1 lettre miniscule" },
+    { regex: /[A-Z]/, text: "Au moins 1 lettre majuscule" },
+];
 
 export default function ParametrePage() {
+    const id = useId();
+    const [password, setPassword] = useState("");
+    const [isVisible, setIsVisible] = useState(false);
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [isConfirmVisible, setIsConfirmVisible] = useState(false);
+    const passwordsMatch = useMemo(() => {
+        return password === confirmPassword;
+    }, [password, confirmPassword]);
+    const strength = requirements.map((req) => ({
+        met: req.regex.test(password),
+        text: req.text,
+    }));
+    const strengthScore = useMemo(() => {
+        return strength.filter((req) => req.met).length;
+    }, [strength]);
+    const getStrengthColor = (score: number) => {
+        if (score === 0) return "bg-border";
+        if (score <= 1) return "bg-red-500";
+        if (score <= 2) return "bg-orange-500";
+        if (score === 3) return "bg-amber-500";
+        return "bg-emerald-500";
+    };
+    const getStrengthText = (score: number) => {
+        if (score === 0) return "Entrer un mot de passe";
+        if (score <= 2) return "Mot de passe faible";
+        if (score === 3) return "Mot de passe moyen";
+        return "Mot de passe fort";
+    };
+
     return (
         <div className="p-6 lg:p-8 max-w-7xl mx-auto w-full">
             <div className="mb-6">
@@ -144,8 +182,130 @@ export default function ParametrePage() {
                     </div>
                 </div>
             </div>
-            <div className="flex flex-wrap items-center md:gap-10 mb-5 bg-surface-container-lowest py-6 ps-10 pe-6 rounded-xl border border-outline-variant/20">
-                
+            <div className="flex flex-col flex-wrap md:gap-1 mb-5 bg-surface-container-lowest py-6 ps-10 pe-6 rounded-xl border border-outline-variant/20">
+                <h2 className="text-lg font-medium text-on-surface">Modifier mot de passe</h2>
+                <p className="text-on-surface-variant text-[15px] mb-6">
+                    Entrez un nouveau mot de passe pour protéger votre compte.
+                </p>
+                <form className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor={id}>Nouveau mot de passe</Label>
+                        <InputGroup className="w-lg">
+                            <InputGroupInput
+                                required
+                                aria-describedby={`${id}-description`}
+                                id={id}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Password"
+                                type={isVisible ? "text" : "password"}
+                                value={password}
+                                className="[&::-ms-reveal]:hidden [&::-webkit-reveal]:hidden"
+                            />
+                            <InputGroupAddon align="inline-end">
+                                <Button
+                                    aria-label={isVisible ? "Hide password" : "Show password"}
+                                    onClick={() => setIsVisible(!isVisible)}
+                                    size="icon-xs"
+                                    variant="ghost"
+                                >
+                                    {isVisible ? (
+                                        <EyeOffIcon aria-hidden="true" />
+                                    ) : (
+                                        <EyeIcon aria-hidden="true" />
+                                    )}
+                                </Button>
+                            </InputGroupAddon>
+                        </InputGroup>
+                    </div>
+                    <div
+                        aria-label="Password strength"
+                        aria-valuemax={4}
+                        aria-valuemin={0}
+                        aria-valuenow={strengthScore}
+                        className="h-1 w-lg overflow-hidden rounded-full bg-border"
+                        role="progressbar"
+                        tabIndex={-1}
+                    >
+                        <div
+                            className={`h-full ${getStrengthColor(strengthScore)} transition-all duration-500 ease-out`}
+                            style={{ width: `${(strengthScore / 4) * 100}%` }}
+                        />
+                    </div>
+                    <p
+                        className="font-medium text-foreground text-sm"
+                        id={`${id}-description`}
+                    >
+                        {getStrengthText(strengthScore)}. Doit contenir:
+                    </p>
+                    <ul aria-label="Password requirements" className="flex flex-col gap-1.5">
+                        {strength.map((req) => (
+                            <li className="flex items-center gap-2" key={req.text}>
+                                {req.met ? (
+                                    <CheckIcon
+                                        aria-hidden="true"
+                                        className="size-4 text-emerald-500"
+                                    />
+                                ) : (
+                                    <XIcon
+                                        aria-hidden="true"
+                                        className="size-4 text-muted-foreground/80"
+                                    />
+                                )}
+                                <span
+                                    className={`text-xs ${req.met ? "text-emerald-600" : "text-muted-foreground"}`}
+                                >
+                                    {req.text}
+                                    <span className="sr-only">
+                                        {req.met ? " - Requirement met" : " - Requirement not met"}
+                                    </span>
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                    <div className="flex flex-col gap-2 mt-4">
+                        <Label htmlFor={`${id}-confirm`}>Confirmation du mot de passe</Label>
+
+                        <InputGroup className="w-lg">
+                            <InputGroupInput
+                                required
+                                id={`${id}-confirm`}
+                                placeholder="Confirmer le mot de passe"
+                                type={isConfirmVisible ? "text" : "password"}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="[&::-ms-reveal]:hidden [&::-webkit-reveal]:hidden"
+                            />
+
+                            <InputGroupAddon align="inline-end">
+                                <Button
+                                    type="button"
+                                    aria-label={isConfirmVisible ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                                    onClick={() => setIsConfirmVisible(!isConfirmVisible)}
+                                    size="icon-xs"
+                                    variant="ghost"
+                                >
+                                    {isConfirmVisible ? (
+                                        <EyeOffIcon aria-hidden="true" />
+                                    ) : (
+                                        <EyeIcon aria-hidden="true" />
+                                    )}
+                                </Button>
+                            </InputGroupAddon>
+                        </InputGroup>
+                    </div>
+                    {confirmPassword && !passwordsMatch && (
+                        <p className="text-sm text-red-600">
+                            Les mots de passe ne correspondent pas.
+                        </p>
+                    )}
+                    <Button
+                        type="submit"
+                        className="mt-6 w-lg bg-primary-container hover:bg-primary-container/90"
+                        disabled={!passwordsMatch || strengthScore < 4}
+                    >
+                        Enregistrer
+                    </Button>
+                </form>
             </div>
         </div>
     );
