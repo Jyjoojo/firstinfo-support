@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { Mail, Paperclip } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -51,7 +52,7 @@ const messages: MessagePreview[] = [
     },
     {
         id: "3",
-        ticketId: "TK-3987",
+        ticketId: "TK-5009",
         ticketTitle: "Demande d'ajout d'utilisateur",
         authorName: "Awa Bamba",
         authorInitials: "AB",
@@ -63,15 +64,16 @@ const messages: MessagePreview[] = [
 ]
 
 export default function MailBox() {
+    const [open, setOpen] = useState(false)
     const unreadCount = messages.filter((m) => m.unread).length
 
     return (
-        <Drawer direction="right">
+        <Drawer direction="right" open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>
                 <button className="relative w-9 h-9 flex items-center justify-center cursor-pointer text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
                     <Mail size={19} />
                     {unreadCount > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-[3px] rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                        <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-[3px] rounded-full bg-tertiary text-white text-[10px] font-bold flex items-center justify-center leading-none">
                             {unreadCount > 9 ? "9+" : unreadCount}
                         </span>
                     )}
@@ -91,10 +93,11 @@ export default function MailBox() {
                         <Link
                             key={message.id}
                             href={`/dashboard/client/tickets/${message.ticketId}#dernier-message`}
+                            onClick={() => setOpen(false)}
                             className="relative block bg-surface-container-lowest border border-outline-variant/40 hover:border-primary/40 hover:bg-surface-container-low rounded-xl px-4 py-3 transition-colors"
                         >
                             {message.unread && (
-                                <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full bg-primary" />
+                                <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full bg-primary-container" />
                             )}
                             <div className="flex items-start gap-3">
                                 <div className="w-9 h-9 rounded-full bg-primary/10 border border-outline-variant/30 flex items-center justify-center text-primary font-bold text-xs shrink-0">
@@ -120,7 +123,7 @@ export default function MailBox() {
                                     </p>
                                 </div>
                                 {message.unread && (
-                                    <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1" />
+                                    <span className="w-2 h-2 rounded-full bg-primary-container shrink-0 mt-1" />
                                 )}
                             </div>
                         </Link>
@@ -139,7 +142,7 @@ export default function MailBox() {
                         Marquer tout comme lu
                     </Button>
                     <DrawerClose asChild>
-                        <Button variant="ghost" className="w-full">
+                        <Button variant="ghost" className="w-full bg-primary-container hover:bg-primary-container/90 cursor-pointer">
                             Fermer
                         </Button>
                     </DrawerClose>
