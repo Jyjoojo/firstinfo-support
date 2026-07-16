@@ -1,5 +1,6 @@
 import { Search, HelpCircle, Bell } from "lucide-react";
 import NotificationsBell from "./NotificationBell";
+import MailBox from "./MailBox";
 
 export default function TopBar() {
   return (
@@ -18,9 +19,7 @@ export default function TopBar() {
         </div>
       </div>
       <div className="flex items-center gap-3 ml-8">
-        <button className="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
-          <HelpCircle size={19} />
-        </button>
+        <MailBox />
         <NotificationsBell />
         <div className="h-6 w-px bg-outline-variant/30" />
         <div className="flex items-center gap-2.5 pl-1">
