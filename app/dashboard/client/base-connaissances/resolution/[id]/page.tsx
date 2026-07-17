@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { MY_RESOLUTIONS } from "@/lib/knowledge-base";
 
-export default function ResolutionDetailPage({ params }: { params: { id: string } }) {
-  const resolution = MY_RESOLUTIONS.find(r => r.id === params.id);
+export default async function ResolutionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const resolution = MY_RESOLUTIONS.find(r => r.id === id);
 
   if (!resolution) {
     notFound();
@@ -41,9 +42,9 @@ export default function ResolutionDetailPage({ params }: { params: { id: string 
           <Badge variant="secondary">{resolution.module}</Badge>
           <span className="text-sm text-muted-foreground">Par {resolution.technician}</span>
         </div>
-        
+
         <h1 className="text-3xl font-bold mb-6 text-foreground">{resolution.title}</h1>
-        
+
         <div className="p-5 bg-muted/50 rounded-xl text-foreground text-sm leading-relaxed mb-8 border border-border">
           <h3 className="font-semibold mb-2">Résumé de l'intervention :</h3>
           {resolution.summary}
@@ -52,12 +53,11 @@ export default function ResolutionDetailPage({ params }: { params: { id: string 
         <div className="pt-6 border-t border-border flex justify-between items-center">
           <Button variant="outline" asChild>
             <Link href="/dashboard/client/base-connaissances">
-              <ArrowLeft className="w-4 h-4 mr-2"/> Retour à la base
+              <ArrowLeft className="w-4 h-4 mr-2" /> Retour à la base
             </Link>
           </Button>
-          
+
           <Button variant="link" asChild className="text-muted-foreground">
-            {/* Si tu as une page de ticket, tu peux lier directement ici */}
             <Link href={`/dashboard/client/tickets/${resolution.ticketId}`}>
               Voir le ticket d'origine
             </Link>

@@ -1,21 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { KNOWLEDGE_BASE_PUBLIC } from "@/lib/knowledge-base";
 
-export default function ArticleDetailPage({ params }: { params: { id: string } }) {
-  const article = KNOWLEDGE_BASE_PUBLIC.find(a => a.id === params.id);
+export default async function ArticleDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const article = KNOWLEDGE_BASE_PUBLIC.find((item) => item.id === id);
 
   if (!article) {
-    notFound(); // Renvoie vers la page 404 de Next.js si l'ID n'existe pas
+    notFound();
   }
 
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6">
-      {/* Breadcrumb shadcn correctement implémenté avec Link */}
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -25,31 +25,40 @@ export default function ArticleDetailPage({ params }: { params: { id: string } }
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>{article.module}</BreadcrumbPage>
+            <BreadcrumbLink asChild>
+              <Link href="/dashboard/client/base-connaissances">{article.module}</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{article.title}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="bg-white border border-border rounded-xl p-6 md:p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-3 mb-6">
           <Badge>{article.category}</Badge>
           <Badge variant="secondary">{article.module}</Badge>
-        </div>
-        
-        <h1 className="text-3xl font-bold mb-4 text-foreground">{article.title}</h1>
-        <p className="text-lg text-muted-foreground mb-8">{article.excerpt}</p>
-        
-        {/* Ici tu pourras injecter le contenu riche (HTML ou Markdown) de l'article */}
-        <div className="prose prose-sm md:prose-base max-w-none text-foreground space-y-4 mb-8">
-          <p>Voici le contenu détaillé de la solution technique...</p>
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5" />{article.readTime} de lecture
+          </span>
         </div>
 
-        <div className="pt-6 border-t border-border">
+        <h1 className="text-3xl font-bold mb-4 text-foreground">{article.title}</h1>
+        <p className="text-lg text-muted-foreground mb-8">{article.excerpt}</p>
+
+        <div className="prose prose-sm md:prose-base max-w-none text-foreground space-y-4 mb-8">
+          <p>{article.content}</p>
+        </div>
+
+        <div className="pt-6 border-t border-border flex flex-wrap justify-between items-center gap-3">
           <Button variant="outline" asChild>
             <Link href="/dashboard/client/base-connaissances">
-              <ArrowLeft className="w-4 h-4 mr-2"/> Retour à la base
+              <ArrowLeft className="w-4 h-4 mr-2" /> Retour à la base
             </Link>
           </Button>
+          <span className="text-xs text-muted-foreground">Dernière mise à jour : {article.lastUpdated}</span>
         </div>
       </div>
     </div>

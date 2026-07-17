@@ -24,10 +24,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import TicketStatusStepper from "@/app/ui/dashboard/TicketStatusStepper";
-import { Share } from "next/font/google";
 
-export default async function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default function TicketDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const ticket = tickets.find((item) => item.id === id);
 
   const PriorityIcon = ticket ? priorityStyles[ticket.priorite].icon : null;
