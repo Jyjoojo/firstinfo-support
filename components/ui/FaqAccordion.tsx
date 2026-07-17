@@ -50,7 +50,7 @@ export default function FaqAccordion({
                   isOpen ? "text-sage-blue" : "text-white"
                 }`}
               >
-                <span className="flex-1">{item.question}</span>
+                <span className="flex-1 text-lg">{item.question}</span>
                 <span
                   className="grid place-items-center shrink-0 rounded-full transition-colors duration-300"
                   style={{

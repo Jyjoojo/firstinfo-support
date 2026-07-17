@@ -19,7 +19,6 @@ const navItems = [
   { href: "/dashboard/client", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/dashboard/client/tickets", label: "Mes Tickets", icon: Ticket },
   { href: "/dashboard/client/base-connaissances", label: "Base de connaissances", icon: BookOpen },
-  { href: "/dashboard/client/messagerie", label: "Messagerie", icon: MessageSquare },
   { href: "/dashboard/client/parametres", label: "Paramètres", icon: Settings },
 ];
 
@@ -78,14 +77,15 @@ export default function Sidebar() {
         </button>
         <div className="border-t border-outline-variant/30 pt-4 space-y-1">
           <Link
-            href="#"
+            href="/dashboard/client/aide-support"
             className="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
           >
             <HelpCircle size={19} />
             Aide &amp; Support
           </Link>
+          {/* TODO: Ajouter le bon lien de déconnexion */}
           <Link
-            href="#"
+            href="/"
             className="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
           >
             <LogOut size={19} />
