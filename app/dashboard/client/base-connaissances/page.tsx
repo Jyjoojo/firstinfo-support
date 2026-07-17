@@ -3,20 +3,29 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, FileText, CheckCircle2, Clock, ChevronRight } from "lucide-react";
+import { Search, FileText, CheckCircle2, Clock, ChevronRight, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KNOWLEDGE_BASE_PUBLIC, MY_RESOLUTIONS } from "@/lib/knowledge-base";
+import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 
 type KbTab = "public" | "resolutions";
 
 function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick}
-      className={`relative shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors duration-150 ${
-        active ? "text-white border-transparent bg-primary-container" : "bg-white text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
-      }`}>
+      className={`relative shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors duration-150 ${active ? "text-white border-transparent bg-primary-container" : "bg-white text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+        }`}>
       {active && (
         <motion.span layoutId="kb-filter-pill" transition={{ type: "spring", stiffness: 500, damping: 35 }}
           className="absolute inset-0 rounded-full bg-primary -z-10" />
@@ -42,20 +51,20 @@ export default function KnowledgeBasePage() {
   const filteredPublic = useMemo(() =>
     KNOWLEDGE_BASE_PUBLIC.filter(a =>
       (a.title.toLowerCase().includes(search.toLowerCase()) ||
-       a.module.toLowerCase().includes(search.toLowerCase()) ||
-       a.category.toLowerCase().includes(search.toLowerCase())) &&
+        a.module.toLowerCase().includes(search.toLowerCase()) ||
+        a.category.toLowerCase().includes(search.toLowerCase())) &&
       (!category || a.category === category)
     ), [search, category]);
 
   const filteredRes = useMemo(() =>
     MY_RESOLUTIONS.filter(r =>
       (r.title.toLowerCase().includes(search.toLowerCase()) ||
-       r.module.toLowerCase().includes(search.toLowerCase())) &&
+        r.module.toLowerCase().includes(search.toLowerCase())) &&
       (!module || r.module === module)
     ), [search, module]);
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-6 md:p-7 max-w-6xl mx-auto space-y-6 w-full">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-foreground">Base de Connaissances</h1>
       </div>
@@ -73,15 +82,15 @@ export default function KnowledgeBasePage() {
         />
       </div>
 
-      <Tabs value={activeTab} onValueChange={v => handleTabChange(v as KbTab)} className="w-full">
-        <TabsList className="mb-3">
+      <Tabs value={activeTab} onValueChange={v => handleTabChange(v as KbTab)}>
+        <TabsList className="mb-3 w-full bg-on-secondary-fixed-variant/10">
           <TabsTrigger value="public">Base Publique ({filteredPublic.length})</TabsTrigger>
           <TabsTrigger value="resolutions">Mes Résolutions ({filteredRes.length})</TabsTrigger>
         </TabsList>
 
         {/* Filtres à puces — catégories pour la base publique, modules pour mes résolutions */}
         <AnimatePresence mode="wait">
-          <motion.div key={activeTab} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.15 }}
+          <motion.div key={activeTab} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.08 }}
             className="flex items-center gap-1.5 overflow-x-auto pb-1 mb-4 -mx-1 px-1">
             {activeTab === "public" ? (
               <>
@@ -138,7 +147,8 @@ export default function KnowledgeBasePage() {
               <p className="text-sm text-muted-foreground py-8 text-center">Aucune résolution trouvée.</p>
             )}
             {filteredRes.map((res, i) => (
-              <motion.div key={res.id} layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18, delay: i * 0.02 }}>
+              <motion.div key={res.id} layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18, delay: i * 0.02 }}
+                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }}>
                 <Link
                   href={`/dashboard/client/base-connaissances/resolution/${res.id}`}
                   className="bg-white border border-border rounded-xl p-4 hover:border-emerald-400/50 hover:shadow-md transition-all flex items-center gap-3 group shadow-sm"
@@ -157,6 +167,31 @@ export default function KnowledgeBasePage() {
           </div>
         </TabsContent>
       </Tabs>
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious href="#" />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href="#">1</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href="#" isActive>
+              2
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href="#">3</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext href="#" />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
   );
 }
+
