@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, FileText, CheckCircle2, Clock, ChevronRight, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KNOWLEDGE_BASE_PUBLIC, MY_RESOLUTIONS } from "@/lib/knowledge-base";
@@ -20,20 +21,19 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Field, FieldLabel } from "@/components/ui/field"
 
 type KbTab = "public" | "resolutions";
 
 function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick}
-      className={`relative shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors duration-150 ${active ? "text-white border-transparent bg-primary-container" : "bg-white text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
-        }`}>
+      className={`relative px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors duration-150 ${active ? "text-white border-transparent bg-primary-container" : "bg-white text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+        }`}
+    >
       {active && (
         <motion.span layoutId="kb-filter-pill" transition={{ type: "spring", stiffness: 500, damping: 35 }}
           className="absolute inset-0 rounded-full bg-primary -z-10" />
@@ -48,13 +48,40 @@ export default function KnowledgeBasePage() {
   const [activeTab, setActiveTab] = useState<KbTab>("public");
   const [category, setCategory] = useState<string | null>(null);
   const [module, setModule] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(6);
 
   const categories = useMemo(() =>
     Array.from(new Set(KNOWLEDGE_BASE_PUBLIC.map(a => a.category))), []);
   const resModules = useMemo(() =>
     Array.from(new Set(MY_RESOLUTIONS.map(r => r.module))), []);
 
-  const handleTabChange = (t: KbTab) => { setActiveTab(t); setCategory(null); setModule(null); };
+  const handleTabChange = (t: string) => {
+    setActiveTab(t as KbTab);
+    setCategory(null);
+    setModule(null);
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (c: string | null) => {
+    setCategory(c);
+    setCurrentPage(1);
+  };
+
+  const handleModuleChange = (m: string | null) => {
+    setModule(m);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleItemsPerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1);
+  };
 
   const filteredPublic = useMemo(() =>
     KNOWLEDGE_BASE_PUBLIC.filter(a =>
@@ -71,6 +98,47 @@ export default function KnowledgeBasePage() {
       (!module || r.module === module)
     ), [search, module]);
 
+  const currentList = activeTab === "public" ? filteredPublic : filteredRes;
+  const totalPages = Math.ceil(currentList.length / itemsPerPage);
+
+  const displayedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return currentList.slice(startIndex, startIndex + itemsPerPage);
+  }, [currentList, currentPage, itemsPerPage]);
+
+  const generatePagination = (totalPages: number, currentPage: number) => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 4) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+    if (currentPage > totalPages - 4) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  };
+
+  const paginationRange = useMemo(() => generatePagination(totalPages, currentPage), [totalPages, currentPage]);
+
+  const handlePageChange = (page: number | '...') => {
+    if (typeof page === 'number') {
+      setCurrentPage(page);
+    }
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const totalLength = currentList.length;
+  const startItem = totalLength > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
+  const endItem = Math.min(currentPage * itemsPerPage, totalLength);
+
   return (
     <div className="p-6 md:p-7 max-w-6xl mx-auto space-y-6 w-full">
       <div className="flex justify-between items-center">
@@ -82,7 +150,7 @@ export default function KnowledgeBasePage() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={handleSearchChange}
           placeholder={activeTab === "public"
             ? "Rechercher un article, un module Sage, une catégorie..."
             : "Rechercher dans mes résolutions..."}
@@ -90,7 +158,7 @@ export default function KnowledgeBasePage() {
         />
       </div>
 
-      <Tabs value={activeTab} onValueChange={v => handleTabChange(v as KbTab)}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="mb-3 w-full bg-on-secondary-fixed-variant/10">
           <TabsTrigger value="public">Base Publique ({filteredPublic.length})</TabsTrigger>
           <TabsTrigger value="resolutions">Mes Résolutions ({filteredRes.length})</TabsTrigger>
@@ -98,20 +166,20 @@ export default function KnowledgeBasePage() {
 
         {/* Filtres à puces — catégories pour la base publique, modules pour mes résolutions */}
         <AnimatePresence mode="wait">
-          <motion.div key={activeTab} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.08 }}
-            className="flex items-center gap-1.5 overflow-x-auto pb-1 mb-4 -mx-1 px-1">
+          <motion.div key={activeTab} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.15 }}
+            className="flex flex-wrap items-center gap-2 pb-1 mb-4 -mx-1 px-1">
             {activeTab === "public" ? (
               <>
-                <FilterChip label={`Toutes (${KNOWLEDGE_BASE_PUBLIC.length})`} active={!category} onClick={() => setCategory(null)} />
+                <FilterChip label={`Toutes (${KNOWLEDGE_BASE_PUBLIC.length})`} active={!category} onClick={() => handleCategoryChange(null)} />
                 {categories.map(c => (
-                  <FilterChip key={c} label={c} active={category === c} onClick={() => setCategory(category === c ? null : c)} />
+                  <FilterChip key={c} label={c} active={category === c} onClick={() => handleCategoryChange(category === c ? null : c)} />
                 ))}
               </>
             ) : (
               <>
-                <FilterChip label={`Tous modules (${MY_RESOLUTIONS.length})`} active={!module} onClick={() => setModule(null)} />
+                <FilterChip label={`Tous modules (${MY_RESOLUTIONS.length})`} active={!module} onClick={() => handleModuleChange(null)} />
                 {resModules.map(m => (
-                  <FilterChip key={m} label={m} active={module === m} onClick={() => setModule(module === m ? null : m)} />
+                  <FilterChip key={m} label={m} active={module === m} onClick={() => handleModuleChange(module === m ? null : m)} />
                 ))}
               </>
             )}
@@ -120,10 +188,10 @@ export default function KnowledgeBasePage() {
 
         <TabsContent value="public" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredPublic.length === 0 && (
+            {displayedItems.length === 0 && (
               <p className="text-sm text-muted-foreground col-span-full py-8 text-center">Aucun article trouvé.</p>
             )}
-            {filteredPublic.map((article, i) => (
+            {displayedItems.map((item, i) => { const article = item as KnowledgeBaseArticle; return (
               <motion.div key={article.id} layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18, delay: i * 0.02 }}
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }}
               >
@@ -145,16 +213,16 @@ export default function KnowledgeBasePage() {
                   <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary-container transition-transform group-hover:translate-x-1 mt-1" />
                 </Link>
               </motion.div>
-            ))}
+            )})}
           </div>
         </TabsContent>
 
         <TabsContent value="resolutions" className="mt-0">
           <div className="space-y-3">
-            {filteredRes.length === 0 && (
+            {displayedItems.length === 0 && (
               <p className="text-sm text-muted-foreground py-8 text-center">Aucune résolution trouvée.</p>
             )}
-            {filteredRes.map((res, i) => (
+            {displayedItems.map((item, i) => { const res = item as MyResolution; return (
               <motion.div key={res.id} layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18, delay: i * 0.02 }}
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }}>
                 <Link
@@ -171,53 +239,57 @@ export default function KnowledgeBasePage() {
                   <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-emerald-600 transition-transform group-hover:translate-x-1" />
                 </Link>
               </motion.div>
-            ))}
+            )})}
           </div>
         </TabsContent>
       </Tabs>
-      <div className="flex items-center bg-white justify-between gap-4 border rounded-lg py-2 px-5">
-        <Field orientation="horizontal" className="w-fit flex-1">
-          <FieldLabel htmlFor="select-rows-per-page">Ligne par page</FieldLabel>
-          <Select defaultValue="25">
-            <SelectTrigger className="w-20" id="select-rows-per-page">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="start">
-              <SelectGroup>
-                <SelectItem value="10">6</SelectItem>
-                <SelectItem value="25">12</SelectItem>
-                <SelectItem value="50">24</SelectItem>
-                <SelectItem value="100">50</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </Field>
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious href="#" className="hover:bg-primary-container/80"/>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">1</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" isActive className="bg-primary-container/80">
-                2
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">3</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext href="#" className="hover:bg-primary-container/80"/>
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between gap-4 rounded-lg border bg-white px-4 py-2">
+          <div className="flex items-center gap-2 text-sm">
+            <label htmlFor="rows-per-page" className="text-muted-foreground">Lignes par page</label>
+            <Select value={String(itemsPerPage)} onValueChange={handleItemsPerPageChange}>
+              <SelectTrigger className="w-20" id="rows-per-page">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="6">6</SelectItem>
+                <SelectItem value="12">12</SelectItem>
+                <SelectItem value="24">24</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <p className="text-sm text-muted-foreground">
+              {startItem}-{endItem} sur {totalLength}
+            </p>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious onClick={handlePrevPage}
+                    className={cn("cursor-pointer", { "pointer-events-none opacity-50": currentPage === 1 })} />
+                </PaginationItem>
+                {paginationRange.map((page, index) => (
+                  <PaginationItem key={index} className="cursor-pointer">
+                    {page === '...' ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink isActive={currentPage === page} onClick={() => handlePageChange(page)}>
+                        {page}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext onClick={handleNextPage}
+                    className={cn("cursor-pointer", { "pointer-events-none opacity-50": currentPage === totalPages })} />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
