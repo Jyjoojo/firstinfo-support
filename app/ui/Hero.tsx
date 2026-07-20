@@ -1,5 +1,6 @@
 "use client";
 import { BadgeCheck, LockIcon } from "lucide-react";
+import Link from "next/link";
 import { TypeAnimation } from 'react-type-animation';
 
 export default function Hero() {
@@ -43,13 +44,17 @@ export default function Hero() {
           un temps de réponse garanti inférieur à 24 heures pour nos clients sous contrat.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <a
+          <Link href="/dashboard/client" className="flex items-center gap-2 bg-primary-container text-on-primary-container px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all active:scale-[0.98]">
+              <LockIcon size={14}/>
+            Espace Client
+          </Link>
+          {/* <a
             href="#"
             className="flex items-center gap-2 bg-primary-container text-on-primary-container px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all active:scale-[0.98]"
           >
             <LockIcon size={14}/>
             Espace Client
-          </a>
+          </a> */}
           <a
             href="#"
             className="px-8 py-4 rounded-xl font-bold text-lg border border-outline-variant hover:bg-surface-container transition-all"

@@ -3,12 +3,12 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, FileText, CheckCircle2, Clock, ChevronRight, Plus } from "lucide-react";
+import { Search, FileText, CheckCircle2, Clock, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { KNOWLEDGE_BASE_PUBLIC, MY_RESOLUTIONS } from "@/lib/knowledge-base";
+import { KNOWLEDGE_BASE_PUBLIC, KnowledgeBaseArticle, MY_RESOLUTIONS, MyResolution } from "@/lib/knowledge-base";
 import {
   Pagination,
   PaginationContent,
@@ -106,7 +106,7 @@ export default function KnowledgeBasePage() {
     return currentList.slice(startIndex, startIndex + itemsPerPage);
   }, [currentList, currentPage, itemsPerPage]);
 
-  const generatePagination = (totalPages: number, currentPage: number) => {
+  const generatePagination = (totalPages: number, currentPage: number): Array<number | '...'> => {
     if (totalPages <= 7) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
@@ -140,7 +140,7 @@ export default function KnowledgeBasePage() {
   const endItem = Math.min(currentPage * itemsPerPage, totalLength);
 
   return (
-    <div className="p-6 md:p-7 max-w-6xl mx-auto space-y-6 w-full">
+    <div className="flex min-h-full w-full max-w-6xl mx-auto flex-col gap-6 p-6 md:p-7">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-foreground">Base de Connaissances</h1>
       </div>
@@ -158,7 +158,7 @@ export default function KnowledgeBasePage() {
         />
       </div>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1">
         <TabsList className="mb-3 w-full bg-on-secondary-fixed-variant/10">
           <TabsTrigger value="public">Base Publique ({filteredPublic.length})</TabsTrigger>
           <TabsTrigger value="resolutions">Mes Résolutions ({filteredRes.length})</TabsTrigger>
@@ -243,8 +243,7 @@ export default function KnowledgeBasePage() {
           </div>
         </TabsContent>
       </Tabs>
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between gap-4 rounded-lg border bg-white px-4 py-2">
+      <div className="mt-auto flex items-center justify-between gap-4 rounded-lg border bg-white px-4 py-2">
           <div className="flex items-center gap-2 text-sm">
             <label htmlFor="rows-per-page" className="text-muted-foreground">Lignes par page</label>
             <Select value={String(itemsPerPage)} onValueChange={handleItemsPerPageChange}>
@@ -261,14 +260,14 @@ export default function KnowledgeBasePage() {
           </div>
 
           <div className="flex items-center gap-6">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground w-full">
               {startItem}-{endItem} sur {totalLength}
             </p>
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious onClick={handlePrevPage}
-                    className={cn("cursor-pointer", { "pointer-events-none opacity-50": currentPage === 1 })} />
+                    className={cn("cursor-pointer", { "pointer-events-none opacity-50": currentPage === 1 || totalPages <= 1 })} />
                 </PaginationItem>
                 {paginationRange.map((page, index) => (
                   <PaginationItem key={index} className="cursor-pointer">
@@ -283,13 +282,12 @@ export default function KnowledgeBasePage() {
                 ))}
                 <PaginationItem>
                   <PaginationNext onClick={handleNextPage}
-                    className={cn("cursor-pointer", { "pointer-events-none opacity-50": currentPage === totalPages })} />
+                    className={cn("cursor-pointer", { "pointer-events-none opacity-50": currentPage === totalPages || totalPages <= 1 })} />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
           </div>
         </div>
-      )}
     </div>
   );
 }

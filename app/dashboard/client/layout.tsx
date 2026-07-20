@@ -15,7 +15,7 @@ export default function PortailLayout({ children }: { children: ReactNode }) {
 
         {/* Seule cette zone défile : sidebar et topbar restent fixes */}
         <main className="relative flex-1 min-h-0 overflow-y-auto pb-20 lg:pb-0 flex flex-col bg-secondary">
-          <div>{children}</div>
+          <div className="flex flex-1 min-h-0 flex-col">{children}</div>
         </main>
       </div>
 

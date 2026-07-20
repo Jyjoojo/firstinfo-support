@@ -1,4 +1,5 @@
 "use client";
+import { use } from "react";
 import Link from "next/link";
 import Image from 'next/image'
 
@@ -25,8 +26,8 @@ import {
 } from "@/components/ui/breadcrumb"
 import TicketStatusStepper from "@/app/ui/dashboard/TicketStatusStepper";
 
-export default function TicketDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const ticket = tickets.find((item) => item.id === id);
 
   const PriorityIcon = ticket ? priorityStyles[ticket.priorite].icon : null;

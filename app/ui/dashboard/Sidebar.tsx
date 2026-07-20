@@ -69,12 +69,11 @@ export default function Sidebar() {
           })}
         </nav>
       </div>
-      {/* TODO: Ajouter les bons chemins pour les liens d'aide et de déconnexion */}
       <div className="mt-auto p-4 space-y-4">
-        <button className="w-full bg-tertiary hover:bg-primary/90 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-sm font-semibold text-sm transition-all active:scale-95">
+        <Link href="/dashboard/client/tickets/nouveau" className="w-full bg-tertiary hover:bg-primary/90 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-sm font-semibold text-sm transition-all active:scale-95">
           <Plus size={18} />
           Nouveau Ticket
-        </button>
+        </Link>
         <div className="border-t border-outline-variant/30 pt-4 space-y-1">
           <Link
             href="/dashboard/client/aide-support"
