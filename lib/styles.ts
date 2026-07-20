@@ -15,14 +15,15 @@ import {
 export type StatusVariant = Ticket["statut"];
 export type PriorityVariant = Ticket["priorite"];
 
-export const statusStyles: Record<StatusVariant, { base: string; icon?: LucideIcon }> = {
-  nouveau: { base: "border border-blue-300 bg-blue-50 text-blue-700", icon: FilePlus2 },
+export const statusStyles: Record<StatusVariant, { base: string; chartColor: string; icon?: LucideIcon }> = {
+  nouveau: { base: "border border-blue-300 bg-blue-50 text-blue-700", chartColor: "#1d4ed8", icon: FilePlus2 },
   "en cours": {
     base: "border border-orange-300 bg-orange-50 text-orange-700",
+    chartColor: "#c2410c",
     icon: LoaderCircle,
   },
-  résolu: { base: "border border-green-300 bg-green-50 text-green-700", icon: CheckCircle },
-  fermé: { base: "border border-slate-300 bg-slate-100 text-slate-700", icon: Archive },
+  résolu: { base: "border border-green-300 bg-green-50 text-green-700", chartColor: "#15803d", icon: CheckCircle },
+  fermé: { base: "border border-slate-300 bg-slate-100 text-slate-700", chartColor: "#475569", icon: Archive },
 };
 
 export const priorityStyles: Record<
