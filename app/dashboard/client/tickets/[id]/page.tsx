@@ -216,7 +216,7 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
                     />
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-on-surface">{ticket.assigneA}</p>
+                    <p className="font-bold text-on-surface">{ticket.assigneA ?? "Non assigné"}</p>
                     <p className="text-[12px] text-on-surface-variant">Consultante Senior ERP</p>
                   </div>
                   <Link href="#conversation-card" className="w-8 h-8 rounded-full bg-on-secondary-fixed-variant/10 text-on-secondary-fixed-variant flex items-center justify-center hover:bg-tertiary-container hover:text-white transition-colors shrink-0">

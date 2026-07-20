@@ -51,6 +51,9 @@ export default function Sidebar({
   supportHref,
 }: SidebarProps) {
   const pathname = usePathname();
+  const activeHref = navItems
+    .filter((item) => item.href === homeHref ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
     <aside className="hidden lg:flex flex-col h-screen fixed left-0 top-0 border-r border-outline-variant/30 bg-white w-60 z-50">
@@ -68,9 +71,7 @@ export default function Sidebar({
         <nav className="space-y-1">
           {navItems.map(({ href, label, icon }) => {
             const Icon = sidebarIcons[icon];
-            const isActive = href === homeHref
-              ? pathname === href
-              : pathname === href || pathname.startsWith(`${href}/`);
+            const isActive = href === activeHref;
 
             return (
               <Link

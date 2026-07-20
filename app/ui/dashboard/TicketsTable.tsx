@@ -80,7 +80,7 @@ export default function TicketsTable({ tickets }: { tickets: Ticket[] }) {
         { id: 'categorie', name: 'Catégorie', selector: (row) => row.categorie, sortable: true, width: '140px' },
         { id: 'statut', name: 'Statut', selector: (row) => row.statut, sortable: true, cell: (row) => <StatusBadge statut={row.statut} /> },
         { id: 'priorite', name: 'Priorité', selector: (row) => row.priorite, sortable: true, cell: (row) => <PriorityBadge priorite={row.priorite} /> },
-        { id: 'assigneA', name: 'Assigné à', selector: (row) => row.assigneA, sortable: true, width: '140px' },
+        { id: 'assigneA', name: 'Assigné à', selector: (row) => row.assigneA ?? 'Non assigné', sortable: true, width: '140px' },
         {
             id: 'dateCreation',
             name: 'Créé le',

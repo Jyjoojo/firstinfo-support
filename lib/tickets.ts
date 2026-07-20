@@ -8,7 +8,7 @@ export interface Ticket {
     priorite: 'basse' | 'normale' | 'haute' | 'urgente';
     dateCreation: string;
     dateModification: string;
-    assigneA: string;
+    assigneA: string | null;
 }
 
 export const tickets: Ticket[] = [
@@ -132,5 +132,16 @@ export const tickets: Ticket[] = [
         dateCreation: "2023-10-11",
         dateModification: "2023-10-11",
         assigneA: "Ivy Clark"
+    },
+    {
+        id: "TK-5012",
+        titre: "Problème d'analyse CRM",
+        contenu: "Je rencontre des difficultés pour me connecter à l'application.",
+        statut: "nouveau",
+        categorie: "Sage CRM",
+        priorite: "haute",
+        dateCreation: "2023-10-11",
+        dateModification: "2023-10-11",
+        assigneA: null
     },
 ]

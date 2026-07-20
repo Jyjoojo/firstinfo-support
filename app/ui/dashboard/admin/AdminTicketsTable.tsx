@@ -65,7 +65,7 @@ export default function AdminTicketsTable({ tickets }: { tickets: Ticket[] }) {
   const [creationDateRange, setCreationDateRange] = useState<DateRange | undefined>();
 
   const categories = useMemo(() => [...new Set(tickets.map((ticket) => ticket.categorie))].sort(), [tickets]);
-  const technicians = useMemo(() => [...new Set(tickets.map((ticket) => ticket.assigneA))].sort(), [tickets]);
+  const technicians = useMemo(() => [...new Set(tickets.map((ticket) => ticket.assigneA).filter((assignee): assignee is string => Boolean(assignee)))].sort(), [tickets]);
 
   const columns = useMemo<ColumnDef<Ticket>[]>(() => [
     {
@@ -86,7 +86,13 @@ export default function AdminTicketsTable({ tickets }: { tickets: Ticket[] }) {
     { accessorKey: "categorie", header: "Catégorie", cell: ({ getValue }) => <span className="text-sm text-on-surface">{getValue<string>()}</span>, size: 160 },
     { accessorKey: "statut", header: "Statut", cell: ({ getValue }) => <StatusBadge status={getValue<Ticket["statut"]>()} />, size: 130 },
     { accessorKey: "priorite", header: "Priorité", cell: ({ getValue }) => <PriorityBadge priority={getValue<Ticket["priorite"]>()} />, size: 130 },
-    { accessorKey: "assigneA", header: "Assigné à", cell: ({ getValue }) => <span className="whitespace-nowrap text-sm text-on-surface">{getValue<string>()}</span>, size: 150 },
+    {
+      accessorKey: "assigneA",
+      header: "Assigné à",
+      filterFn: (row, columnId, value) => value === "unassigned" ? !row.getValue<string | null>(columnId) : row.getValue<string | null>(columnId) === value,
+      cell: ({ getValue }) => <span className="whitespace-nowrap text-sm text-on-surface">{getValue<string | null>() || "Non assigné"}</span>,
+      size: 150,
+    },
     {
       accessorKey: "dateCreation",
       header: "Créé le",
@@ -163,7 +169,6 @@ export default function AdminTicketsTable({ tickets }: { tickets: Ticket[] }) {
     const selectedRows = table.getSelectedRowModel().rows;
     const rows = selectedRows.length > 0 ? selectedRows : table.getSortedRowModel().rows;
     const columns = table.getVisibleLeafColumns().filter((column) => !["select", "actions"].includes(column.id));
-    const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
     const valueForColumn = (ticket: Ticket, columnId: string) => {
       const value = ticket[columnId as keyof Ticket];
       return columnId === "dateCreation" || columnId === "dateModification"
@@ -175,8 +180,41 @@ export default function AdminTicketsTable({ tickets }: { tickets: Ticket[] }) {
 
     if (!printWindow) return;
 
-    printWindow.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Impression des tickets</title><style>body{font-family:Arial,sans-serif;color:#211a15;padding:28px}h1{font-size:22px;margin:0 0 4px}p{color:#6b6560;margin:0 0 20px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f5f2ef;text-align:left;text-transform:uppercase;font-size:10px;letter-spacing:.06em}th,td{border:1px solid #ddd5ce;padding:9px;vertical-align:top}tr:nth-child(even){background:#fcfbfa}@media print{body{padding:0}}</style></head><body><h1>Liste des tickets</h1><p>${escapeHtml(title)}</p><table><thead><tr>${columns.map((column) => `<th>${escapeHtml(typeof column.columnDef.header === "string" ? column.columnDef.header : column.id)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${columns.map((column) => `<td>${escapeHtml(valueForColumn(row.original, column.id))}</td>`).join("")}</tr>`).join("")}</tbody></table></body></html>`);
-    printWindow.document.close();
+    const printDocument = printWindow.document;
+    printDocument.title = "Impression des tickets";
+
+    const style = printDocument.createElement("style");
+    style.textContent = "body{font-family:Arial,sans-serif;color:#211a15;padding:28px}h1{font-size:22px;margin:0 0 4px}p{color:#6b6560;margin:0 0 20px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f5f2ef;text-align:left;text-transform:uppercase;font-size:10px;letter-spacing:.06em}th,td{border:1px solid #ddd5ce;padding:9px;vertical-align:top}tr:nth-child(even){background:#fcfbfa}@media print{body{padding:0}}";
+    printDocument.head.appendChild(style);
+
+    const heading = printDocument.createElement("h1");
+    heading.textContent = "Liste des tickets";
+    const subtitle = printDocument.createElement("p");
+    subtitle.textContent = title;
+    const printableTable = printDocument.createElement("table");
+    const tableHead = printDocument.createElement("thead");
+    const headerRow = printDocument.createElement("tr");
+
+    columns.forEach((column) => {
+      const cell = printDocument.createElement("th");
+      cell.textContent = typeof column.columnDef.header === "string" ? column.columnDef.header : column.id;
+      headerRow.appendChild(cell);
+    });
+    tableHead.appendChild(headerRow);
+    printableTable.appendChild(tableHead);
+
+    const tableBody = printDocument.createElement("tbody");
+    rows.forEach((row) => {
+      const rowElement = printDocument.createElement("tr");
+      columns.forEach((column) => {
+        const cell = printDocument.createElement("td");
+        cell.textContent = valueForColumn(row.original, column.id);
+        rowElement.appendChild(cell);
+      });
+      tableBody.appendChild(rowElement);
+    });
+    printableTable.appendChild(tableBody);
+    printDocument.body.append(heading, subtitle, printableTable);
     printWindow.focus();
     window.setTimeout(() => printWindow.print(), 150);
   };
@@ -197,7 +235,7 @@ export default function AdminTicketsTable({ tickets }: { tickets: Ticket[] }) {
           <select aria-label="Filtrer par statut" onChange={(event) => updateFilter("statut", event.target.value)} className="h-9 rounded-lg border border-outline-variant/30 bg-white px-3 text-sm text-on-surface"><option value="all">Tous les statuts</option>{statusOptions.map((status) => <option key={status} value={status}>{status}</option>)}</select>
           <select aria-label="Filtrer par priorité" onChange={(event) => updateFilter("priorite", event.target.value)} className="h-9 rounded-lg border border-outline-variant/30 bg-white px-3 text-sm text-on-surface"><option value="all">Toutes priorités</option>{priorityOptions.map((priority) => <option key={priority} value={priority}>{priority}</option>)}</select>
           <select aria-label="Filtrer par catégorie" onChange={(event) => updateFilter("categorie", event.target.value)} className="h-9 rounded-lg border border-outline-variant/30 bg-white px-3 text-sm text-on-surface"><option value="all">Toutes catégories</option>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select>
-          <select aria-label="Filtrer par technicien" onChange={(event) => updateFilter("assigneA", event.target.value)} className="h-9 rounded-lg border border-outline-variant/30 bg-white px-3 text-sm text-on-surface"><option value="all">Tous les techniciens</option>{technicians.map((technician) => <option key={technician} value={technician}>{technician}</option>)}</select>
+          <select aria-label="Filtrer par technicien" onChange={(event) => updateFilter("assigneA", event.target.value)} className="h-9 rounded-lg border border-outline-variant/30 bg-white px-3 text-sm text-on-surface"><option value="all">Tous les techniciens</option><option value="unassigned">Tickets non assignés</option>{technicians.map((technician) => <option key={technician} value={technician}>{technician}</option>)}</select>
           <details className="relative"><summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-lg border border-outline-variant/30 bg-white px-3 text-sm text-on-surface hover:bg-surface-container-low"><CalendarDays size={15} />{creationDateRange?.from ? creationDateRange.to ? `${formatDateLabel(creationDateRange.from)} – ${formatDateLabel(creationDateRange.to)}` : `Depuis le ${formatDateLabel(creationDateRange.from)}` : "Date de création"}</summary><div className="absolute right-0 z-30 mt-2 rounded-lg border border-outline-variant/30 bg-white shadow-lg"><Calendar mode="range" selected={creationDateRange} onSelect={updateCreationDateFilter} numberOfMonths={2} defaultMonth={creationDateRange?.from} /></div></details>
           <details className="relative ml-auto"><summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-lg border border-outline-variant/30 px-3 text-sm font-medium text-on-surface hover:bg-surface-container-low"><Settings2 size={15} /> Colonnes</summary><div className="absolute right-0 z-30 mt-2 w-52 rounded-lg border border-outline-variant/30 bg-white p-2 shadow-lg">{table.getAllLeafColumns().filter((column) => column.getCanHide()).map((column) => <label key={column.id} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-surface-container-low"><input type="checkbox" checked={column.getIsVisible()} onChange={column.getToggleVisibilityHandler()} className="accent-primary" />{typeof column.columnDef.header === "string" ? column.columnDef.header : column.id}</label>)}</div></details>
         </div>
@@ -206,10 +244,10 @@ export default function AdminTicketsTable({ tickets }: { tickets: Ticket[] }) {
       {table.getSelectedRowModel().rows.length > 0 && <div className="flex items-center justify-between border-b border-primary/20 bg-primary/5 px-4 py-2 text-sm text-on-surface"><span><strong>{table.getSelectedRowModel().rows.length}</strong> ticket(s) sélectionné(s)</span><button type="button" onClick={() => table.resetRowSelection()} className="font-semibold text-primary hover:underline">Désélectionner</button></div>}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1100px] text-left">
-          <thead className="border-b border-outline-variant/20 bg-surface-container-low text-xs uppercase tracking-wider text-on-surface-variant">
-            {table.getHeaderGroups().map((headerGroup) => <tr key={headerGroup.id}>{headerGroup.headers.map((header) => <th key={header.id} style={{ width: header.getSize() }} className="px-4 py-3 font-semibold">{header.isPlaceholder ? null : header.column.getCanSort() ? <button type="button" onClick={header.column.getToggleSortingHandler()} className="inline-flex items-center gap-1 hover:text-primary">{flexRender(header.column.columnDef.header, header.getContext())}{header.column.getIsSorted() === "asc" ? " ↑" : header.column.getIsSorted() === "desc" ? " ↓" : ""}</button> : flexRender(header.column.columnDef.header, header.getContext())}</th>)}</tr>)}
+          <thead className="border-b border-outline-variant/20 bg-surface-container-low text-xs tracking-wider text-on-surface-variant">
+            {table.getHeaderGroups().map((headerGroup) => <tr key={headerGroup.id}>{headerGroup.headers.map((header) => <th key={header.id} style={{ width: header.getSize() }} className={`px-4 py-3 font-semibold ${header.column.id === "actions" ? "normal-case" : "uppercase"}`}>{header.isPlaceholder ? null : header.column.getCanSort() ? <button type="button" onClick={header.column.getToggleSortingHandler()} className="inline-flex items-center gap-1 hover:text-primary">{flexRender(header.column.columnDef.header, header.getContext())}{header.column.getIsSorted() === "asc" ? " ↑" : header.column.getIsSorted() === "desc" ? " ↓" : ""}</button> : flexRender(header.column.columnDef.header, header.getContext())}</th>)}</tr>)}
           </thead>
-          <tbody className="divide-y divide-outline-variant/15">{table.getRowModel().rows.length ? table.getRowModel().rows.map((row) => <tr key={row.id} className="transition-colors hover:bg-surface-container-low/70">{row.getVisibleCells().map((cell) => <td key={cell.id} className="px-4 py-3 align-middle">{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>)}</tr>) : <tr><td colSpan={table.getVisibleLeafColumns().length} className="px-4 py-12 text-center text-sm text-on-surface-variant">Aucun ticket ne correspond aux filtres sélectionnés.</td></tr>}</tbody>
+          <tbody className="divide-y divide-outline-variant/15">{table.getRowModel().rows.length ? table.getRowModel().rows.map((row) => <tr key={row.id} className={`transition-colors ${row.original.assigneA ? "hover:bg-surface-container-low/70" : "bg-tertiary/10 hover:bg-tertiary/20"}`}>{row.getVisibleCells().map((cell) => <td key={cell.id} className="px-4 py-3 align-middle">{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>)}</tr>) : <tr><td colSpan={table.getVisibleLeafColumns().length} className="px-4 py-12 text-center text-sm text-on-surface-variant">Aucun ticket ne correspond aux filtres sélectionnés.</td></tr>}</tbody>
         </table>
       </div>
       <div className="m-4 flex flex-col gap-4 rounded-[20px] border border-outline-variant/40 px-5 py-3 text-sm text-on-surface sm:flex-row sm:items-center sm:justify-between">

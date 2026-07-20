@@ -22,6 +22,7 @@ export default function DashboardPage() {
     .filter(({ value }) => value > 0);
   const technicianPerformance = Object.values(
     tickets.reduce<Record<string, { name: string; assigned: number; resolved: number }>>((result, ticket) => {
+      if (!ticket.assigneA) return result;
       const technician = result[ticket.assigneA] ?? { name: ticket.assigneA, assigned: 0, resolved: 0 };
       technician.assigned += 1;
       technician.resolved += Number(ticket.statut === "résolu" || ticket.statut === "fermé");

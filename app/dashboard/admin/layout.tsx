@@ -13,6 +13,7 @@ export default function PortailLayout({ children }: { children: ReactNode }) {
         navItems={[
           { href: "/dashboard/admin", label: "Tableau de bord", icon: "dashboard" },
           { href: "/dashboard/admin/tickets", label: "Tous les tickets", icon: "tickets" },
+          { href: "/dashboard/admin/categories", label: "Gestion des catégories", icon: "tickets" },
           { href: "/dashboard/admin/utilisateurs", label: "Gestion utilisateurs", icon: "users" },
           { href: "/dashboard/admin/rapports", label: "Rapports & stats", icon: "reports" },
           { href: "/dashboard/admin/base-connaissances", label: "Gestion des connaissances", icon: "knowledge" },
