@@ -8,16 +8,16 @@ export default function PortailLayout({ children }: { children: ReactNode }) {
   return (
     <div className="h-screen flex bg-background text-on-surface overflow-hidden">
       <Sidebar
-        title="Portail Client"
-        homeHref="/dashboard/client"
+        title="Administration"
+        homeHref="/dashboard/admin"
         navItems={[
-          { href: "/dashboard/client", label: "Tableau de bord", icon: "dashboard" },
-          { href: "/dashboard/client/tickets", label: "Mes Tickets", icon: "tickets" },
-          { href: "/dashboard/client/base-connaissances", label: "Base de connaissances", icon: "knowledge" },
-          { href: "/dashboard/client/parametres", label: "Paramètres", icon: "settings" },
+          { href: "/dashboard/admin", label: "Tableau de bord", icon: "dashboard" },
+          { href: "/dashboard/admin/tickets", label: "Tous les tickets", icon: "tickets" },
+          { href: "/dashboard/admin/utilisateurs", label: "Gestion utilisateurs", icon: "users" },
+          { href: "/dashboard/admin/rapports", label: "Rapports & stats", icon: "reports" },
+          { href: "/dashboard/admin/base-connaissances", label: "Gestion des connaissances", icon: "knowledge" },
+          { href: "/dashboard/admin/parametres", label: "Paramètres", icon: "settings" },
         ]}
-        primaryAction={{ href: "/dashboard/client/tickets/nouveau", label: "Nouveau Ticket" }}
-        supportHref="/dashboard/client/aide-support"
       />
 
       {/* lg:pl-60 compense la largeur de la sidebar fixe (w-60) */}
