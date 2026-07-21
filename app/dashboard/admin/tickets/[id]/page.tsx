@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Building2, FileText, ImageIcon, Paperclip, Plus, Upload, UserRoundCheck } from "lucide-react";
+import { Building2, UserRoundCheck } from "lucide-react";
 import { tickets } from "@/lib/tickets";
 import { priorityStyles, statusStyles } from "@/lib/styles";
 import TicketStatusStepper from "@/app/ui/dashboard/TicketStatusStepper";
@@ -8,6 +8,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { CloseTicketAction, DeleteTicketAction, ReopenTicketAction } from "@/app/ui/dashboard/admin/TicketDetailActions";
 import EditTicketDialog from "@/app/ui/dashboard/admin/EditTicketDialog";
 import AdminTicketConversation from "@/app/ui/dashboard/admin/AdminTicketConversation";
+import TicketAttachments from "@/app/ui/dashboard/admin/TicketAttachments";
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
@@ -113,32 +114,7 @@ export default async function AdminTicketDetailPage({ params }: { params: Promis
 
         <main className="space-y-5 xl:col-span-7">
           <AdminTicketConversation ticketId={ticket.id} initialMessages={messageRows} />
-          <section className="rounded-2xl border border-outline-variant/30 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-lg font-bold text-on-surface">
-                <Paperclip size={16} /> Pièces jointes (2)
-              </h2>
-              <button type="button" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-                <Plus size={16} /> Ajouter
-              </button>
-            </div>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-4">
-                <FileText className="text-primary" size={19} />
-                <p className="mt-2 font-semibold">journal_ticket.txt</p>
-                <p className="text-xs text-on-surface-variant">1.2 MB</p>
-              </div>
-              <div className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-4">
-                <ImageIcon className="text-primary" size={19} />
-                <p className="mt-2 font-semibold">capture_erreur.png</p>
-                <p className="text-xs text-on-surface-variant">450 KB</p>
-              </div>
-              <button type="button" className="flex min-h-28 flex-col items-center justify-center rounded-xl border-2 border-dashed border-outline-variant/30 text-sm text-on-surface-variant">
-                <Upload size={22} />
-                <span className="mt-2">Nouveau fichier</span>
-              </button>
-            </div>
-          </section>
+          <TicketAttachments ticketId={ticket.id} />
         </main>
       </div>
 
