@@ -7,6 +7,7 @@ import TicketStatusStepper from "@/app/ui/dashboard/TicketStatusStepper";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { CloseTicketAction, DeleteTicketAction, ReopenTicketAction } from "@/app/ui/dashboard/admin/TicketDetailActions";
 import EditTicketDialog from "@/app/ui/dashboard/admin/EditTicketDialog";
+import AdminMessageActions from "@/app/ui/dashboard/admin/AdminMessageActions";
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
@@ -61,11 +62,39 @@ export default async function AdminTicketDetailPage({ params }: { params: Promis
 
         <main className="space-y-5 xl:col-span-7">
           <section className="overflow-hidden rounded-2xl border border-outline-variant/30 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-outline-variant/20 p-5"><h2 className="flex items-center gap-2 text-2xl font-bold text-on-surface"><Mail className="text-primary" /> Espace technicien</h2><span className="rounded-md bg-surface-container-low px-3 py-1 text-sm font-semibold">{messageRows.length} messages</span></div>
-            <div className="space-y-5 p-5">
-              {messageRows.map((message, index) => <div key={index} className={`flex flex-col gap-2 ${message.client ? "items-start" : "items-end"}`}><div className="flex items-center gap-2 text-sm"><span className="font-semibold text-on-surface">{message.author}</span><span className="text-xs text-on-surface-variant">{message.time}</span></div><p className={`max-w-[88%] rounded-2xl border px-4 py-3 leading-6 ${message.client ? "border-outline-variant/20 bg-surface-container-low" : "border-primary/20 bg-primary/5"}`}>{message.text}</p></div>)}
+            <div className="flex items-center justify-between border-b border-outline-variant/20 p-5">
+            <h2 className="flex items-center gap-2 text-2xl font-bold text-on-surface">
+              <Mail className="text-primary-container" /> Espace technicien</h2><span className="rounded-md bg-surface-container-low px-3 py-1 text-sm font-semibold">{messageRows.length} messages</span></div>
+            <div className="max-h-[500px] space-y-5 overflow-y-auto p-5">
+              {messageRows.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex flex-col gap-2 ${message.client ? "items-start" : "items-end"}`}
+                >
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className={`font-bold ${
+                        message.client
+                          ? "text-"
+                          : "text-tertiary"
+                      }`}>{message.author}</span>
+                    <span className="text-xs text-on-surface-variant">{message.time}</span>
+                  </div>
+                  <div className="max-w-[88%]">
+                    <p
+                      className={`rounded-2xl border px-4 py-3 leading-6 ${
+                        message.client
+                          ? "border-outline-variant/20 bg-surface-container-low"
+                          : "border-tertiary-fixed bg-tertiary-fixed"
+                      }`}
+                    >
+                      {message.text}
+                    </p>
+                    <AdminMessageActions messageId={index} content={message.text} />
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="border-t border-outline-variant/20 p-5"><div className="flex gap-2"><input placeholder="Répondre au client…" className="h-12 flex-1 rounded-xl border border-outline-variant/40 px-4 text-sm outline-none focus:border-primary" /><button type="button" className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white"><Send size={19} /></button></div><div className="mt-3 flex items-center justify-between text-sm"><label className="flex items-center gap-2 text-on-surface-variant"><input type="checkbox" className="accent-primary" /> Marquer comme solution</label><div className="flex gap-3 text-on-surface-variant"><Paperclip size={18} /><MoreHorizontal size={18} /></div></div></div>
+            <div className="border-t border-outline-variant/20 p-5"><div className="flex gap-2"><input placeholder="Répondre au client…" className="h-12 flex-1 rounded-xl border border-outline-variant/40 px-4 text-sm outline-none focus:border-primary" /><button type="button" className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary-container cursor-pointer text-white"><Send size={19} /></button></div><div className="mt-3 flex items-center justify-between text-sm"><label className="flex items-center gap-2 text-on-surface-variant"><input type="checkbox" className="accent-primary" /> Marquer comme solution</label><div className="flex gap-3 text-on-surface-variant"><Paperclip size={18} /><MoreHorizontal size={18} /></div></div></div>
           </section>
           <section className="rounded-2xl border border-outline-variant/30 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><h2 className="flex items-center gap-2 text-lg font-bold text-on-surface"><Paperclip size={19} /> Pièces jointes (2)</h2><button type="button" className="inline-flex items-center gap-2 text-sm font-semibold text-primary"><Plus size={16} /> Ajouter</button></div><div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3"><div className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-4"><FileText className="text-primary" size={22} /><p className="mt-2 font-semibold">journal_ticket.txt</p><p className="text-xs text-on-surface-variant">1.2 MB</p></div><div className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-4"><ImageIcon className="text-primary" size={22} /><p className="mt-2 font-semibold">capture_erreur.png</p><p className="text-xs text-on-surface-variant">450 KB</p></div><button type="button" className="flex min-h-28 flex-col items-center justify-center rounded-xl border-2 border-dashed border-outline-variant/30 text-sm text-on-surface-variant"><Upload size={22} /><span className="mt-2">Nouveau fichier</span></button></div></section>
         </main>
