@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { motion } from "motion/react";
 import { Archive, ChevronLeft, ChevronRight, Eye, FilePenLine, Plus, Search, Send, X, ChartBarBig, Clock4 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -151,9 +152,21 @@ export default function KnowledgeBaseManager({
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.08 } },
+      }}
+      className="space-y-6"
+    >
       <section className="grid grid-cols-1 md:grid-cols-4 gap-gutter mt-2 mb-9">
-        <article className="rounded-xl border border-outline-variant/30 bg-white p-5 shadow-sm md:col-span-2 bg-surface-container-lowest flex items-center justify-between overflow-hidden relative">
+        <motion.article
+          variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="rounded-xl border border-outline-variant/30 bg-white p-5 shadow-sm md:col-span-2 bg-surface-container-lowest flex items-center justify-between overflow-hidden relative"
+        >
           <div className="z-10">
             <p className="text-lg font-medium uppercase tracking-wider text-on-surface-variant">Performance du KB</p>
             <p className="mt-3 text-5xl font-bold text-teal-700">84%</p>
@@ -162,23 +175,35 @@ export default function KnowledgeBaseManager({
           <div className="absolute -right-2 bottom-0 opacity-10">
             <ChartBarBig size={100}/>
           </div>
-        </article>
-        <article className="rounded-xl bg-primary-container p-5 shadow-sm">
+        </motion.article>
+        <motion.article
+          variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="rounded-xl bg-primary-container p-5 shadow-sm"
+        >
           <p className="text-lg font-medium uppercase tracking-wide text-teal-950">Articles en brouillon</p>
           <p className="mt-3 text-5xl font-bold text-black">{draftCount}</p>
           <div className="flex items-center gap-1 mt-2">
             <Clock4 size={12}/>
             <p className="text-sm font-medium text-black"> Requièrent validation</p>
           </div>
-        </article>
-        <article className="rounded-xl bg-teal-300 p-5 shadow-sm">
+        </motion.article>
+        <motion.article
+          variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="rounded-xl bg-teal-300 p-5 shadow-sm"
+        >
           <p className="text-lg font-medium uppercase tracking-wide text-teal-950">Total lectures</p>
           <p className="mt-3 text-5xl font-bold text-teal-700">{new Intl.NumberFormat("fr-FR", { notation: "compact" }).format(totalViews)}</p>
           <p className="mt-2 text-sm text-teal-900">{publishedCount} article{publishedCount > 1 ? "s" : ""} publié{publishedCount > 1 ? "s" : ""}</p>
-        </article>
+        </motion.article>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-white shadow-sm">
+      <motion.section
+        variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-white shadow-sm"
+      >
         <div className="border-b border-outline-variant/20 p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <label className="relative block w-full sm:max-w-md">
@@ -215,8 +240,14 @@ export default function KnowledgeBaseManager({
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/15">
-              {visibleArticles.map((article) => (
-                <tr key={article.id} className={article.status === "published" ? "transition-colors hover:bg-surface-container-low/70" : "bg-tertiary-container/10 transition-colors hover:bg-surface-container-low"}>
+              {visibleArticles.map((article, index) => (
+                <motion.tr
+                  key={article.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.18, delay: index * 0.03, ease: "easeOut" }}
+                  className={article.status === "published" ? "transition-colors hover:bg-surface-container-low/70" : "bg-tertiary-container/10 transition-colors hover:bg-surface-container-low"}
+                >
                   <td className="px-6 py-4"><p className="max-w-64 font-semibold text-on-surface">{article.title}</p><p className="mt-1 text-xs text-on-surface-variant">Réf: {article.id}</p></td>
                   <td className="px-4 py-4 text-sm text-on-surface-variant">{article.category ?? "—"}</td>
                   <td className="px-4 py-4 text-sm text-on-surface-variant">{article.author ?? "Non assigné"}</td>
@@ -225,16 +256,16 @@ export default function KnowledgeBaseManager({
                   <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[article.status]}`}>{statusLabels[article.status]}</span></td>
                   <td className="px-4 py-4 text-sm text-on-surface-variant">{formatDate(article.updatedAt)}</td>
                   <td className="px-5 py-4"><div className="flex justify-end gap-1"><button type="button" onClick={() => setDrawer({ article, form: { title: article.title, content: article.content, category: article.category, keywords: article.keywords } })} className="inline-flex size-8 items-center justify-center rounded-lg text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container cursor-pointer" aria-label={`Modifier ${article.title}`} title="Modifier l’article"><FilePenLine size={16} /></button>{article.status === "draft" && <button type="button" onClick={() => applyStatus(article, "published")} className="inline-flex size-8 items-center justify-center  cursor-pointer rounded-lg text-teal-700 hover:bg-teal-100" aria-label={`Publier ${article.title}`} title="Publier l’article"><Send size={16} /></button>}{article.status !== "archived" && <button type="button" onClick={() => applyStatus(article, "archived")} className="inline-flex size-8 items-center justify-center rounded-lg text-on-surface-variant hover:bg-stone-200" aria-label={`Archiver ${article.title}`} title="Archiver l’article"><Archive size={16} /></button>}</div></td>
-                </tr>
+                </motion.tr>
               ))}
               {!visibleArticles.length && <tr><td colSpan={8} className="px-6 py-12 text-center text-sm text-on-surface-variant">Aucun article ne correspond aux filtres.</td></tr>}
             </tbody>
           </table>
         </div>
         <div className="flex flex-col gap-3 border-t border-outline-variant/20 px-6 py-4 text-sm text-on-surface-variant sm:flex-row sm:items-center sm:justify-between"><span>Affichage {filtered.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-{Math.min(currentPage * PAGE_SIZE, filtered.length)} sur {filtered.length} articles</span><div className="flex items-center gap-2"><button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1} className="inline-flex size-8 items-center justify-center rounded-lg border border-outline-variant/30 disabled:opacity-40"><ChevronLeft size={17} /></button><span>Page {currentPage} / {pageCount}</span><button type="button" onClick={() => setPage((value) => Math.min(pageCount, value + 1))} disabled={currentPage === pageCount} className="inline-flex size-8 items-center justify-center rounded-lg border border-outline-variant/30 disabled:opacity-40"><ChevronRight size={17} /></button></div></div>
-      </section>
+      </motion.section>
       {drawer && <ArticleDrawer drawer={drawer} categories={categories} onClose={() => setDrawer(null)} onSave={saveArticle} />}
-    </div>
+    </motion.div>
   );
 }
 
