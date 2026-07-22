@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { motion } from "motion/react";
 import { BriefcaseBusiness, Database, Download, Filter, FolderCog, Search, ShieldCheck, UsersRound } from "lucide-react";
 import type { TicketCategory } from "@/lib/ticket-categories";
 import EditTicketCategoryDialog from "@/app/ui/dashboard/admin/EditTicketCategoryDialog";
@@ -41,7 +42,12 @@ export default function TicketCategoriesTable({ categories }: { categories: Tick
   };
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-white shadow-sm">
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-white shadow-sm"
+    >
       <div className="flex flex-col gap-3 border-b border-outline-variant/20 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-sm"><Search size={17} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" /><input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Filtrer par libellé…" className="h-10 w-full rounded-lg border border-outline-variant/30 bg-white py-2 pl-10 pr-3 text-sm outline-none focus:border-primary" /></div>
         <div className="flex items-center gap-2"><button type="button" onClick={exportCategories} className="inline-flex h-10 items-center gap-2 rounded-lg border border-outline-variant/30 px-3 text-sm font-semibold text-on-surface hover:bg-surface-container-low"><Download size={16} /> Exporter</button><button type="button" aria-label="Options de filtre" className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant/30 text-on-surface hover:bg-surface-container-low"><Filter size={17} /></button></div>
@@ -50,9 +56,15 @@ export default function TicketCategoriesTable({ categories }: { categories: Tick
         <table className="w-full min-w-[820px] text-left">
           <thead className="border-b border-outline-variant/20 bg-surface-container-low text-xs uppercase tracking-wider text-on-surface-variant"><tr><th className="px-6 py-4 font-semibold">Libellé</th><th className="px-6 py-4 font-semibold">Description</th><th className="px-6 py-4 font-semibold">Date de création</th><th className="px-6 py-4 font-semibold">Dernière mise à jour</th><th className="px-6 py-4 text-right font-semibold">Action</th></tr></thead>
           <tbody className="divide-y divide-outline-variant/15">
-            {visibleCategories.map((category) => {
+            {visibleCategories.map((category, index) => {
               const Icon = categoryIcons[category.icon];
-              return <tr key={category.id} className="transition-colors hover:bg-surface-container-low/70">
+              return <motion.tr
+                key={category.id}
+                initial={{ opacity: 0, x: -18 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.22, delay: index * 0.04, ease: "easeOut" }}
+                className="transition-colors hover:bg-surface-container-low/70"
+              >
                 <td className="px-6 py-5">
                   <div className="flex items-center gap-3">
                     <span className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${iconColors[category.icon]}`}>
@@ -64,7 +76,7 @@ export default function TicketCategoriesTable({ categories }: { categories: Tick
                 <td className="px-6 py-5 text-sm text-on-surface-variant">{formatDate(category.updatedAt)}</td>
                 <td className="px-6 py-5 text-right"><EditTicketCategoryDialog category={category} />
                 </td>
-              </tr>;
+              </motion.tr>;
             })}
             {!visibleCategories.length && <tr><td colSpan={5} className="px-6 py-12 text-center text-sm text-on-surface-variant">Aucune catégorie ne correspond à la recherche.</td></tr>}
           </tbody>
@@ -78,6 +90,6 @@ export default function TicketCategoriesTable({ categories }: { categories: Tick
           </button>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

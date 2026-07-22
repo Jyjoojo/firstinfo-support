@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { Activity, FolderKanban, RefreshCw, ShieldCheck } from "lucide-react";
 import TicketCategoriesTable from "@/app/ui/dashboard/admin/TicketCategoriesTable";
+import CategoriesPageTransition from "@/app/ui/dashboard/admin/CategoriesPageTransition";
 import NewTicketCategoryDialog from "@/app/ui/dashboard/admin/NewTicketCategoryDialog";
 import { ticketCategories } from "@/lib/ticket-categories";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
 export default function TicketCategoriesPage() {
   return (
-    <div className="w-full max-w-7xl p-6 lg:p-8">
+    <CategoriesPageTransition>
+      <div className="w-full max-w-7xl p-6 lg:p-8">
       <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Breadcrumb className="mb-5">
@@ -51,6 +53,7 @@ export default function TicketCategoriesPage() {
         </article>
       </section>
       <TicketCategoriesTable categories={ticketCategories} />
-    </div>
+      </div>
+    </CategoriesPageTransition>
   );
 }
