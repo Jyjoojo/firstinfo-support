@@ -1,3 +1,4 @@
+// Données conservées pour l'espace client.
 export interface KnowledgeBaseArticle {
   id: string;
   title: string;
@@ -21,207 +22,40 @@ export interface MyResolution {
 }
 
 export const KNOWLEDGE_BASE_PUBLIC: KnowledgeBaseArticle[] = [
-  {
-    id: "kb-1",
-    title: "Renouveler le certificat SSL d'une instance SQL Server",
-    module: "Sage 100 Comptabilité",
-    category: "Infrastructure",
-    readTime: "4 min",
-    lastUpdated: "2024-07-18",
-    excerpt: "Procédure pas-à-pas pour renouveler un certificat SSL expiré sur SQL Server 2016/2019.",
-    content: "Contenu détaillé de l'article sur le renouvellement SSL...",
-  },
-  {
-    id: "kb-2",
-    title: "Procédure de clôture annuelle Sage Paie & RH",
-    module: "Sage Paie & RH",
-    category: "Paie",
-    readTime: "6 min",
-    lastUpdated: "2024-07-15",
-    excerpt: "Checklist complète avant la clôture : validation des bulletins, envoi DSN, sauvegarde dossier.",
-    content: "Contenu détaillé de l'article sur la clôture annuelle...",
-  },
-  {
-    id: "kb-3",
-    title: "Sauvegarder et restaurer un dossier Sage",
-    module: "Sage 100 / Gestion Commerciale",
-    category: "Maintenance",
-    readTime: "3 min",
-    lastUpdated: "2024-07-12",
-    excerpt: "Les bonnes pratiques de sauvegarde pour éviter toute perte de données en cas d'incident.",
-    content: "Contenu détaillé de l'article sur la sauvegarde...",
-  },
-  {
-    id: "kb-4",
-    title: "Corriger un stock négatif après inventaire",
-    module: "Sage Gestion Commerciale",
-    category: "Stock",
-    readTime: "5 min",
-    lastUpdated: "2024-07-10",
-    excerpt: "Comment verrouiller les stocks avant l'inventaire et recalculer les coûts moyens pondérés.",
-    content: "Contenu détaillé de l'article sur les stocks négatifs...",
-  },
-  {
-    id: "kb-5",
-    title: "Configurer le rapprochement bancaire automatique",
-    module: "Sage 100 Comptabilité",
-    category: "Comptabilité",
-    readTime: "4 min",
-    lastUpdated: "2024-07-08",
-    excerpt: "Import des relevés OFX/CFONB et paramétrage des règles de rapprochement automatique.",
-    content: "Contenu détaillé de l'article sur le rapprochement bancaire...",
-  },
-  {
-    id: "kb-6",
-    title: "Résoudre une erreur de DSN mensuelle (code S40.001)",
-    module: "Sage Paie & RH",
-    category: "Paie",
-    readTime: "3 min",
-    lastUpdated: "2024-07-05",
-    excerpt: "Diagnostic et correction du code d'erreur S40.001 lors de la transmission DSN.",
-    content: "Contenu détaillé de l'article sur l'erreur DSN...",
-  },
-  {
-    id: "kb-7",
-    title: "Optimiser les performances de Sage 100 sur un réseau distant",
-    module: "Sage 100 Comptabilité",
-    category: "Infrastructure",
-    readTime: "7 min",
-    lastUpdated: "2024-07-01",
-    excerpt: "Configuration des sessions TSE/RDS, optimisation de la bande passante et réglages SQL pour un accès fluide.",
-    content: "Contenu détaillé sur l'optimisation des performances...",
-  },
-  {
-    id: "kb-8",
-    title: "Gérer les acomptes et factures d'acompte",
-    module: "Sage Gestion Commerciale",
-    category: "Facturation",
-    readTime: "4 min",
-    lastUpdated: "2024-06-28",
-    excerpt: "De la création de la facture d'acompte à son imputation sur la facture finale.",
-    content: "Contenu détaillé sur la gestion des acomptes...",
-  },
-  {
-    id: "kb-9",
-    title: "Personnaliser les modèles d'impression (mises en page)",
-    module: "Sage 100 / Gestion Commerciale",
-    category: "Personnalisation",
-    readTime: "8 min",
-    lastUpdated: "2024-06-25",
-    excerpt: "Utiliser l'éditeur de mises en page pour ajouter un logo, des champs personnalisés et des conditions d'affichage.",
-    content: "Contenu détaillé sur la personnalisation des modèles...",
-  },
-  {
-    id: "kb-10",
-    title: "Configurer un nouvel exercice comptable",
-    module: "Sage 100 Comptabilité",
-    category: "Comptabilité",
-    readTime: "3 min",
-    lastUpdated: "2024-06-22",
-    excerpt: "Étapes pour créer un nouvel exercice, reporter les à-nouveaux et archiver l'exercice précédent.",
-    content: "Contenu détaillé sur la création d'exercice...",
-  },
-  {
-    id: "kb-11",
-    title: "Automatiser l'envoi des factures par e-mail",
-    module: "Sage Gestion Commerciale",
-    category: "Facturation",
-    readTime: "5 min",
-    lastUpdated: "2024-06-20",
-    excerpt: "Paramétrage du serveur SMTP et configuration des modèles d'e-mail pour l'envoi en masse.",
-    content: "Contenu détaillé sur l'envoi de factures par e-mail...",
-  },
-  {
-    id: "kb-12",
-    title: "Gérer les profils de congés et absences",
-    module: "Sage Paie & RH",
-    category: "Paie",
-    readTime: "6 min",
-    lastUpdated: "2024-06-18",
-    excerpt: "Création des profils de congés (payés, RTT, maladie) et affectation aux salariés pour un décompte automatique.",
-    content: "Contenu détaillé sur la gestion des congés...",
-  },
+  { id: "kb-1", title: "Renouveler le certificat SSL d'une instance SQL Server", module: "Sage 100 Comptabilité", category: "Infrastructure", readTime: "4 min", lastUpdated: "2024-07-18", excerpt: "Procédure pas-à-pas pour renouveler un certificat SSL expiré.", content: "Contenu détaillé de l'article sur le renouvellement SSL..." },
+  { id: "kb-2", title: "Procédure de clôture annuelle Sage Paie & RH", module: "Sage Paie & RH", category: "Paie", readTime: "6 min", lastUpdated: "2024-07-15", excerpt: "Checklist complète avant la clôture.", content: "Contenu détaillé de l'article sur la clôture annuelle..." },
+  { id: "kb-3", title: "Sauvegarder et restaurer un dossier Sage", module: "Sage Gestion Commerciale", category: "Maintenance", readTime: "3 min", lastUpdated: "2024-07-12", excerpt: "Les bonnes pratiques de sauvegarde.", content: "Contenu détaillé de l'article sur la sauvegarde..." },
+  { id: "kb-4", title: "Corriger un stock négatif après inventaire", module: "Sage Gestion Commerciale", category: "Stock", readTime: "5 min", lastUpdated: "2024-07-10", excerpt: "Recalculer les coûts moyens pondérés.", content: "Contenu détaillé sur les stocks négatifs..." },
+  { id: "kb-5", title: "Configurer le rapprochement bancaire automatique", module: "Sage 100 Comptabilité", category: "Comptabilité", readTime: "4 min", lastUpdated: "2024-07-08", excerpt: "Importer les relevés et paramétrer les règles.", content: "Contenu détaillé sur le rapprochement bancaire..." },
+  { id: "kb-6", title: "Résoudre une erreur de DSN mensuelle", module: "Sage Paie & RH", category: "Paie", readTime: "3 min", lastUpdated: "2024-07-05", excerpt: "Diagnostic du code d'erreur DSN.", content: "Contenu détaillé sur l'erreur DSN..." },
 ];
 
 export const MY_RESOLUTIONS: MyResolution[] = [
-  {
-    id: "res-1",
-    ticketId: "TKT-2026-042",
-    title: "Problème d'impression des bulletins de paie",
-    summary: "Le service d'impression a été redémarré et le modèle de bulletin a été réassocié dans les paramètres de la société.",
-    module: "Sage Paie & RH",
-    resolvedDate: "15 Mai 2026",
-    technician: "Support Niveau 2",
-    breadcrumb: ["Mes Résolutions", "Sage Paie & RH", "Impression"]
-  },
-  {
-    id: "res-2",
-    ticketId: "TK-2026-0831",
-    title: "Résolution : Bulletins de paie non imprimables",
-    module: "Sage Paie & RH",
-    resolvedDate: "6 mai 2026",
-    technician: "Traoré M.",
-    breadcrumb: ["Base de connaissances", "Sage Paie & RH", "Impression bulletins"],
-    summary: "Le pilote d'impression par défaut était corrompu. Réinstallation du driver et redémarrage du service Spooler ont résolu le problème. Les modèles de bulletins ont été reconfigurés.",
-  },
-  {
-    id: "res-3",
-    ticketId: "TK-2026-0812",
-    title: "Résolution : DSN mensuelle rejetée S40.001",
-    module: "Sage Paie & RH",
-    resolvedDate: "20 avr. 2026",
-    technician: "Traoré M.",
-    breadcrumb: ["Base de connaissances", "Sage Paie & RH", "DSN / Déclarations"],
-    summary: "Un SIRET incorrect dans la fiche établissement causait le rejet. Correction du numéro, régénération de la DSN et retransmission via Net-Entreprises.",
-  },
-  {
-    id: "res-4",
-    ticketId: "TK-2026-0785",
-    title: "Résolution : Migration Sage 100 v8 → v9",
-    module: "Sage 100 Comptabilité",
-    resolvedDate: "23 mars 2026",
-    technician: "Kouassi A.",
-    breadcrumb: ["Base de connaissances", "Sage 100 Comptabilité", "Migration / Mise à jour"],
-    summary: "Incompatibilité de charset entre la base v8 (Latin1) et v9 (UTF-8). Conversion effectuée via script SQL fourni par l'éditeur, puis restauration du dossier comptable.",
-  },
-  {
-    id: "res-5",
-    ticketId: "TK-2026-0750",
-    title: "Résolution : Lenteurs extrêmes sur les éditions",
-    module: "Sage 100 Gestion Commerciale",
-    resolvedDate: "15 mars 2026",
-    technician: "Kouassi A.",
-    breadcrumb: ["Base de connaissances", "Sage 100 Gestion Commerciale", "Performances"],
-    summary: "L'index de la table des documents de vente était fragmenté à plus de 90%. Une réindexation complète de la base de données a restauré les performances nominales.",
-  },
-  {
-    id: "res-6",
-    ticketId: "TK-2026-0699",
-    title: "Résolution : Erreur d'accès à la base de données après mise à jour Windows",
-    module: "Sage 100 Comptabilité",
-    resolvedDate: "2 fév. 2026",
-    technician: "Diallo S.",
-    breadcrumb: ["Base de connaissances", "Sage 100 Comptabilité", "Infrastructure"],
-    summary: "La mise à jour Windows a réactivé une règle de pare-feu bloquant le port 1433. Ajout d'une règle entrante explicite pour autoriser le trafic SQL.",
-  },
-  {
-    id: "res-7",
-    ticketId: "TK-2026-0651",
-    title: "Résolution : Calcul de TVA incorrect sur facture",
-    module: "Sage Gestion Commerciale",
-    resolvedDate: "10 jan. 2026",
-    technician: "Traoré M.",
-    breadcrumb: ["Base de connaissances", "Sage Gestion Commerciale", "Facturation"],
-    summary: "Le code taxe associé à l'article était erroné (5.5% au lieu de 20%). Correction de la fiche article et re-génération de la facture.",
-  },
-  {
-    id: "res-8",
-    ticketId: "TK-2026-0610",
-    title: "Résolution : Impossible d'ouvrir le dossier de paie",
-    module: "Sage Paie & RH",
-    resolvedDate: "18 déc. 2025",
-    technician: "Kouassi A.",
-    breadcrumb: ["Base de connaissances", "Sage Paie & RH", "Accès"],
-    summary: "Le fichier .prh était en lecture seule suite à une restauration incorrecte. Rétablissement des permissions d'écriture pour le groupe 'Utilisateurs' sur le dossier de la société.",
-  },
+  { id: "res-1", ticketId: "TKT-2026-042", title: "Problème d'impression des bulletins de paie", summary: "Le service d'impression a été redémarré.", module: "Sage Paie & RH", resolvedDate: "15 Mai 2026", technician: "Support Niveau 2", breadcrumb: ["Mes Résolutions", "Sage Paie & RH", "Impression"] },
+  { id: "res-2", ticketId: "TK-2026-0831", title: "Bulletins de paie non imprimables", summary: "Le pilote d'impression par défaut était corrompu.", module: "Sage Paie & RH", resolvedDate: "6 mai 2026", technician: "Traoré M.", breadcrumb: ["Base de connaissances", "Sage Paie & RH", "Impression bulletins"] },
+  { id: "res-3", ticketId: "TK-2026-0812", title: "DSN mensuelle rejetée S40.001", summary: "Le numéro SIRET a été corrigé.", module: "Sage Paie & RH", resolvedDate: "20 avr. 2026", technician: "Traoré M.", breadcrumb: ["Base de connaissances", "Sage Paie & RH", "DSN"] },
+];
+
+export type ArticleStatus = "draft" | "published" | "archived";
+
+export type KnowledgeArticle = {
+  id: string;
+  title: string;
+  content: string;
+  category: string | null;
+  author: string | null;
+  keywords: string[];
+  views: number;
+  status: ArticleStatus;
+  updatedAt: string;
+};
+
+export const knowledgeCategories = ["Sage 100", "Sage Paie", "Infrastructure", "Comptabilité"];
+
+export const knowledgeArticles: KnowledgeArticle[] = [
+  { id: "KB-2024-001", title: "Configuration SQL Server pour Sage 100", content: "Procédure de configuration de SQL Server et de la connexion Sage 100.", category: "Sage 100", author: "Jean Dupont", keywords: ["SQL", "Sage"], views: 1245, status: "published", updatedAt: "2024-10-12T09:15:00.000Z" },
+  { id: "KB-2024-042", title: "Erreur de clôture annuelle – Paie", content: "Résoudre les erreurs fréquentes rencontrées lors de la clôture annuelle.", category: "Sage Paie", author: "Marie Kone", keywords: ["Clôture", "Paie"], views: 89, status: "draft", updatedAt: "2026-07-22T09:30:00.000Z" },
+  { id: "KB-2023-112", title: "Guide Migration Cloud Sage", content: "Guide de préparation et de migration d'un environnement Sage vers le cloud.", category: "Infrastructure", author: "Ali Kouame", keywords: ["Migration", "Cloud"], views: 3402, status: "archived", updatedAt: "2023-09-15T10:00:00.000Z" },
+  { id: "KB-2025-018", title: "Créer un exercice comptable", content: "Étapes pour créer et paramétrer un nouvel exercice comptable.", category: "Comptabilité", author: "Jean Dupont", keywords: ["Exercice", "Comptabilité"], views: 756, status: "published", updatedAt: "2025-11-04T08:20:00.000Z" },
+  { id: "KB-2025-030", title: "Vérifier la sauvegarde quotidienne", content: "Checklist de vérification des sauvegardes quotidiennes de l'infrastructure.", category: "Infrastructure", author: null, keywords: ["Sauvegarde", "Serveur"], views: 0, status: "draft", updatedAt: "2026-07-20T16:10:00.000Z" },
 ];
