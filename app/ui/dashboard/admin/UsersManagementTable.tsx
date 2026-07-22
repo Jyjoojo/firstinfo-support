@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { motion } from "motion/react";
 import {
   ChevronDown,
   ChevronLeft,
@@ -182,7 +183,12 @@ export default function UsersManagementTable({ users }: { users: SupportUser[] }
   };
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-white shadow-sm">
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-white shadow-sm"
+    >
       <div className="border-b border-outline-variant/20 p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <label className="relative block w-full sm:max-w-sm">
@@ -323,13 +329,14 @@ export default function UsersManagementTable({ users }: { users: SupportUser[] }
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/15">
-            {visibleUsers.map((user) => {
+            {visibleUsers.map((user, index) => {
               const isExpanded = expandedId === user.id;
 
               return (
                 <UserRow
                   key={user.id}
                   user={user}
+                  rowIndex={index}
                   isExpanded={isExpanded}
                   isSelected={selectedIds.has(user.id)}
                   onToggleExpanded={() => setExpandedId(isExpanded ? null : user.id)}
@@ -377,12 +384,13 @@ export default function UsersManagementTable({ users }: { users: SupportUser[] }
           </button>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
 
 type UserRowProps = {
   user: SupportUser;
+  rowIndex: number;
   isExpanded: boolean;
   isSelected: boolean;
   onToggleExpanded: () => void;
@@ -393,6 +401,7 @@ type UserRowProps = {
 
 function UserRow({
   user,
+  rowIndex,
   isExpanded,
   isSelected,
   onToggleExpanded,
@@ -417,11 +426,15 @@ function UserRow({
 
   return (
     <>
-      <tr className={isExpanded
-        ? "bg-primary-container/35"
-        : isSelected
-          ? "bg-primary-container/20"
-          : "transition-colors hover:bg-surface-container-low/70"}
+      <motion.tr
+        initial={{ opacity: 0, x: -18 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.80, delay: rowIndex * 0.035, ease: "easeOut" }}
+        className={isExpanded
+          ? "bg-primary-container/35"
+          : isSelected
+            ? "bg-primary-container/20"
+            : "transition-colors hover:bg-surface-container-low/70"}
       >
         <td className={`px-5 py-4 ${isExpanded ? "border-l-2 border-t-2 border-primary-container" : ""}`}>
           <input
@@ -486,7 +499,7 @@ function UserRow({
             </button>
           </div>
         </td>
-      </tr>
+      </motion.tr>
       {isExpanded && (
         <tr className="bg-white">
           <td colSpan={8} className="border-x-2 border-b-2 border-primary-container px-6 py-5">
