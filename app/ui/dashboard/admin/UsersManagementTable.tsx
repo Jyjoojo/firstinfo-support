@@ -8,13 +8,29 @@ import {
   Edit3,
   Mail,
   MapPin,
-  Plus,
   Search,
   Trash2,
   UserCheck,
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import CreateUserDialog from "@/app/ui/dashboard/admin/CreateUserDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { SupportUser, UserRole } from "@/lib/users";
 
 const PAGE_SIZE = 20;
@@ -145,65 +161,81 @@ export default function UsersManagementTable({ users }: { users: SupportUser[] }
             />
           </label>
 
-          <select
+          <Select
             value={role}
-            onChange={(event) => {
-              setRole(event.target.value as "all" | UserRole);
+            onValueChange={(value) => {
+              setRole(value as "all" | UserRole);
               resetPage();
             }}
-            className="h-10 rounded-lg border border-outline-variant/30 bg-white px-3 text-sm text-on-surface outline-none focus:border-primary"
-            aria-label="Filtrer par rôle"
           >
-            <option value="all">Tous les rôles</option>
-            <option value="administrateur">Administrateurs</option>
-            <option value="technicien">Techniciens</option>
-            <option value="client">Clients</option>
-          </select>
+            <SelectTrigger className="h-10 min-w-40 border-outline-variant/30 bg-white text-on-surface">
+              <SelectValue placeholder="Tous les rôles" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les rôles</SelectItem>
+              <SelectItem value="administrateur">Administrateurs</SelectItem>
+              <SelectItem value="technicien">Techniciens</SelectItem>
+              <SelectItem value="client">Clients</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <select
+          <Select
             value={speciality}
-            onChange={(event) => {
-              setSpeciality(event.target.value);
+            onValueChange={(value) => {
+              setSpeciality(value);
               resetPage();
             }}
-            className="h-10 rounded-lg border border-outline-variant/30 bg-white px-3 text-sm text-on-surface outline-none focus:border-primary"
-            aria-label="Filtrer par spécialité"
           >
-            <option value="all">Toutes les spécialités</option>
-            {specialities.map((value) => (
-              <option key={value} value={value}>{value}</option>
-            ))}
-          </select>
+            <SelectTrigger className="h-10 min-w-48 border-outline-variant/30 bg-white text-on-surface">
+              <SelectValue placeholder="Toutes les spécialités" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les spécialités</SelectItem>
+              {specialities.map((value) => (
+                <SelectItem key={value} value={value}>{value}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <select
+          <Select
             value={status}
-            onChange={(event) => {
-              setStatus(event.target.value as "all" | "active" | "inactive");
+            onValueChange={(value) => {
+              setStatus(value as "all" | "active" | "inactive");
               resetPage();
             }}
-            className="h-10 rounded-lg border border-outline-variant/30 bg-white px-3 text-sm text-on-surface outline-none focus:border-primary"
-            aria-label="Filtrer par statut"
           >
-            <option value="all">Tous les statuts</option>
-            <option value="active">Actifs</option>
-            <option value="inactive">Inactifs</option>
-          </select>
+            <SelectTrigger className="h-10 min-w-36 border-outline-variant/30 bg-white text-on-surface">
+              <SelectValue placeholder="Tous les statuts" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les statuts</SelectItem>
+              <SelectItem value="active">Actifs</SelectItem>
+              <SelectItem value="inactive">Inactifs</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <button
-          type="button"
-          onClick={() => toast.info("Le formulaire de création sera relié à l’API utilisateurs.")}
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-on-primary hover:bg-primary/90"
-        >
-          <Plus size={17} />
-          Ajouter un utilisateur
-        </button>
+        <CreateUserDialog
+          onCreated={(user) => {
+            setItems((current) => [user, ...current]);
+            resetPage();
+          }}
+        />
       </div>
 
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-2 border-b border-outline-variant/20 bg-primary-container/30 px-5 py-3 text-sm font-medium text-on-surface">
-          <UserCheck size={17} className="text-primary" />
-          {selectedIds.size} utilisateur{selectedIds.size > 1 ? "s" : ""} sélectionné{selectedIds.size > 1 ? "s" : ""}
+        <div className="flex items-center justify-between gap-3 border-b border-outline-variant/20 bg-primary-container/30 px-5 py-3 text-sm font-medium text-on-surface">
+          <span className="flex items-center gap-2">
+            <UserCheck size={17} className="text-primary" />
+            {selectedIds.size} utilisateur{selectedIds.size > 1 ? "s" : ""} sélectionné{selectedIds.size > 1 ? "s" : ""}
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelectedIds(new Set())}
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            Tout désélectionner
+          </button>
         </div>
       )}
 
@@ -307,10 +339,30 @@ function UserRow({
   onToggleActive,
   onAction,
 }: UserRowProps) {
+  const [confirmation, setConfirmation] = useState<"status" | "delete" | null>(null);
+
+  const closeConfirmation = () => setConfirmation(null);
+  const confirmAction = () => {
+    if (confirmation === "status") {
+      onToggleActive();
+    }
+
+    if (confirmation === "delete") {
+      onAction("supprimer", user);
+    }
+
+    closeConfirmation();
+  };
+
   return (
     <>
-      <tr className={isSelected ? "bg-primary-container/20" : "transition-colors hover:bg-surface-container-low/70"}>
-        <td className="px-5 py-4">
+      <tr className={isExpanded
+        ? "bg-primary-container/35"
+        : isSelected
+          ? "bg-primary-container/20"
+          : "transition-colors hover:bg-surface-container-low/70"}
+      >
+        <td className={`px-5 py-4 ${isExpanded ? "border-l-2 border-t-2 border-primary-container" : ""}`}>
           <input
             type="checkbox"
             checked={isSelected}
@@ -319,7 +371,7 @@ function UserRow({
             className="size-4 accent-primary"
           />
         </td>
-        <td className="px-4 py-4">
+        <td className={`px-4 py-4 ${isExpanded ? "border-t-2 border-primary-container" : ""}`}>
           <button
             type="button"
             onClick={onToggleExpanded}
@@ -340,27 +392,27 @@ function UserRow({
             </span>
           </button>
         </td>
-        <td className="px-4 py-4">
+        <td className={`px-4 py-4 ${isExpanded ? "border-t-2 border-primary-container" : ""}`}>
           <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${roleStyles[user.role]}`}>
             {roleLabels[user.role]}
           </span>
         </td>
-        <td className="px-4 py-4 text-sm text-on-surface-variant">{user.email}</td>
-        <td className="px-4 py-4 text-sm text-on-surface-variant">{user.telephone}</td>
-        <td className="px-4 py-4">
+        <td className={`px-4 py-4 text-sm text-on-surface-variant ${isExpanded ? "border-t-2 border-primary-container" : ""}`}>{user.email}</td>
+        <td className={`px-4 py-4 text-sm text-on-surface-variant ${isExpanded ? "border-t-2 border-primary-container" : ""}`}>{user.telephone}</td>
+        <td className={`px-4 py-4 ${isExpanded ? "border-t-2 border-primary-container" : ""}`}>
           <button
             type="button"
-            onClick={onToggleActive}
+            onClick={() => setConfirmation("status")}
             className={user.actif
-              ? "rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-200"
-              : "rounded-full bg-stone-200 px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-300"}
+              ? "rounded-full cursor-pointer bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-200"
+              : "rounded-full cursor-pointer bg-stone-200 px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-300"}
             title={user.actif ? "Désactiver ce compte" : "Activer ce compte"}
           >
             {user.actif ? "Actif" : "Inactif"}
           </button>
         </td>
-        <td className="px-4 py-4 text-sm text-on-surface-variant">{formatDate(user.createdAt)}</td>
-        <td className="px-5 py-4">
+        <td className={`px-4 py-4 text-sm text-on-surface-variant ${isExpanded ? "border-t-2 border-primary-container" : ""}`}>{formatDate(user.createdAt)}</td>
+        <td className={`px-5 py-4 ${isExpanded ? "border-r-2 border-t-2 border-primary-container" : ""}`}>
           <div className="flex justify-end gap-2">
             <button
               type="button"
@@ -372,7 +424,7 @@ function UserRow({
             </button>
             <button
               type="button"
-              onClick={() => onAction("supprimer", user)}
+              onClick={() => setConfirmation("delete")}
               aria-label={`Supprimer ${user.prenoms} ${user.nom}`}
               className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg text-destructive hover:bg-destructive/10"
             >
@@ -382,12 +434,43 @@ function UserRow({
         </td>
       </tr>
       {isExpanded && (
-        <tr className="bg-surface-container-low/60">
-          <td colSpan={8} className="px-6 py-5">
+        <tr className="bg-white">
+          <td colSpan={8} className="border-x-2 border-b-2 border-primary-container px-6 py-5">
             <UserDetails user={user} />
           </td>
         </tr>
       )}
+      <Dialog open={confirmation !== null} onOpenChange={(open) => !open && closeConfirmation()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold">
+              {confirmation === "delete"
+                ? `Supprimer ${user.prenoms} ${user.nom} ?`
+                : `${user.actif ? "Désactiver" : "Activer"} le compte ?`}
+            </DialogTitle>
+            <DialogDescription>
+              {confirmation === "delete"
+                ? "Cette action supprimera définitivement le compte utilisateur. Elle est irréversible."
+                : user.actif
+                  ? `Le compte de ${user.prenoms} ${user.nom} ne pourra plus accéder au portail.`
+                  : `Le compte de ${user.prenoms} ${user.nom} pourra de nouveau accéder au portail.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={closeConfirmation}>
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              variant={confirmation === "delete" ? "outline" : "default"}
+              onClick={confirmAction}
+              className="bg-tertiary"
+            >
+              {confirmation === "delete" ? "Supprimer" : user.actif ? "Désactiver" : "Activer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

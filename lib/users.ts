@@ -105,7 +105,7 @@ export const supportUsers: SupportUser[] = [
   },
   {
     id: "USR-007",
-    nom: "Koueh",
+    nom: "Kouehi",
     prenoms: "Ange Joël",
     email: "ange.koueh@firstinfo.ci",
     role: "administrateur",
