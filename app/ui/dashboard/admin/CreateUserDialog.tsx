@@ -166,7 +166,7 @@ export default function CreateUserDialog({ onCreated }: CreateUserDialogProps) {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-on-primary hover:bg-primary/90"
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-tertiary/90 cursor-pointer px-4 text-sm font-semibold text-on-primary hover:bg-tertiary"
         >
           <Plus size={17} />
           Ajouter un utilisateur

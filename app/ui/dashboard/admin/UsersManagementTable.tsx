@@ -5,9 +5,10 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Edit3,
+  Download,
   Mail,
   MapPin,
+  RotateCcw,
   Search,
   Trash2,
   UserCheck,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import CreateUserDialog from "@/app/ui/dashboard/admin/CreateUserDialog";
+import EditUserDialog from "@/app/ui/dashboard/admin/EditUserDialog";
 import {
   Dialog,
   DialogContent,
@@ -99,6 +101,45 @@ export default function UsersManagementTable({ users }: { users: SupportUser[] }
 
   const resetPage = () => setPage(1);
 
+  const resetFilters = () => {
+    setSearch("");
+    setRole("all");
+    setSpeciality("all");
+    setStatus("all");
+    resetPage();
+  };
+
+  const exportUsers = () => {
+    const headers = [
+      "Nom",
+      "Prénoms",
+      "Rôle",
+      "Email",
+      "Téléphone",
+      "Statut",
+      "Date de création",
+    ];
+    const rows = filteredUsers.map((user) => [
+      user.nom,
+      user.prenoms,
+      roleLabels[user.role],
+      user.email,
+      user.telephone,
+      user.actif ? "Actif" : "Inactif",
+      formatDate(user.createdAt),
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(";"))
+      .join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "utilisateurs.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const toggleSelection = (userId: string) => {
     setSelectedIds((current) => {
       const next = new Set(current);
@@ -142,8 +183,8 @@ export default function UsersManagementTable({ users }: { users: SupportUser[] }
 
   return (
     <section className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-white shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-outline-variant/20 p-5 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-1 flex-col gap-3 sm:flex-row">
+      <div className="border-b border-outline-variant/20 p-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <label className="relative block w-full sm:max-w-sm">
             <span className="sr-only">Rechercher un utilisateur</span>
             <Search
@@ -160,7 +201,24 @@ export default function UsersManagementTable({ users }: { users: SupportUser[] }
               className="h-10 w-full rounded-lg border border-outline-variant/30 bg-white py-2 pl-10 pr-3 text-sm outline-none focus:border-primary"
             />
           </label>
-
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={exportUsers}
+              className="inline-flex h-10 items-center gap-2 rounded-lg border border-outline-variant/30 px-3 text-sm font-semibold text-on-surface hover:bg-surface-container-low"
+            >
+              <Download size={16} />
+              Exporter
+            </button>
+            <CreateUserDialog
+              onCreated={(user) => {
+                setItems((current) => [user, ...current]);
+                resetPage();
+              }}
+            />
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
           <Select
             value={role}
             onValueChange={(value) => {
@@ -213,14 +271,17 @@ export default function UsersManagementTable({ users }: { users: SupportUser[] }
               <SelectItem value="inactive">Inactifs</SelectItem>
             </SelectContent>
           </Select>
-        </div>
 
-        <CreateUserDialog
-          onCreated={(user) => {
-            setItems((current) => [user, ...current]);
-            resetPage();
-          }}
-        />
+          <button
+            type="button"
+            onClick={resetFilters}
+            aria-label="Réinitialiser les filtres"
+            title="Réinitialiser les filtres"
+            className="inline-flex size-10 items-center cursor-pointer justify-center rounded-lg border border-outline-variant/30 text-on-surface hover:bg-surface-container-low"
+          >
+            <RotateCcw size={16} />
+          </button>
+        </div>
       </div>
 
       {selectedIds.size > 0 && (
@@ -327,7 +388,7 @@ type UserRowProps = {
   onToggleExpanded: () => void;
   onToggleSelection: () => void;
   onToggleActive: () => void;
-  onAction: (action: "modifier" | "supprimer", user: SupportUser) => void;
+  onAction: (action: "supprimer", user: SupportUser) => void;
 };
 
 function UserRow({
@@ -414,14 +475,7 @@ function UserRow({
         <td className={`px-4 py-4 text-sm text-on-surface-variant ${isExpanded ? "border-t-2 border-primary-container" : ""}`}>{formatDate(user.createdAt)}</td>
         <td className={`px-5 py-4 ${isExpanded ? "border-r-2 border-t-2 border-primary-container" : ""}`}>
           <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => onAction("modifier", user)}
-              aria-label={`Modifier ${user.prenoms} ${user.nom}`}
-              className="inline-flex size-8 items-center justify-center rounded-lg text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container"
-            >
-              <Edit3 size={16} />
-            </button>
+            <EditUserDialog user={user} />
             <button
               type="button"
               onClick={() => setConfirmation("delete")}

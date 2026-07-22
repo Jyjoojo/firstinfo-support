@@ -114,6 +114,7 @@ export default function AdminTicketsTable({ tickets }: { tickets: Ticket[] }) {
             <summary title="Actions du ticket" className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-primary/10 hover:text-primary"><MoreVertical size={17} /></summary>
             <div className="absolute right-0 z-20 mt-1 w-40 rounded-lg border border-outline-variant/30 bg-white p-1 shadow-lg">
               <Link href={`/dashboard/admin/tickets/${row.original.id}`} className="block rounded-md px-3 py-2 text-sm hover:bg-surface-container-low">Voir les détails</Link>
+              {/* TODO: Implémenter la fonctionnalité assigné */}
               <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-surface-container-low"><UserRoundCheck size={15} /> Assigner</button>
             </div>
           </details>
