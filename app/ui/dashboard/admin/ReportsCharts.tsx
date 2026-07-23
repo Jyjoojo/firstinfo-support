@@ -70,8 +70,10 @@ export function TicketEvolutionChart({
 
 export function DonutChart({
   data,
+  semicircle = false,
 }: {
   data: Array<{ label: string; value: number; color: string }>;
+  semicircle?: boolean;
 }) {
   return (
     <div className="h-64 w-full">
@@ -85,6 +87,9 @@ export function DonutChart({
             outerRadius={84}
             paddingAngle={3}
             stroke="none"
+            startAngle={semicircle ? 180 : undefined}
+            endAngle={semicircle ? 0 : undefined}
+            cy={semicircle ? "72%" : "50%"}
           >
             {data.map((entry) => (
               <Cell key={entry.label} fill={entry.color} />
@@ -124,4 +129,3 @@ export function CategoryBarChart({
     </div>
   );
 }
-

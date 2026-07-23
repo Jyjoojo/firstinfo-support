@@ -45,6 +45,7 @@ import {
   DonutChart,
   TicketEvolutionChart,
 } from "@/app/ui/dashboard/admin/ReportsCharts";
+import { statusStyles } from "@/lib/styles";
 
 const REPORTS_PER_PAGE = 15;
 
@@ -60,10 +61,26 @@ const ticketEvolution = [
 ];
 
 const statusDistribution = [
-  { label: "Nouveaux", value: 32, color: "#f59e0b" },
-  { label: "En cours", value: 46, color: "#a15c00" },
-  { label: "Résolus", value: 98, color: "#0f766e" },
-  { label: "Fermés", value: 52, color: "#94a3b8" },
+  {
+    label: "Nouveaux",
+    value: 32,
+    color: statusStyles.nouveau.chartColor,
+  },
+  {
+    label: "En cours",
+    value: 46,
+    color: statusStyles["en cours"].chartColor,
+  },
+  {
+    label: "Résolus",
+    value: 98,
+    color: statusStyles.résolu.chartColor,
+  },
+  {
+    label: "Fermés",
+    value: 52,
+    color: statusStyles.fermé.chartColor,
+  },
 ];
 
 const ticketCategories = [
@@ -439,7 +456,7 @@ export default function ReportsDashboard() {
             description="Manuel, auto et self-assignation."
             className="xl:col-span-2"
           >
-            <DonutChart data={assignmentDistribution} />
+            <DonutChart data={assignmentDistribution} semicircle />
           </ChartCard>
         </div>
 

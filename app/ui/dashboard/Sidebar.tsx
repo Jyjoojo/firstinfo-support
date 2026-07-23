@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
@@ -59,8 +60,15 @@ export default function Sidebar({
     <aside className="hidden lg:flex flex-col h-screen fixed left-0 top-0 border-r border-outline-variant/30 bg-white w-60 z-50">
       <div className="px-5 py-6">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shrink-0">
-            <ShieldCheck size={18} className="text-white" />
+          <div className=" flex items-center justify-center shrink-0">
+            {/* <ShieldCheck size={18} className="text-white" /> */}
+            <Image
+              src="/logofirstinfo-v2.png"
+              width={50}
+              height={50}
+              className="font-headline-md text-headline-md font-bold text-tertiary"
+              alt="First Info CI Logo"
+            />
           </div>
           <div>
             <h1 className="font-bold text-sm text-on-surface leading-tight">{title}</h1>
@@ -77,11 +85,10 @@ export default function Sidebar({
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-                  isActive
+                className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive
                     ? "bg-primary-container text-on-primary-container"
                     : "text-on-surface-variant hover:bg-surface-variant/50"
-                }`}
+                  }`}
               >
                 <Icon size={19} />
                 {label}
