@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Archive, ChevronLeft, ChevronRight, Eye, FilePenLine, Plus, Search, Send, X, ChartBarBig, Clock4 } from "lucide-react";
+import { Archive, ChevronLeft, ChevronRight, Eye, FilePenLine, Plus, Search, Send, X, ChartBarBig, Clock4, EyeIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -252,7 +252,12 @@ export default function KnowledgeBaseManager({
                   <td className="px-4 py-4 text-sm text-on-surface-variant">{article.category ?? "—"}</td>
                   <td className="px-4 py-4 text-sm text-on-surface-variant">{article.author ?? "Non assigné"}</td>
                   <td className="px-4 py-4"><div className="flex max-w-44 flex-wrap gap-1">{article.keywords.length ? article.keywords.map((keyword) => <span key={keyword} className="rounded font-semibold border border-primary-container px-2 py-1 text-xs text-on-surface-variant">{keyword}</span>) : "—"}</div></td>
-                  <td className="px-4 py-4 text-sm font-medium text-on-surface">{article.views.toLocaleString("fr-FR")}</td>
+                  <td className="px-4 py-4 text-sm font-medium text-on-surface">
+                    <span className="flex items-center gap-1.5">
+                      <EyeIcon size={16} />
+                      {article.views.toLocaleString("fr-FR")}
+                    </span>
+                  </td>
                   <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[article.status]}`}>{statusLabels[article.status]}</span></td>
                   <td className="px-4 py-4 text-sm text-on-surface-variant">{formatDate(article.updatedAt)}</td>
                   <td className="px-5 py-4"><div className="flex justify-end gap-1"><button type="button" onClick={() => setDrawer({ article, form: { title: article.title, content: article.content, category: article.category, keywords: article.keywords } })} className="inline-flex size-8 items-center justify-center rounded-lg text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container cursor-pointer" aria-label={`Modifier ${article.title}`} title="Modifier l’article"><FilePenLine size={16} /></button>{article.status === "draft" && <button type="button" onClick={() => applyStatus(article, "published")} className="inline-flex size-8 items-center justify-center  cursor-pointer rounded-lg text-teal-700 hover:bg-teal-100" aria-label={`Publier ${article.title}`} title="Publier l’article"><Send size={16} /></button>}{article.status !== "archived" && <button type="button" onClick={() => applyStatus(article, "archived")} className="inline-flex size-8 items-center justify-center rounded-lg text-on-surface-variant hover:bg-stone-200" aria-label={`Archiver ${article.title}`} title="Archiver l’article"><Archive size={16} /></button>}</div></td>
