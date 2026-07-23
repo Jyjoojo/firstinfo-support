@@ -14,11 +14,12 @@ import {
   type RowSelectionState,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { CalendarDays, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Eye, MoreVertical, Plus, Printer, Search, Settings2, UserRoundCheck } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Eye, Plus, Printer, Search, Settings2 } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import type { Ticket } from "@/lib/tickets";
 import { priorityStyles, statusStyles } from "@/lib/styles";
 import { Calendar } from "@/components/ui/calendar";
+import TicketActionsMenu from "@/app/ui/dashboard/admin/TicketActionsMenu";
 
 function useColumnVisibility(): [VisibilityState, React.Dispatch<React.SetStateAction<VisibilityState>>] {
   return useState<VisibilityState>({ contenu: false, dateModification: false });
@@ -110,14 +111,10 @@ export default function AdminTicketsTable({ tickets }: { tickets: Ticket[] }) {
       header: "Actions",
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <details className="relative">
-            <summary title="Actions du ticket" className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-primary/10 hover:text-primary"><MoreVertical size={17} /></summary>
-            <div className="absolute right-0 z-20 mt-1 w-40 rounded-lg border border-outline-variant/30 bg-white p-1 shadow-lg">
-              <Link href={`/dashboard/admin/tickets/${row.original.id}`} className="block rounded-md px-3 py-2 text-sm hover:bg-surface-container-low">Voir les détails</Link>
-              {/* TODO: Implémenter la fonctionnalité assigné */}
-              <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-surface-container-low"><UserRoundCheck size={15} /> Assigner</button>
-            </div>
-          </details>
+          <TicketActionsMenu
+            ticketId={row.original.id}
+            currentAssignee={row.original.assigneA}
+          />
         </div>
       ),
       enableSorting: false,
