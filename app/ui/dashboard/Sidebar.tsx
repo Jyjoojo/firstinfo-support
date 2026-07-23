@@ -61,7 +61,6 @@ export default function Sidebar({
       <div className="px-5 py-6">
         <div className="flex items-center gap-3 mb-8">
           <div className=" flex items-center justify-center shrink-0">
-            {/* <ShieldCheck size={18} className="text-white" /> */}
             <Image
               src="/logofirstinfo-v2.png"
               width={50}

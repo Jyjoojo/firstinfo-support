@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import CountUp from "react-countup";
 import type { DateRange } from "react-day-picker";
 import {
   Archive,
@@ -47,7 +48,7 @@ import {
 } from "@/app/ui/dashboard/admin/ReportsCharts";
 import { statusStyles } from "@/lib/styles";
 
-const REPORTS_PER_PAGE = 15;
+const REPORTS_PER_PAGE = 5;
 
 const ticketEvolution = [
   { label: "01 juil.", created: 24, resolved: 18 },
@@ -100,9 +101,9 @@ const knowledgeCategories = [
 ];
 
 const assignmentDistribution = [
-  { label: "Manuel", value: 58, color: "#a15c00" },
-  { label: "Automatique", value: 30, color: "#0f766e" },
-  { label: "Self", value: 12, color: "#94a3b8" },
+  { label: "Manuel", value: 58, count: 132, color: "#fb923c" },
+  { label: "Auto", value: 30, count: 68, color: "#eab308" },
+  { label: "Soi-même", value: 12, count: 28, color: "#14b8a6" },
 ];
 
 const technicians = [
@@ -175,7 +176,7 @@ type GeneratedReport = (typeof generatedReports)[number];
 
 type MetricCardProps = {
   label: string;
-  value: string;
+  value: string | number;
   detail?: string;
   icon: React.ReactNode;
   alert?: boolean;
@@ -209,7 +210,17 @@ function MetricCard({
             {label}
           </p>
           <p className="mt-2 text-2xl font-bold tracking-tight text-on-surface">
-            {value}
+            {typeof value === "number" ? (
+              <CountUp
+                end={value}
+                duration={1.5}
+                separator=" "
+                enableScrollSpy
+                scrollSpyOnce
+              />
+            ) : (
+              value
+            )}
           </p>
           {detail && (
             <p className="mt-2 text-xs font-medium text-on-surface-variant">
@@ -269,6 +280,115 @@ function SectionHeading({
         <p className="mt-1 text-sm text-on-surface-variant">{description}</p>
       )}
     </div>
+  );
+}
+
+function AssignmentMethodSummary() {
+  const gridTemplateColumns = assignmentDistribution
+    .map((item) => `${item.value}fr`)
+    .join(" ");
+
+  return (
+    <div>
+      <div
+        className="grid"
+        style={{ gridTemplateColumns }}
+      >
+        {assignmentDistribution.map((item) => (
+          <div key={item.label} className="min-w-0">
+            <p className="mb-2 text-sm font-bold text-on-surface">
+              {item.value}%
+            </p>
+            <div className="h-9 border-l border-outline-variant/30" />
+            <div
+              className="h-1.5 border-r-4 border-white last:border-r-0"
+              style={{ backgroundColor: item.color }}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {assignmentDistribution.map((item) => (
+          <div
+            key={item.label}
+            className="rounded-xl border border-outline-variant/25 bg-white px-4 py-3 shadow-sm"
+          >
+            <p className="flex items-center gap-2 text-lg font-bold text-on-surface">
+              <span
+                className="size-2 rounded-full"
+                style={{ backgroundColor: item.color }}
+              />
+              {item.count}
+            </p>
+            <p className="mt-1 text-sm text-on-surface-variant">
+              {item.label}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 grid grid-cols-2 gap-5 border-t border-outline-variant/20 pt-5">
+        <div>
+          <p className="text-3xl font-bold tracking-tight text-on-surface">
+            228
+          </p>
+          <p className="mt-1 text-sm text-on-surface-variant">
+            Tickets assignés
+          </p>
+        </div>
+        <div>
+          <p className="text-3xl font-bold tracking-tight text-on-surface">
+            176
+          </p>
+          <p className="mt-1 text-sm text-on-surface-variant">
+            Tickets résolus
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClientMetricCard({
+  label,
+  value,
+  detail,
+  icon,
+  delay = 0,
+}: {
+  label: string;
+  value: string;
+  detail: string;
+  icon: React.ReactNode;
+  delay?: number;
+}) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.35, delay, ease: "easeOut" }}
+      whileHover={{ y: -3 }}
+      className="relative flex min-h-56 flex-col rounded-xl border border-outline-variant/20 bg-white p-5 shadow-sm"
+    >
+      <span className="absolute right-5 top-5 rounded-lg bg-primary-container/15 p-2.5 text-primary">
+        {icon}
+      </span>
+
+      <div className="flex flex-1 items-center justify-center">
+        <p className="text-center text-6xl font-bold tracking-tight text-on-surface">
+          {value}
+        </p>
+      </div>
+
+      <div className="text-center">
+        <p className="text-sm font-semibold text-on-surface">{label}</p>
+        <p className="mt-1 text-xs font-medium text-on-surface-variant">
+          {detail}
+        </p>
+      </div>
+    </motion.article>
   );
 }
 
@@ -453,10 +573,10 @@ export default function ReportsDashboard() {
 
           <ChartCard
             title="Méthode d’assignation"
-            description="Manuel, auto et self-assignation."
+            description="Répartition entre manuel, auto et auto-assignation."
             className="xl:col-span-2"
           >
-            <DonutChart data={assignmentDistribution} semicircle />
+            <AssignmentMethodSummary />
           </ChartCard>
         </div>
 
@@ -504,24 +624,24 @@ export default function ReportsDashboard() {
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             label="Total articles"
-            value="128"
+            value={128}
             icon={<BookOpen size={19} />}
           />
           <MetricCard
             label="Publiés"
-            value="96"
+            value={96}
             icon={<FileText size={19} />}
             delay={0.05}
           />
           <MetricCard
             label="Brouillons"
-            value="12"
+            value={12}
             icon={<FileText size={19} />}
             delay={0.1}
           />
           <MetricCard
             label="Archivés"
-            value="20"
+            value={20}
             icon={<Archive size={19} />}
             delay={0.15}
           />
@@ -564,9 +684,17 @@ export default function ReportsDashboard() {
         <div className="mt-6">
           <ChartCard title="Articles récemment publiés">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-              {recentArticles.map((article) => (
-                <div
+              {recentArticles.map((article, index) => (
+                <motion.div
                   key={article.title}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{
+                    duration: 0.7,
+                    delay: index * 0.08,
+                    ease: "easeOut",
+                  }}
                   className="border-l-2 border-primary-container pl-3"
                 >
                   <p className="text-xs text-on-surface-variant">
@@ -575,7 +703,7 @@ export default function ReportsDashboard() {
                   <p className="mt-1 text-sm font-semibold text-on-surface">
                     {article.title}
                   </p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </ChartCard>
@@ -585,13 +713,13 @@ export default function ReportsDashboard() {
       <section className="mb-12">
         <SectionHeading title="Statistiques clients" />
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
-          <MetricCard
+          <ClientMetricCard
             label="Clients actifs"
             value="64"
             detail="Sur la période sélectionnée"
             icon={<Users size={19} />}
           />
-          <MetricCard
+          <ClientMetricCard
             label="Nouveaux comptes"
             value="9"
             detail="+3 par rapport à la période précédente"
