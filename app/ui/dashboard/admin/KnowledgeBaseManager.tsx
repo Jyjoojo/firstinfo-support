@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
+import CountUp from "react-countup";
 import { Archive, ChevronLeft, ChevronRight, Eye, FilePenLine, Plus, Search, Send, X, ChartBarBig, Clock4, EyeIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,13 @@ type StatusFilter = "all" | ArticleStatus;
 type ArticleForm = Pick<KnowledgeArticle, "title" | "content" | "category" | "keywords">;
 
 const PAGE_SIZE = 20;
+const compactNumberFormatter = new Intl.NumberFormat("fr-FR", {
+  notation: "compact",
+});
+
+function formatCompactNumber(value: number) {
+  return compactNumberFormatter.format(value);
+}
 
 const statusLabels: Record<ArticleStatus, string> = {
   draft: "Brouillon",
@@ -169,7 +177,15 @@ export default function KnowledgeBaseManager({
         >
           <div className="z-10">
             <p className="text-lg font-medium uppercase tracking-wider text-on-surface-variant">Performance du KB</p>
-            <p className="mt-3 text-5xl font-bold text-teal-700">84%</p>
+            <p className="mt-3 text-5xl font-bold text-teal-700">
+              <CountUp
+                end={84}
+                duration={3}
+                suffix="%"
+                enableScrollSpy
+                scrollSpyOnce
+              />
+            </p>
             <p className="mt-2 text-sm text-on-surface-variant">Taux de résolution autonome</p>
           </div>
           <div className="absolute -right-2 bottom-0 opacity-10">
@@ -182,7 +198,15 @@ export default function KnowledgeBaseManager({
           className="rounded-xl bg-primary-container p-5 shadow-sm"
         >
           <p className="text-lg font-medium uppercase tracking-wide text-teal-950">Articles en brouillon</p>
-          <p className="mt-3 text-5xl font-bold text-black">{draftCount}</p>
+          <p className="mt-3 text-5xl font-bold text-black">
+            <CountUp
+              end={draftCount}
+              duration={2.4}
+              enableScrollSpy
+              scrollSpyOnce
+              preserveValue
+            />
+          </p>
           <div className="flex items-center gap-1 mt-2">
             <Clock4 size={12}/>
             <p className="text-sm font-medium text-black"> Requièrent validation</p>
@@ -194,8 +218,27 @@ export default function KnowledgeBaseManager({
           className="rounded-xl bg-teal-300 p-5 shadow-sm"
         >
           <p className="text-lg font-medium uppercase tracking-wide text-teal-950">Total lectures</p>
-          <p className="mt-3 text-5xl font-bold text-teal-700">{new Intl.NumberFormat("fr-FR", { notation: "compact" }).format(totalViews)}</p>
-          <p className="mt-2 text-sm text-teal-900">{publishedCount} article{publishedCount > 1 ? "s" : ""} publié{publishedCount > 1 ? "s" : ""}</p>
+          <p className="mt-3 text-5xl font-bold text-teal-700">
+            <CountUp
+              end={totalViews}
+              duration={2.5}
+              formattingFn={formatCompactNumber}
+              enableScrollSpy
+              scrollSpyOnce
+              preserveValue
+            />
+          </p>
+          <p className="mt-2 text-sm text-teal-900">
+            <CountUp
+              end={publishedCount}
+              duration={1}
+              enableScrollSpy
+              scrollSpyOnce
+              preserveValue
+            />{" "}
+            article{publishedCount > 1 ? "s" : ""} publié
+            {publishedCount > 1 ? "s" : ""}
+          </p>
         </motion.article>
       </section>
 
