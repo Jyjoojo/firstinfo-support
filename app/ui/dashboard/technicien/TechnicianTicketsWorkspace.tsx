@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  Plus,
   RotateCcw,
   Search,
   UserRoundCheck,
@@ -39,6 +38,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import CreateTicketDialog from "@/app/ui/dashboard/CreateTicketDialog";
 import { priorityStyles, statusStyles } from "@/lib/styles";
 import type { Ticket } from "@/lib/tickets";
 
@@ -93,6 +93,18 @@ export default function TechnicianTicketsWorkspace({
     () =>
       [...new Set(sourceTickets.map((ticket) => ticket.categorie))].sort(),
     [sourceTickets],
+  );
+
+  const creationCategories = useMemo(
+    () =>
+      [
+        ...new Set(
+          [...myTickets, ...unassignedTickets].map(
+            (ticket) => ticket.categorie,
+          ),
+        ),
+      ].sort(),
+    [myTickets, unassignedTickets],
   );
 
   const filteredTickets = useMemo(() => {
@@ -210,13 +222,9 @@ export default function TechnicianTicketsWorkspace({
                 />
               </div>
 
-              <Link
-                href="/dashboard/technicien/tickets/nouveau"
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-lg bg-primary-container px-4 text-sm font-semibold text-on-primary-container transition-colors hover:bg-primary-container/90 sm:self-auto"
-              >
-                <Plus size={17} />
-                Créer un ticket
-              </Link>
+              <CreateTicketDialog
+                categories={creationCategories}
+              />
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   flexRender,
@@ -14,11 +13,12 @@ import {
   type RowSelectionState,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { CalendarDays, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Eye, Plus, Printer, Search, Settings2 } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Printer, Search, Settings2 } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import type { Ticket } from "@/lib/tickets";
 import { priorityStyles, statusStyles } from "@/lib/styles";
 import { Calendar } from "@/components/ui/calendar";
+import CreateTicketDialog from "@/app/ui/dashboard/CreateTicketDialog";
 import TicketActionsMenu from "@/app/ui/dashboard/admin/TicketActionsMenu";
 
 function useColumnVisibility(): [VisibilityState, React.Dispatch<React.SetStateAction<VisibilityState>>] {
@@ -225,7 +225,7 @@ export default function AdminTicketsTable({ tickets }: { tickets: Ticket[] }) {
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={printTickets} className="inline-flex items-center gap-2 rounded-lg border border-outline-variant/40 px-3 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low"><Printer size={16} /> Imprimer</button>
             <button type="button" onClick={exportTickets} className="inline-flex items-center gap-2 rounded-lg border border-outline-variant/40 px-3 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low"><Download size={16} /> Exporter</button>
-            <Link href="/dashboard/admin/tickets/nouveau" className="inline-flex items-center gap-2 rounded-lg bg-primary-container text-white px-3 py-2 text-sm font-semibold hover:bg-primary-container/90"><Plus size={16} /> Créer un ticket</Link>
+            <CreateTicketDialog categories={categories} />
           </div>
         </div>
 
