@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Activity, FolderKanban, RefreshCw, ShieldCheck } from "lucide-react";
-import TicketCategoriesTable from "@/app/ui/dashboard/admin/TicketCategoriesTable";
+import TicketCategoriesTable from "@/app/ui/dashboard/TicketCategoriesTable";
 import CategoriesPageTransition from "@/app/ui/dashboard/admin/CategoriesPageTransition";
 import NewTicketCategoryDialog from "@/app/ui/dashboard/admin/NewTicketCategoryDialog";
 import { ticketCategories } from "@/lib/ticket-categories";
