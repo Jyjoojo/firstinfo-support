@@ -7,6 +7,10 @@ import Hero from "./ui/Hero";
 import ServiceCards from "./ui/ServiceCards";
 import StatsBanner from "./ui/StatsBanner";
 
+export const metadata = {
+  title: "Accueil - Support FIRST INFO"
+};
+
 export default function HomePage() {
   return (
     <div className="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">

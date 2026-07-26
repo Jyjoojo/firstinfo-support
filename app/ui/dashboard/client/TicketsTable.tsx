@@ -1,4 +1,7 @@
+"use client";
+
 import { Eye } from "lucide-react";
+import { motion } from "motion/react";
 
 const statusStyles: Record<string, string> = {
   "En cours": "bg-orange-50 text-orange-700 border-orange-100",
@@ -45,8 +48,7 @@ const tickets = [
   },
 ];
 
-export default function 
-TicketsTable() {
+export default function TicketsTable() {
   return (
     <div className="bg-white rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden">
       <table className="w-full text-left">
@@ -70,8 +72,26 @@ TicketsTable() {
           </tr>
         </thead>
         <tbody className="divide-y divide-outline-variant/10">
-          {tickets.map((ticket) => (
-            <tr key={ticket.id} className="hover:bg-surface-container-low/50 transition-colors">
+          {tickets.map((ticket, index) => (
+            <motion.tr
+              key={ticket.id}
+              initial={{
+                opacity: 0,
+                x: -12,
+              }}
+              whileInView={{
+                opacity: 1,
+                x: 0,
+              }}
+              viewport={{
+                once: true,
+              }}
+              transition={{
+                duration: 0.3,
+                delay: index * 0.07,
+              }}
+              className="transition-colors hover:bg-surface-container-low/50"
+            >
               <td className="px-5 py-3.5 text-primary text-sm">{ticket.id}</td>
               <td className="px-5 py-3.5">
                 <p className="font-bold text-on-surface text-sm">{ticket.title}</p>
@@ -91,7 +111,7 @@ TicketsTable() {
                   <Eye size={17} />
                 </button>
               </td>
-            </tr>
+            </motion.tr>
           ))}
         </tbody>
       </table>
