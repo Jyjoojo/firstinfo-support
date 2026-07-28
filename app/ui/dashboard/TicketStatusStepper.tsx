@@ -3,18 +3,34 @@ import { cn } from "@/lib/utils";
 import { Ticket } from "@/lib/tickets";
 
 interface TicketStatusStepperProps {
-  currentStatus: Ticket["statut"];
+  currentStatus: Ticket["statut"] | TicketWorkflowStatus;
 }
 
-const STEPS: { key: Ticket["statut"]; label: string }[] = [
+export type TicketWorkflowStatus =
+  | "nouveau"
+  | "en_cours"
+  | "en_attente"
+  | "resolu"
+  | "ferme";
+
+const STEPS: { key: TicketWorkflowStatus; label: string }[] = [
   { key: "nouveau", label: "Nouveau" },
-  { key: "en cours", label: "En cours" },
-  { key: "résolu", label: "Résolu" },
-  { key: "fermé", label: "Fermé" },
+  { key: "en_cours", label: "En cours" },
+  { key: "en_attente", label: "En attente" },
+  { key: "resolu", label: "Résolu" },
+  { key: "ferme", label: "Fermé" },
 ];
 
 export default function TicketStatusStepper({ currentStatus }: TicketStatusStepperProps) {
-  const currentIndex = STEPS.findIndex((step) => step.key === currentStatus);
+  const normalizedStatus: TicketWorkflowStatus =
+    currentStatus === "en cours"
+      ? "en_cours"
+      : currentStatus === "résolu"
+        ? "resolu"
+        : currentStatus === "fermé"
+          ? "ferme"
+          : currentStatus;
+  const currentIndex = STEPS.findIndex((step) => step.key === normalizedStatus);
 
   return (
     <div className="bg-surface-container-lowest rounded-xl card-shadow px-5 py-3 border border-outline-variant/20">
@@ -25,7 +41,12 @@ export default function TicketStatusStepper({ currentStatus }: TicketStatusStepp
           const isLast = index === STEPS.length - 1;
 
           return (
-            <div key={step.key} className={cn("flex items-center", !isLast && "flex-1")}>
+            <div
+              key={step.key}
+              data-testid={`ticket-status-${step.key}`}
+              data-state={isActive ? "active" : isCompleted ? "completed" : "upcoming"}
+              className={cn("flex items-center", !isLast && "flex-1")}
+            >
               {/* Étape (cercle + label) */}
               <div className="flex flex-col items-center gap-2 shrink-0">
                 {/* Chevron au-dessus de l'étape active */}
