@@ -8,13 +8,13 @@ import {
   BookOpen,
   HelpCircle,
   LayoutDashboard,
-  LogOut,
   Plus,
   Settings,
   ShieldCheck,
   Ticket,
   Users,
 } from "lucide-react";
+import LogoutButton from "./LogoutButton";
 
 const sidebarIcons = {
   dashboard: LayoutDashboard,
@@ -111,10 +111,7 @@ export default function Sidebar({
               Aide &amp; Support
             </Link>
           )}
-          <Link href="/" className="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors">
-            <LogOut size={19} />
-            Déconnexion
-          </Link>
+          <LogoutButton />
         </div>
       </div>
     </aside>

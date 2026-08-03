@@ -3,14 +3,52 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({ email: "", password: "", remember: false });
+    const [error, setError] = useState("");
+    const [isPending, setIsPending] = useState(false);
+    const router = useRouter();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: brancher sur l'API d'authentification (Sanctum)
+        setError("");
+        setIsPending(true);
+
+        try {
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(form),
+            });
+            const data = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                setError(data?.message ?? "La connexion a échoué.");
+                return;
+            }
+
+            const role = String(data?.user?.role ?? "").toLowerCase();
+            const roleDestinations: Record<string, string> = {
+                admin: "/dashboard/admin",
+                administrateur: "/dashboard/admin",
+                technicien: "/dashboard/technicien",
+                client: "/dashboard/client",
+            };
+            const requestedPath = new URLSearchParams(window.location.search).get("redirect");
+            const safeRequestedPath = requestedPath?.startsWith("/dashboard/")
+                ? requestedPath
+                : null;
+
+            router.replace(safeRequestedPath ?? roleDestinations[role] ?? "/dashboard/client");
+            router.refresh();
+        } catch {
+            setError("Le service d'authentification est momentanément indisponible.");
+        } finally {
+            setIsPending(false);
+        }
     };
 
     return (
@@ -80,11 +118,18 @@ export default function LoginForm() {
                             </Link>
                         </div>
 
+                        {error && (
+                            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                                {error}
+                            </p>
+                        )}
+
                         <button
                             type="submit"
-                            className="w-full bg-primary-container hover:bg-primary-container/90 text-white font-bold py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm"
+                            disabled={isPending}
+                            className="w-full bg-primary-container hover:bg-primary-container/90 text-white font-bold py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm disabled:cursor-wait disabled:opacity-60"
                         >
-                            Se connecter
+                            {isPending ? "Connexion…" : "Se connecter"}
                         </button>
                     </form>
 
