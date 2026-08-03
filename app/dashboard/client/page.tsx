@@ -197,9 +197,9 @@ export default function DashboardPage() {
                 x: 3,
               }}
               className="flex items-center gap-1 text-sm font-bold text-primary hover:underline"
-              href="#"
+              href="client/tickets"
             >
-              Voir tout
+               Voir tout
               <ChevronRight size={16} />
             </motion.a>
           </motion.div>

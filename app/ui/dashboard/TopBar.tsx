@@ -1,8 +1,28 @@
-import { Search, HelpCircle, Bell } from "lucide-react";
+import { Search } from "lucide-react";
 import NotificationsBell from "./NotificationBell";
 import MailBox from "./MailBox";
+import { getAuthenticatedUser } from "@/lib/auth";
 
-export default function TopBar() {
+function getInitials(firstName?: string, lastName?: string) {
+  const firstInitial = firstName?.trim().charAt(0) ?? "";
+  const lastInitial = lastName?.trim().charAt(0) ?? "";
+
+  return `${firstInitial}${lastInitial}`.toUpperCase() || "?";
+}
+
+export default async function TopBar() {
+  const user = await getAuthenticatedUser();
+  const fullName = [user?.prenom, user?.nom].filter(Boolean).join(" ") || "Utilisateur";
+  const role = user?.role.toLowerCase();
+  const subtitle = role === "client"
+    ? user?.client?.entreprise || "Client"
+    : role === "technicien"
+      ? "Technicien"
+      : role === "admin" || role === "administrateur"
+        ? "Admin entreprise"
+        : "Compte utilisateur";
+  const initials = getInitials(user?.prenom, user?.nom);
+
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-outline-variant/20 px-6 py-3.5 flex items-center justify-between">
       <div className="flex-1 max-w-md">
@@ -24,13 +44,13 @@ export default function TopBar() {
         <div className="h-6 w-px bg-outline-variant/30" />
         <div className="flex items-center gap-2.5 pl-1">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-on-surface leading-tight">Jean Dupont</p>
+            <p className="text-sm font-bold text-on-surface leading-tight">{fullName}</p>
             <p className="text-[10px] text-on-surface-variant uppercase tracking-wider">
-              Admin Entreprise
+              {subtitle}
             </p>
           </div>
           <div className="w-8 h-8 rounded-full bg-primary/10 border border-outline-variant/30 flex items-center justify-center text-primary font-bold text-xs">
-            JD
+            {initials}
           </div>
         </div>
       </div>
