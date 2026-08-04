@@ -4,6 +4,13 @@ import { z } from "zod";
 
 const AUTH_COOKIE = "auth_token";
 
+const roleDestinations: Record<string, string> = {
+  client: "/dashboard/client",
+  technicien: "/dashboard/technicien",
+  admin: "/dashboard/admin",
+  administrateur: "/dashboard/admin",
+};
+
 const loginSchema = z
   .object({
     email: z
@@ -72,6 +79,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const role = typeof data.user.role === "string"
+      ? data.user.role.trim().toLowerCase()
+      : "";
+    const redirectTo = roleDestinations[role];
+
+    if (!redirectTo) {
+      return NextResponse.json(
+        { message: "Le rôle de ce compte ne permet pas d'accéder à un portail." },
+        { status: 403 },
+      );
+    }
+
     const cookieStore = await cookies();
     cookieStore.set(AUTH_COOKIE, data.token, {
       httpOnly: true,
@@ -81,7 +100,7 @@ export async function POST(request: Request) {
       maxAge: body.remember ? 60 * 60 * 24 * 7 : undefined,
     });
 
-    return NextResponse.json({ success: true, user: data.user });
+    return NextResponse.json({ success: true, user: data.user, redirectTo });
   } catch {
     return NextResponse.json(
       { message: "Le service d'authentification est momentanément indisponible." },

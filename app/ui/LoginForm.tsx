@@ -30,19 +30,18 @@ export default function LoginForm() {
                 return;
             }
 
-            const role = String(data?.user?.role ?? "").toLowerCase();
-            const roleDestinations: Record<string, string> = {
-                admin: "/dashboard/admin",
-                administrateur: "/dashboard/admin",
-                technicien: "/dashboard/technicien",
-                client: "/dashboard/client",
-            };
+            const portal = typeof data?.redirectTo === "string" ? data.redirectTo : null;
+            if (!portal) {
+                setError("Impossible de déterminer le portail associé à ce compte.");
+                return;
+            }
+
             const requestedPath = new URLSearchParams(window.location.search).get("redirect");
-            const safeRequestedPath = requestedPath?.startsWith("/dashboard/")
+            const safeRequestedPath = requestedPath === portal || requestedPath?.startsWith(`${portal}/`)
                 ? requestedPath
                 : null;
 
-            router.replace(safeRequestedPath ?? roleDestinations[role] ?? "/dashboard/client");
+            router.replace(safeRequestedPath ?? portal);
             router.refresh();
         } catch {
             setError("Le service d'authentification est momentanément indisponible.");

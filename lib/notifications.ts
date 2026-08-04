@@ -1,16 +1,46 @@
+import { z } from "zod";
+
 export type NotificationType = "ticket" | "info" | "contract";
+export type NotificationPeriod = "Aujourd'hui" | "Hier" | "Cette semaine" | "Plus ancien";
+
+export const laravelNotificationSchema = z.object({
+  id: z.string().min(1),
+  type: z.string(),
+  data: z.object({
+    message: z.string().optional().default("Nouvelle notification"),
+    type: z.string().optional().default("info"),
+    ticket_id: z.union([z.string(), z.number()]).nullish(),
+  }).passthrough(),
+  read_at: z.string().nullable().optional().default(null),
+  created_at: z.string(),
+  updated_at: z.string().optional(),
+}).passthrough();
+
+export const notificationsResponseSchema = z.object({
+  current_page: z.coerce.number().int().positive(),
+  data: z.array(laravelNotificationSchema),
+  last_page: z.coerce.number().int().positive(),
+  next_page_url: z.string().nullable(),
+  per_page: z.coerce.number().int().positive(),
+  total: z.coerce.number().int().nonnegative(),
+  total_non_lues: z.coerce.number().int().nonnegative(),
+}).passthrough();
+
+export type LaravelNotification = z.infer<typeof laravelNotificationSchema>;
+export type NotificationsResponse = z.infer<typeof notificationsResponseSchema>;
 
 export interface AppNotification {
   id: string;
   type: NotificationType;
+  sourceType: string;
   title: string;
   description: string;
   time: string;
-  day: "Aujourd'hui" | "Hier" | "Cette semaine" | "Plus ancien";
+  day: NotificationPeriod;
   read: boolean;
+  ticketId?: string;
 }
 
-// Style associé à chaque type de notification (icône + couleurs)
 export const notificationTypeStyles: Record<
   NotificationType,
   { bg: string; text: string; iconName: "ticket" | "info" | "history" }
@@ -20,89 +50,97 @@ export const notificationTypeStyles: Record<
   contract: { bg: "bg-green-50", text: "text-green-700", iconName: "history" },
 };
 
-// Aperçu affiché dans le volet (les plus récentes)
-export const recentNotifications: AppNotification[] = [
-  {
-    id: "n1",
-    type: "ticket",
-    title: "Ticket #TK-4029 mis à jour",
-    description:
-      "Un expert a répondu à votre demande concernant l'erreur de synchronisation.",
-    time: "Il y a 15 min",
-    day: "Aujourd'hui",
-    read: false,
-  },
-  {
-    id: "n2",
-    type: "info",
-    title: "Alerte Maintenance",
-    description: "L'intervention sur Sage Cloud est confirmée pour ce soir à 22h.",
-    time: "Il y a 2h",
-    day: "Aujourd'hui",
-    read: false,
-  },
-  {
-    id: "n3",
-    type: "contract",
-    title: "Renouvellement de contrat",
-    description: "Votre contrat Sage Paie & RH arrive à échéance dans 30 jours.",
-    time: "Hier, 14:30",
-    day: "Hier",
-    read: true,
-  },
-];
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-// Historique complet (page dédiée) — inclut les notifications récentes + plus anciennes
-export const allNotifications: AppNotification[] = [
-  ...recentNotifications,
-  {
-    id: "n4",
-    type: "ticket",
-    title: "Ticket #TK-4015 résolu",
-    description: "Votre demande sur la mise à jour DSN a été clôturée par notre équipe.",
-    time: "Hier, 09:10",
-    day: "Hier",
-    read: true,
-  },
-  {
-    id: "n5",
-    type: "info",
-    title: "Nouvel article publié",
-    description: "\"Optimiser les clôtures mensuelles\" est disponible dans la base de connaissances.",
-    time: "Lundi, 11:00",
-    day: "Cette semaine",
-    read: true,
-  },
-  {
-    id: "n6",
-    type: "ticket",
-    title: "Ticket #TK-3998 assigné",
-    description: "Un technicien a pris en charge votre blocage d'interface Sage X3.",
-    time: "Lundi, 08:42",
-    day: "Cette semaine",
-    read: true,
-  },
-  {
-    id: "n7",
-    type: "contract",
-    title: "Contrat Sage CRM",
-    description: "Votre contrat expire dans 60 jours. Contactez-nous pour le renouveler.",
-    time: "Il y a 2 semaines",
-    day: "Plus ancien",
-    read: true,
-  },
-  {
-    id: "n8",
-    type: "info",
-    title: "Mise à jour de sécurité",
-    description: "Un correctif a été appliqué sur votre instance Sage 100 Comptabilité.",
-    time: "Il y a 3 semaines",
-    day: "Plus ancien",
-    read: true,
-  },
-];
+function startOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
 
-export const DAY_ORDER: AppNotification["day"][] = [
+function getPeriod(createdAt: Date, now: Date): NotificationPeriod {
+  const days = Math.floor(
+    (startOfDay(now).getTime() - startOfDay(createdAt).getTime()) / DAY_IN_MS,
+  );
+
+  if (days <= 0) return "Aujourd'hui";
+  if (days === 1) return "Hier";
+  if (days < 7) return "Cette semaine";
+  return "Plus ancien";
+}
+
+function getRelativeTime(createdAt: Date, now: Date) {
+  const seconds = Math.round((createdAt.getTime() - now.getTime()) / 1000);
+  const formatter = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
+
+  if (Math.abs(seconds) < 60) return formatter.format(seconds, "second");
+  const minutes = Math.round(seconds / 60);
+  if (Math.abs(minutes) < 60) return formatter.format(minutes, "minute");
+  const hours = Math.round(minutes / 60);
+  if (Math.abs(hours) < 24) return formatter.format(hours, "hour");
+  const days = Math.round(hours / 24);
+  if (Math.abs(days) < 7) return formatter.format(days, "day");
+
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "short",
+    year: createdAt.getFullYear() === now.getFullYear() ? undefined : "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(createdAt);
+}
+
+function getVisualType(sourceType: string): NotificationType {
+  const type = sourceType.toLowerCase();
+  if (type.includes("contrat") || type.includes("contract")) return "contract";
+  if (
+    type.includes("ticket")
+    || type.includes("statut")
+    || type.includes("assign")
+    || type.includes("message")
+    || type.includes("resolu")
+  ) return "ticket";
+  return "info";
+}
+
+function getTitle(sourceType: string, visualType: NotificationType) {
+  const labels: Record<string, string> = {
+    statut_change: "Statut du ticket mis à jour",
+    ticket_assigne: "Ticket assigné",
+    nouveau_message: "Nouveau message",
+    ticket_resolu: "Ticket résolu",
+    contrat_expiration: "Échéance de contrat",
+  };
+
+  return labels[sourceType]
+    ?? (visualType === "ticket"
+      ? "Mise à jour d'un ticket"
+      : visualType === "contract"
+        ? "Information sur votre contrat"
+        : "Information");
+}
+
+export function toAppNotification(
+  notification: LaravelNotification,
+  now = new Date(),
+): AppNotification {
+  const createdAt = new Date(notification.created_at);
+  const visualType = getVisualType(notification.data.type);
+
+  return {
+    id: notification.id,
+    type: visualType,
+    sourceType: notification.data.type,
+    title: getTitle(notification.data.type, visualType),
+    description: notification.data.message,
+    time: getRelativeTime(createdAt, now),
+    day: getPeriod(createdAt, now),
+    read: notification.read_at !== null,
+    ticketId: notification.data.ticket_id == null
+      ? undefined
+      : String(notification.data.ticket_id),
+  };
+}
+
+export const DAY_ORDER: NotificationPeriod[] = [
   "Aujourd'hui",
   "Hier",
   "Cette semaine",
@@ -112,6 +150,6 @@ export const DAY_ORDER: AppNotification["day"][] = [
 export function groupByDay(notifications: AppNotification[]) {
   return DAY_ORDER.map((day) => ({
     day,
-    items: notifications.filter((n) => n.day === day),
+    items: notifications.filter((notification) => notification.day === day),
   })).filter((group) => group.items.length > 0);
 }

@@ -10,9 +10,10 @@ const icons = { ticket: Ticket, info: Info, history: History };
 interface NotificationItemProps {
   notification: AppNotification;
   onDelete?: (id: string) => void;
+  onRead?: (id: string) => void;
 }
 
-export function NotificationItem({ notification, onDelete }: NotificationItemProps) {
+export function NotificationItem({ notification, onDelete, onRead }: NotificationItemProps) {
   const style = notificationTypeStyles[notification.type];
   const Icon = icons[style.iconName];
 
@@ -21,7 +22,11 @@ export function NotificationItem({ notification, onDelete }: NotificationItemPro
       <div className={`w-10 h-10 rounded-lg ${style.bg} flex items-center justify-center shrink-0`}>
         <Icon size={19} className={style.text} />
       </div>
-      <div className="flex-1 min-w-0 cursor-pointer">
+      <button
+        type="button"
+        onClick={() => !notification.read && onRead?.(notification.id)}
+        className="flex-1 min-w-0 cursor-pointer text-left"
+      >
         <div className="flex justify-between items-start gap-2">
           <p className="text-sm font-bold text-on-surface leading-tight">{notification.title}</p>
           {!notification.read && (
@@ -30,7 +35,7 @@ export function NotificationItem({ notification, onDelete }: NotificationItemPro
         </div>
         <p className="text-xs text-on-surface-variant mt-1">{notification.description}</p>
         <p className="text-[10px] text-on-surface-variant mt-2">{notification.time}</p>
-      </div>
+      </button>
       {onDelete && (
         <button
           onClick={() => onDelete(notification.id)}
@@ -47,9 +52,10 @@ export function NotificationItem({ notification, onDelete }: NotificationItemPro
 interface NotificationListProps {
   notifications: AppNotification[];
   onDelete?: (id: string) => void;
+  onRead?: (id: string) => void;
 }
 
-export function NotificationList({ notifications, onDelete }: NotificationListProps) {
+export function NotificationList({ notifications, onDelete, onRead }: NotificationListProps) {
   const groups = groupByDay(notifications);
 
   if (groups.length === 0) {
@@ -73,6 +79,7 @@ export function NotificationList({ notifications, onDelete }: NotificationListPr
                 key={notification.id}
                 notification={notification}
                 onDelete={onDelete}
+                onRead={onRead}
               />
             ))}
           </div>
