@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Icon from "./Icon";
+import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
 export default function ContactSection() {
@@ -61,12 +62,12 @@ export default function ContactSection() {
               <p className="mb-6">
                 Déjà client ? Accédez directement à votre espace de support dédié.
               </p>
-              <a
-                href="#"
+              <Link
+                href="/dashboard/client"
                 className="inline-flex items-center gap-2 bg-white text-inverse-surface px-6 py-3 rounded-xl font-bold hover:bg-primary-fixed transition-colors"
               >
                 Portail Client <ExternalLink className="text-sm" size={15} />
-              </a>
+              </Link>
             </div>
           </div>
 

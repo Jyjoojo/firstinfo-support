@@ -60,7 +60,7 @@ export default function Sidebar({
     <aside className="hidden lg:flex flex-col h-screen fixed left-0 top-0 border-r border-outline-variant/30 bg-white w-60 z-50">
       <div className="px-5 py-6">
         <div className="flex items-center gap-3 mb-8">
-          <div className=" flex items-center justify-center shrink-0">
+          <Link className=" flex items-center justify-center shrink-0" href="/">
             <Image
               src="/logofirstinfo-v2.png"
               width={50}
@@ -68,7 +68,7 @@ export default function Sidebar({
               className="font-headline-md text-headline-md font-bold text-tertiary"
               alt="First Info CI Logo"
             />
-          </div>
+          </Link>
           <div>
             <h1 className="font-bold text-sm text-on-surface leading-tight">{title}</h1>
             <p className="text-[11px] text-on-surface-variant">{subtitle}</p>
