@@ -10,59 +10,26 @@ import type {
   ApiCategory,
   ClientTicket,
   TicketFilters,
-  TicketPriority,
-  TicketStatus,
   TicketsResponse,
 } from "@/lib/ticket-contracts";
+import {
+  priorityStyles,
+  statusStyles,
+  ticketPriorityLabels,
+  ticketStatusLabels,
+} from "@/lib/styles";
 
 type SortKey = "reference" | "titre" | "statut" | "priorite" | "created_at";
 
 const statusOptions = [
   { value: "all", label: "Tous les statuts" },
-  { value: "nouveau", label: "Nouveau" },
-  { value: "en_cours", label: "En cours" },
-  { value: "en_attente", label: "En attente" },
-  { value: "resolu", label: "Résolu" },
-  { value: "ferme", label: "Fermé" },
+  ...Object.entries(ticketStatusLabels).map(([value, label]) => ({ value, label })),
 ];
 
 const priorityOptions = [
   { value: "all", label: "Toutes priorités" },
-  { value: "basse", label: "Basse" },
-  { value: "normale", label: "Normale" },
-  { value: "haute", label: "Haute" },
-  { value: "urgente", label: "Urgente" },
+  ...Object.entries(ticketPriorityLabels).map(([value, label]) => ({ value, label })),
 ];
-
-const statusLabels: Record<TicketStatus, string> = {
-  nouveau: "Nouveau",
-  en_cours: "En cours",
-  en_attente: "En attente",
-  resolu: "Résolu",
-  ferme: "Fermé",
-};
-
-const statusStyles: Record<TicketStatus, string> = {
-  nouveau: "border-blue-300 bg-blue-50 text-blue-700",
-  en_cours: "border-orange-300 bg-orange-50 text-orange-700",
-  en_attente: "border-amber-300 bg-amber-50 text-amber-700",
-  resolu: "border-green-300 bg-green-50 text-green-700",
-  ferme: "border-slate-300 bg-slate-100 text-slate-700",
-};
-
-const priorityLabels: Record<TicketPriority, string> = {
-  basse: "Basse",
-  normale: "Normale",
-  haute: "Haute",
-  urgente: "Urgente",
-};
-
-const priorityStyles: Record<TicketPriority, string> = {
-  basse: "border-emerald-300 bg-emerald-50 text-emerald-700",
-  normale: "border-sky-300 bg-sky-50 text-sky-700",
-  haute: "border-amber-300 bg-amber-50 text-amber-700",
-  urgente: "border-red-300 bg-red-50 text-red-700",
-};
 
 function SortButton({
   label,
@@ -226,13 +193,13 @@ export default function TicketsTable({
                 </td>
                 <td className="px-4 py-3 text-sm text-slate-700">{ticket.categorie?.libelle ?? "Sans catégorie"}</td>
                 <td className="px-4 py-3">
-                  <span className={`inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[ticket.statut]}`}>
-                    {statusLabels[ticket.statut]}
+                  <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[ticket.statut].base}`}>
+                    {ticketStatusLabels[ticket.statut]}
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${priorityStyles[ticket.priorite]}`}>
-                    {priorityLabels[ticket.priorite]}
+                  <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${priorityStyles[ticket.priorite].base}`}>
+                    {ticketPriorityLabels[ticket.priorite]}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-sm text-slate-700">{ticket.technicien_assigne?.nom_complet ?? "Non assigné"}</td>

@@ -1,8 +1,8 @@
 import { Ticket } from "./tickets";
+import type { TicketPriority, TicketStatus } from "./ticket-contracts";
 import {
   SquareArrowDown,
   DiamondMinus,
-  CircleArrowUp,
   CircleAlert,
   TriangleAlert,
   LucideIcon,
@@ -12,7 +12,7 @@ import {
   Archive,
 } from "lucide-react";
 
-export type StatusVariant = Ticket["statut"];
+export type StatusVariant = Ticket["statut"] | TicketStatus;
 export type PriorityVariant = Ticket["priorite"];
 
 export const statusStyles: Record<StatusVariant, { base: string; chartColor: string; icon?: LucideIcon }> = {
@@ -22,8 +22,35 @@ export const statusStyles: Record<StatusVariant, { base: string; chartColor: str
     chartColor: "#c2410c",
     icon: LoaderCircle,
   },
+  en_cours: {
+    base: "border border-orange-300 bg-orange-50 text-orange-700",
+    chartColor: "#c2410c",
+    icon: LoaderCircle,
+  },
+  en_attente: {
+    base: "border border-amber-300 bg-amber-50 text-amber-700",
+    chartColor: "#b45309",
+    icon: LoaderCircle,
+  },
   résolu: { base: "border border-green-300 bg-green-50 text-green-700", chartColor: "#15803d", icon: CheckCircle },
+  resolu: { base: "border border-green-300 bg-green-50 text-green-700", chartColor: "#15803d", icon: CheckCircle },
   fermé: { base: "border border-slate-300 bg-slate-100 text-slate-700", chartColor: "#475569", icon: Archive },
+  ferme: { base: "border border-slate-300 bg-slate-100 text-slate-700", chartColor: "#475569", icon: Archive },
+};
+
+export const ticketStatusLabels: Record<TicketStatus, string> = {
+  nouveau: "Nouveau",
+  en_cours: "En cours",
+  en_attente: "En attente",
+  resolu: "Résolu",
+  ferme: "Fermé",
+};
+
+export const ticketPriorityLabels: Record<TicketPriority, string> = {
+  basse: "Basse",
+  normale: "Normale",
+  haute: "Haute",
+  urgente: "Urgente",
 };
 
 export const priorityStyles: Record<
