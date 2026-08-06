@@ -15,9 +15,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ticketCategories } from "@/lib/ticket-categories";
+import { countUpdatedDuringLastDay, toTicketCategory } from "@/lib/ticket-categories";
+import { getCategories } from "@/lib/tickets-api";
 
-export default function TechnicianTicketCategoriesPage() {
+export default async function TechnicianTicketCategoriesPage() {
+  const ticketCategories = (await getCategories()).map(toTicketCategory);
+  const updatedDuringLastDay = countUpdatedDuringLastDay(ticketCategories);
+
   return (
     <CategoriesPageTransition>
       <div className="w-full max-w-7xl p-6 lg:p-8">
@@ -81,7 +85,7 @@ export default function TechnicianTicketCategoriesPage() {
                 Mises à jour (24h)
               </p>
               <p className="text-2xl font-bold text-on-surface">
-                4
+                {updatedDuringLastDay}
               </p>
             </div>
           </article>

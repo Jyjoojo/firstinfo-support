@@ -37,6 +37,14 @@ export function toTicketCategory(category: ApiCategory): TicketCategory {
   };
 }
 
+export function countUpdatedDuringLastDay(categories: TicketCategory[]) {
+  const now = Date.now();
+  return categories.filter((category) => {
+    const updatedAt = new Date(category.updatedAt).getTime();
+    return Number.isFinite(updatedAt) && now - updatedAt <= 24 * 60 * 60 * 1000;
+  }).length;
+}
+
 export const ticketCategories: TicketCategory[] = [
   { id: "cat-accounting", label: "Comptabilité", description: "Tickets relatifs aux modules de comptabilité Sage.", createdAt: "2023-10-12", updatedAt: "2024-03-15", icon: "accounting" },
   { id: "cat-hr", label: "Ressources humaines", description: "Gestion de la paie, des congés et des dossiers collaborateurs.", createdAt: "2023-10-14", updatedAt: "2024-04-02", icon: "hr" },

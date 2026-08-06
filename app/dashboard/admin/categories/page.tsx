@@ -3,17 +3,9 @@ import { Activity, FolderKanban, RefreshCw, ShieldCheck } from "lucide-react";
 import TicketCategoriesTable from "@/app/ui/dashboard/TicketCategoriesTable";
 import CategoriesPageTransition from "@/app/ui/dashboard/admin/CategoriesPageTransition";
 import NewTicketCategoryDialog from "@/app/ui/dashboard/admin/NewTicketCategoryDialog";
-import { toTicketCategory } from "@/lib/ticket-categories";
+import { countUpdatedDuringLastDay, toTicketCategory } from "@/lib/ticket-categories";
 import { getCategories } from "@/lib/tickets-api";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-
-function countUpdatedDuringLastDay(categories: ReturnType<typeof toTicketCategory>[]) {
-  const now = Date.now();
-  return categories.filter((category) => {
-    const updatedAt = new Date(category.updatedAt).getTime();
-    return Number.isFinite(updatedAt) && now - updatedAt <= 24 * 60 * 60 * 1000;
-  }).length;
-}
 
 export default async function TicketCategoriesPage() {
   const ticketCategories = (await getCategories()).map(toTicketCategory);
