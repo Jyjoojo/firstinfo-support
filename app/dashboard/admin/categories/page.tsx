@@ -3,10 +3,21 @@ import { Activity, FolderKanban, RefreshCw, ShieldCheck } from "lucide-react";
 import TicketCategoriesTable from "@/app/ui/dashboard/TicketCategoriesTable";
 import CategoriesPageTransition from "@/app/ui/dashboard/admin/CategoriesPageTransition";
 import NewTicketCategoryDialog from "@/app/ui/dashboard/admin/NewTicketCategoryDialog";
-import { ticketCategories } from "@/lib/ticket-categories";
+import { toTicketCategory } from "@/lib/ticket-categories";
+import { getCategories } from "@/lib/tickets-api";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
-export default function TicketCategoriesPage() {
+function countUpdatedDuringLastDay(categories: ReturnType<typeof toTicketCategory>[]) {
+  const now = Date.now();
+  return categories.filter((category) => {
+    const updatedAt = new Date(category.updatedAt).getTime();
+    return Number.isFinite(updatedAt) && now - updatedAt <= 24 * 60 * 60 * 1000;
+  }).length;
+}
+
+export default async function TicketCategoriesPage() {
+  const ticketCategories = (await getCategories()).map(toTicketCategory);
+  const updatedDuringLastDay = countUpdatedDuringLastDay(ticketCategories);
   return (
     <CategoriesPageTransition>
       <div className="w-full max-w-7xl p-6 lg:p-8">
@@ -42,7 +53,7 @@ export default function TicketCategoriesPage() {
           </span>
           <div>
             <p className="text-sm font-medium text-on-surface-variant">Mises à jour (24h)</p>
-            <p className="text-2xl font-bold text-on-surface">4</p></div></article><article className="flex items-center gap-4 rounded-xl border border-outline-variant/20 bg-white p-5 shadow-lg">
+            <p className="text-2xl font-bold text-on-surface">{updatedDuringLastDay}</p></div></article><article className="flex items-center gap-4 rounded-xl border border-outline-variant/20 bg-white p-5 shadow-lg">
           <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-700/10 text-emerald-700">
             <ShieldCheck size={21} />
           </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,13 +11,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+type CategoryErrorResponse = {
+  message?: string;
+  errors?: Record<string, string[]>;
+};
+
 export default function NewTicketCategoryDialog() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
   const [labelError, setLabelError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const cleanLabel = label.trim();
 
@@ -28,10 +36,37 @@ export default function NewTicketCategoryDialog() {
     }
 
     setLabelError(null);
-    setLabel("");
-    setDescription("");
-    setOpen(false);
-    toast.success("Catégorie créée", { description: `« ${cleanLabel} » a été ajoutée avec succès.` });
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          libelle: cleanLabel,
+          description: description.trim() || null,
+        }),
+      });
+      const data = await response.json().catch(() => ({})) as CategoryErrorResponse;
+
+      if (!response.ok) {
+        const message = data.errors?.libelle?.[0] ?? data.message ?? "La catégorie n'a pas pu être créée.";
+        setLabelError(data.errors?.libelle?.[0] ?? null);
+        throw new Error(message);
+      }
+
+      setLabel("");
+      setDescription("");
+      setOpen(false);
+      toast.success("Catégorie créée", { description: `« ${cleanLabel} » a été ajoutée avec succès.` });
+      router.refresh();
+    } catch (error) {
+      toast.error("Création impossible", {
+        description: error instanceof Error ? error.message : "La catégorie n'a pas pu être créée.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -58,7 +93,7 @@ export default function NewTicketCategoryDialog() {
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild><Button type="button" variant="outline">Annuler</Button></DialogClose>
-            <Button type="submit">Créer la catégorie</Button>
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Création..." : "Créer la catégorie"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

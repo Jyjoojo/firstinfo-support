@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,11 +12,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { TicketCategory } from "@/lib/ticket-categories";
 
+type CategoryErrorResponse = {
+  message?: string;
+  errors?: Record<string, string[]>;
+};
+
 export default function EditTicketCategoryDialog({ category }: { category: TicketCategory }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState(category.label);
   const [description, setDescription] = useState(category.description);
   const [labelError, setLabelError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
@@ -26,7 +34,7 @@ export default function EditTicketCategoryDialog({ category }: { category: Ticke
     setOpen(nextOpen);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const cleanLabel = label.trim();
     if (!cleanLabel) {
@@ -36,8 +44,36 @@ export default function EditTicketCategoryDialog({ category }: { category: Ticke
       return;
     }
 
-    setOpen(false);
-    toast.success("Catégorie mise à jour", { description: `« ${cleanLabel} » a été enregistrée.` });
+    setLabelError(null);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`/api/categories/${encodeURIComponent(category.id)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          libelle: cleanLabel,
+          description: description.trim() || null,
+        }),
+      });
+      const data = await response.json().catch(() => ({})) as CategoryErrorResponse;
+
+      if (!response.ok) {
+        const message = data.errors?.libelle?.[0] ?? data.message ?? "La catégorie n'a pas pu être mise à jour.";
+        setLabelError(data.errors?.libelle?.[0] ?? null);
+        throw new Error(message);
+      }
+
+      setOpen(false);
+      toast.success("Catégorie mise à jour", { description: `« ${cleanLabel} » a été enregistrée.` });
+      router.refresh();
+    } catch (error) {
+      toast.error("Mise à jour impossible", {
+        description: error instanceof Error ? error.message : "La catégorie n'a pas pu être mise à jour.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -64,7 +100,7 @@ export default function EditTicketCategoryDialog({ category }: { category: Ticke
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild><Button type="button" variant="outline">Annuler</Button></DialogClose>
-            <Button type="submit">Enregistrer</Button>
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Enregistrement..." : "Enregistrer"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

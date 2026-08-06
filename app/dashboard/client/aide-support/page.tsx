@@ -337,6 +337,8 @@ export default function AideSupportPage() {
       </section>
 
       {/* Cycle de vie d'un ticket */}
+      {/* //TODO: Ajoute le statut en attente qui est soit attente classique : information, intervention ou action externe ;
+solution proposée : attente de validation par le client. */}
       <motion.section
         initial="hidden"
         whileInView="visible"

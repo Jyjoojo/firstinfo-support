@@ -49,7 +49,10 @@ const iconColors = {
 };
 
 function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("fr-FR", {
+  const parsedDate = new Date(date);
+  if (!date || Number.isNaN(parsedDate.getTime())) return "Non renseignée";
+
+  return parsedDate.toLocaleDateString("fr-FR", {
     day: "2-digit",
     month: "short",
     year: "numeric",

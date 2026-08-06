@@ -8,32 +8,26 @@ function apiErrorResponse(error: ApiError) {
   return NextResponse.json(body, { status: error.status });
 }
 
-export async function GET() {
-  try {
-    const categories = await apiFetch<unknown>("/api/categories", {
-      redirectOnUnauthorized: false,
-    });
-    return NextResponse.json(categories);
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return apiErrorResponse(error);
-    }
-    throw error;
-  }
-}
+async function updateCategory(
+  request: Request,
+  context: { params: Promise<{ category: string }> },
+) {
+  const { category } = await context.params;
 
-export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const data = await apiFetch<unknown>("/api/categories", {
-      method: "POST",
+    const data = await apiFetch<unknown>(`/api/categories/${encodeURIComponent(category)}`, {
+      method: request.method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
       redirectOnUnauthorized: false,
     });
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(data);
   } catch (error) {
     if (error instanceof ApiError) return apiErrorResponse(error);
     throw error;
   }
 }
+
+export const PUT = updateCategory;
+export const PATCH = updateCategory;

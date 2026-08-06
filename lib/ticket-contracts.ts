@@ -80,6 +80,8 @@ export const categorySchema = z.object({
   id: z.string().min(1),
   libelle: z.string(),
   description: z.string().nullable().optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
 }).passthrough();
 
 export const categoriesResponseSchema = z.array(categorySchema);

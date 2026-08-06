@@ -1,3 +1,5 @@
+import type { ApiCategory } from "@/lib/ticket-contracts";
+
 export type TicketCategory = {
   id: string;
   label: string;
@@ -6,6 +8,34 @@ export type TicketCategory = {
   updatedAt: string;
   icon: "accounting" | "hr" | "database" | "infrastructure" | "crm" | "security";
 };
+
+const categoryIconValues: TicketCategory["icon"][] = [
+  "accounting", "hr", "database", "infrastructure", "crm", "security",
+];
+
+function iconForCategory(category: ApiCategory): TicketCategory["icon"] {
+  const label = category.libelle.toLocaleLowerCase("fr-FR");
+  if (label.includes("compta")) return "accounting";
+  if (label.includes("paie") || label.includes("ressource")) return "hr";
+  if (label.includes("base") || label.includes("donnée")) return "database";
+  if (label.includes("infra") || label.includes("réseau")) return "infrastructure";
+  if (label.includes("crm") || label.includes("commercial")) return "crm";
+  if (label.includes("sécur") || label.includes("accès")) return "security";
+
+  const hash = [...category.id].reduce((total, character) => total + character.charCodeAt(0), 0);
+  return categoryIconValues[hash % categoryIconValues.length];
+}
+
+export function toTicketCategory(category: ApiCategory): TicketCategory {
+  return {
+    id: category.id,
+    label: category.libelle,
+    description: category.description ?? "",
+    createdAt: category.created_at ?? "",
+    updatedAt: category.updated_at ?? "",
+    icon: iconForCategory(category),
+  };
+}
 
 export const ticketCategories: TicketCategory[] = [
   { id: "cat-accounting", label: "Comptabilité", description: "Tickets relatifs aux modules de comptabilité Sage.", createdAt: "2023-10-12", updatedAt: "2024-03-15", icon: "accounting" },
