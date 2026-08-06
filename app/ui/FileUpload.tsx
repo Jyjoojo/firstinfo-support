@@ -2,25 +2,42 @@
 
 import { useRef, useState } from "react";
 import { UploadCloud, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
-export default function FileUpload() {
+type FileUploadProps = {
+  onFilesChange?: (files: File[]) => void;
+};
+
+export default function FileUpload({ onFilesChange }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
 
   const handleFiles = (selectedFiles: FileList | null) => {
     if (!selectedFiles) return;
 
-    setFiles((prev) => [
-      ...prev,
-      ...Array.from(selectedFiles),
-    ]);
+    setFiles((previousFiles) => {
+      const nextFiles = [...previousFiles, ...Array.from(selectedFiles)];
+      onFilesChange?.(nextFiles);
+      return nextFiles;
+    });
+  };
+
+  const removeFile = (file: File) => {
+    setFiles((previousFiles) => {
+      const nextFiles = previousFiles.filter((item) => item !== file);
+      onFilesChange?.(nextFiles);
+      return nextFiles;
+    });
   };
 
   return (
     <div>
       <div
         onClick={() => inputRef.current?.click()}
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={(event) => {
+          event.preventDefault();
+          handleFiles(event.dataTransfer.files);
+        }}
         className="
           cursor-pointer
           border-2
@@ -50,7 +67,7 @@ export default function FileUpload() {
           ref={inputRef}
           type="file"
           multiple
-          accept=".png,.jpg,.jpeg,.pdf"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
           hidden
           onChange={(e) => handleFiles(e.target.files)}
         />
@@ -69,7 +86,7 @@ export default function FileUpload() {
                 {file.name}
               </span>
 
-              <button onClick={() => setFiles((prev) => prev.filter((f) => f !== file))}>
+              <button type="button" onClick={() => removeFile(file)}>
                 <X className="h-4 w-4 cursor-pointer" />
               </button>
             </div>

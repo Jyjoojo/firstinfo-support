@@ -1,8 +1,10 @@
 ﻿"use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Pencil, Shapes, CircleAlert, FileText, Paperclip, InfoIcon } from "lucide-react";
+import { toast } from "sonner";
 import {
     Select,
     SelectContent,
@@ -14,7 +16,6 @@ import {
 } from "@/components/ui/select"
 import {
     Field,
-    FieldDescription,
     FieldLabel,
 } from "@/components/ui/field"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -28,42 +29,122 @@ import FileUpload from "@/app/ui/FileUpload";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { priorityStyles } from "@/lib/styles";
+import { categoriesResponseSchema, type ApiCategory } from "@/lib/ticket-contracts";
+
+const ACCEPTED_EXTENSIONS = new Set(["pdf", "doc", "docx", "xls", "xlsx", "png", "jpg", "jpeg"]);
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILES = 5;
+
+type TicketCreationResponse = {
+    ticket: {
+        id: string;
+        reference: string;
+    };
+};
+
+type ValidationErrorResponse = {
+    message?: string;
+    errors?: Record<string, string[]>;
+};
 
 export default function NewTicketPage() {
+    const router = useRouter();
     const [categorie, setCategorie] = useState("");
     const [priorite, setPriorite] = useState("basse");
+    const [categories, setCategories] = useState<ApiCategory[]>([]);
+    const [fichiers, setFichiers] = useState<File[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [confirmation, setConfirmation] = useState("");
-    const [error, setError] = useState("");
 
-    function handleFiles(_files: FileList) {
-        // Les pièces jointes seront envoyées par l'API dédiée.
+    useEffect(() => {
+        let active = true;
+
+        fetch("/api/categories", { headers: { Accept: "application/json" } })
+            .then(async (response) => {
+                if (!response.ok) throw new Error();
+                return response.json();
+            })
+            .then((data: unknown) => {
+                const parsed = categoriesResponseSchema.safeParse(data);
+                if (active && parsed.success) setCategories(parsed.data);
+            })
+            .catch(() => {
+                if (active) {
+                    toast.error("Chargement impossible", {
+                        description: "Impossible de charger les catégories.",
+                    });
+                }
+            });
+
+        return () => { active = false; };
+    }, []);
+
+    function validateFiles() {
+        if (fichiers.length > MAX_FILES) return `Vous pouvez joindre au maximum ${MAX_FILES} fichiers.`;
+
+        for (const fichier of fichiers) {
+            if (fichier.size > MAX_FILE_SIZE) return `Le fichier ${fichier.name} dépasse 10 Mo.`;
+            const extension = fichier.name.split(".").pop()?.toLowerCase();
+            if (!extension || !ACCEPTED_EXTENSIONS.has(extension)) {
+                return `Le fichier ${fichier.name} n'est pas dans un format accepté.`;
+            }
+        }
+
+        return "";
     }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const form = new FormData(event.currentTarget);
-        const payload = {
-            titre: String(form.get("titre") ?? ""),
-            description: String(form.get("description") ?? ""),
-            categorie,
-            priorite,
-        };
+        const titre = String(form.get("titre") ?? "").trim();
+        const description = String(form.get("description") ?? "").trim();
+        const fileError = validateFiles();
+
+        if (fileError) {
+            toast.error("Pièces jointes invalides", { description: fileError });
+            return;
+        }
 
         setIsSubmitting(true);
-        setError("");
         try {
-            const response = await fetch("/api/tickets", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-            if (!response.ok) throw new Error("La création du ticket a échoué.");
+            let body: BodyInit;
+            let headers: HeadersInit | undefined;
 
-            const ticket = await response.json() as { id: string };
-            setConfirmation(`Ticket ${ticket.id} créé avec succès.`);
+            if (fichiers.length > 0) {
+                const ticketFormData = new FormData();
+                ticketFormData.append("titre", titre);
+                ticketFormData.append("description", description);
+                ticketFormData.append("priorite", priorite);
+                if (categorie) ticketFormData.append("categorie_id", categorie);
+                fichiers.forEach((fichier) => ticketFormData.append("fichiers[]", fichier));
+                body = ticketFormData;
+            } else {
+                headers = { "Content-Type": "application/json" };
+                body = JSON.stringify({
+                    titre,
+                    description,
+                    priorite,
+                    categorie_id: categorie || null,
+                });
+            }
+
+            const response = await fetch("/api/tickets", { method: "POST", headers, body });
+            const data = await response.json().catch(() => ({})) as TicketCreationResponse & ValidationErrorResponse;
+
+            if (!response.ok) {
+                const validationMessages = Object.values(data.errors ?? {}).flat();
+                throw new Error(validationMessages[0] ?? data.message ?? "La création du ticket a échoué.");
+            }
+
+            toast.success("Ticket créé avec succès", {
+                description: `Ticket ${data.ticket.reference} créé avec succès.`,
+            });
+            router.push(`/dashboard/client/tickets/${data.ticket.id}`);
         } catch (submissionError) {
-            setError(submissionError instanceof Error ? submissionError.message : "La création du ticket a échoué.");
+            toast.error("Création impossible", {
+                description: submissionError instanceof Error
+                    ? submissionError.message
+                    : "La création du ticket a échoué.",
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -84,12 +165,10 @@ export default function NewTicketPage() {
                 <div className="mt-4 flex flex-col lg:flex-row lg:gap-8">
                     {/* Colonne du formulaire */}
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4 border-lg bg-on-primary px-6 py-4 rounded-lg mb-5 lg:w-2/3">
-                        {confirmation && <p role="status" className="text-sm font-medium text-green-700">{confirmation}</p>}
-                        {error && <p role="alert" className="text-sm font-medium text-red-700">{error}</p>}
                         <div className="flex flex-col mb-5">
                             <Field>
                                 <FieldLabel htmlFor="input-titre"><Pencil size={16} className="inline-block text-tertiary" />Titre du ticket *</FieldLabel>
-                                <Input id="input-titre" name="titre" type="text" required placeholder="Erreur lors de la clôture de Sage 100" className="focus-visible:border-primary-container focus-visible:ring-2 focus-visible:ring-primary-container focus-visible:ring-offset-2"/>
+                                <Input id="input-titre" name="titre" type="text" minLength={5} required placeholder="Erreur lors de la clôture de Sage 100" className="focus-visible:border-primary-container focus-visible:ring-2 focus-visible:ring-primary-container focus-visible:ring-offset-2"/>
                             </Field>
                         </div>
                         <div className="flex gap-6 mb-5">
@@ -103,12 +182,9 @@ export default function NewTicketPage() {
                                         <SelectContent>
                                             <SelectGroup>
                                                 <SelectLabel>Sage</SelectLabel>
-                                                <SelectItem value="sage-100-comptabilite">Sage 100 Comptabilité</SelectItem>
-                                                <SelectItem value="banana">Sage Paie & RH</SelectItem>
-                                                <SelectItem value="sage-commerciale">Sage Gestion Commerciale</SelectItem>
-                                                <SelectItem value="sage-immobilisations">Sage Immobilisations</SelectItem>
-                                                <SelectItem value="sage-crm">Sage CRM</SelectItem>
-                                                <SelectItem value="autre">Autre</SelectItem>
+                                                {categories.map((category) => (
+                                                    <SelectItem key={category.id} value={category.id}>{category.libelle}</SelectItem>
+                                                ))}
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
@@ -138,18 +214,13 @@ export default function NewTicketPage() {
                         <div className="flex flex-col mb-5">
                             <Field>
                                 <FieldLabel htmlFor="textarea-message"><FileText size={16} className="inline-block text-tertiary"/>Description du problème *</FieldLabel>
-                                <Textarea id="textarea-message" name="description" className="focus-visible:primary-container" required placeholder="Décrivez les étapes pour réproduire le problème, les messages d'erreurs affichés..." />
+                                <Textarea id="textarea-message" name="description" minLength={10} className="focus-visible:primary-container" required placeholder={"Décrivez les étapes pour réproduire le problème, les messages d'erreurs affichés..."} />
                             </Field>
                         </div>
-                        <div className="mb-10" onDragOver={(e) => e.preventDefault()}
-                            onDrop={(e) => {
-                                e.preventDefault();
-                                handleFiles(e.dataTransfer.files);
-                            }}
-                        >
+                        <div className="mb-10">
                             <Field>
-                                <FieldLabel htmlFor="pieces-jointes"><Paperclip size={16} className="inline-block text-tertiary" />Pièces jointes (Captures d'écran, Logs)</FieldLabel>
-                                <FileUpload />
+                                <FieldLabel htmlFor="pieces-jointes"><Paperclip size={16} className="inline-block text-tertiary" />Pièces jointes (Captures d&apos;écran, Logs)</FieldLabel>
+                                <FileUpload onFilesChange={setFichiers} />
                             </Field>
                         </div>
                         <div className="flex justify-end space-x-2 mb-4">
@@ -163,7 +234,7 @@ export default function NewTicketPage() {
                     <div className="lg:w-1/3 lg:mt-0">
                         <Alert className="bg-error-container py-5 h-fit">
                             <InfoIcon />
-                            <AlertTitle>Besoin d'une assistance immédiate ?</AlertTitle>
+                            <AlertTitle>Besoin d&apos;une assistance immédiate ?</AlertTitle>
                             <AlertDescription>
                                 Pour les urgences critiques bloquant votre production, <br />
                                 <p className="mt-2">
