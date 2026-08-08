@@ -49,6 +49,37 @@ export const clientTicketSchema = z.object({
   technicien_assigne: assignedTechnicianSchema.nullable(),
 });
 
+export const ticketCommentSchema = z.object({
+  id: z.string().min(1),
+  contenu: z.string(),
+  est_solution: z.boolean(),
+  solution_validee_at: z.string().nullable(),
+  solution_rejetee_at: z.string().nullable(),
+  solution_validee_par_id: z.string().nullable(),
+  created_at: z.string().nullable(),
+  auteur: z.object({
+    id: z.string().min(1),
+    nom_complet: z.string(),
+    role: z.string(),
+  }),
+});
+
+export const ticketAttachmentSchema = z.object({
+  id: z.string().min(1),
+  nom_fichier: z.string(),
+  type_mime: z.string(),
+  taille: z.coerce.number().nonnegative(),
+  taille_lisible: z.string(),
+  date_upload: z.string().nullable(),
+  url_affichage: z.string(),
+  url_telechargement: z.string(),
+});
+
+export const ticketDetailSchema = clientTicketSchema.extend({
+  commentaires: z.array(ticketCommentSchema),
+  pieces_jointes: z.array(ticketAttachmentSchema),
+});
+
 const paginationLinkSchema = z.object({
   url: z.string().nullable(),
   label: z.string(),
@@ -87,6 +118,9 @@ export const categorySchema = z.object({
 export const categoriesResponseSchema = z.array(categorySchema);
 
 export type ClientTicket = z.infer<typeof clientTicketSchema>;
+export type TicketComment = z.infer<typeof ticketCommentSchema>;
+export type TicketAttachment = z.infer<typeof ticketAttachmentSchema>;
+export type TicketDetail = z.infer<typeof ticketDetailSchema>;
 export type TicketStatus = z.infer<typeof ticketStatusSchema>;
 export type TicketPriority = z.infer<typeof ticketPrioritySchema>;
 export type TicketsResponse = z.infer<typeof ticketsResponseSchema>;

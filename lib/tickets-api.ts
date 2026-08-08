@@ -1,11 +1,24 @@
 import { api, ApiError } from "@/lib/api";
 import {
   categoriesResponseSchema,
+  ticketDetailSchema,
   ticketsResponseSchema,
   type ApiCategory,
   type TicketFilters,
   type TicketsResponse,
+  type TicketDetail,
 } from "@/lib/ticket-contracts";
+
+export async function getTicket(ticketId: string): Promise<TicketDetail> {
+  const data = await api.get<unknown>(`/api/tickets/${encodeURIComponent(ticketId)}`);
+  const parsed = ticketDetailSchema.safeParse(data);
+
+  if (!parsed.success) {
+    throw new ApiError(502, "La réponse du ticket est invalide.", parsed.error.flatten());
+  }
+
+  return parsed.data;
+}
 
 export async function getTickets(filters: TicketFilters = {}): Promise<TicketsResponse> {
   const searchParams = new URLSearchParams();
