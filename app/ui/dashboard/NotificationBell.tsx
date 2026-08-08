@@ -13,12 +13,14 @@ import { NotificationList } from "@/app/ui/dashboard/NotificationList";
 type NotificationsBellProps = {
   initialNotifications: NotificationsResponse;
   historyHref: string;
+  ticketBaseHref: string;
   initialReferenceTime: string;
 };
 
 export default function NotificationsBell({
   initialNotifications,
   historyHref,
+  ticketBaseHref,
   initialReferenceTime,
 }: NotificationsBellProps) {
   const [open, setOpen] = useState(false);
@@ -61,13 +63,13 @@ export default function NotificationsBell({
 
   async function markAsRead(id: string) {
     const notification = notifications.find((item) => item.id === id);
-    if (!notification || notification.read_at) return;
+    if (!notification || notification.lu) return;
 
     const response = await fetch(`/api/notifications/${id}/lire`, { method: "PATCH" });
     if (!response.ok) return;
 
     setNotifications((items) => items.map((item) => (
-      item.id === id ? { ...item, read_at: new Date().toISOString() } : item
+      item.id === id ? { ...item, lu: true, lu_le: new Date().toISOString() } : item
     )));
     setUnreadCount((count) => Math.max(0, count - 1));
   }
@@ -81,7 +83,11 @@ export default function NotificationsBell({
       if (!response.ok) return;
 
       const readAt = new Date().toISOString();
-      setNotifications((items) => items.map((item) => ({ ...item, read_at: item.read_at ?? readAt })));
+      setNotifications((items) => items.map((item) => ({
+        ...item,
+        lu: true,
+        lu_le: item.lu_le ?? readAt,
+      })));
       setUnreadCount(0);
     } finally {
       setIsUpdating(false);
@@ -164,7 +170,11 @@ export default function NotificationsBell({
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          <NotificationList notifications={visible} onRead={markAsRead} />
+          <NotificationList
+            notifications={visible}
+            onRead={markAsRead}
+            ticketBaseHref={ticketBaseHref}
+          />
         </div>
 
         <div className="p-6 border-t border-outline-variant/20">

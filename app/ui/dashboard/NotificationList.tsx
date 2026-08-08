@@ -1,4 +1,7 @@
+"use client";
+
 import { Ticket, Info, History, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   type AppNotification,
   notificationTypeStyles,
@@ -10,12 +13,26 @@ const icons = { ticket: Ticket, info: Info, history: History };
 interface NotificationItemProps {
   notification: AppNotification;
   onDelete?: (id: string) => void;
-  onRead?: (id: string) => void;
+  onRead?: (id: string) => void | Promise<void>;
+  ticketBaseHref?: string;
 }
 
-export function NotificationItem({ notification, onDelete, onRead }: NotificationItemProps) {
+export function NotificationItem({
+  notification,
+  onDelete,
+  onRead,
+  ticketBaseHref,
+}: NotificationItemProps) {
+  const router = useRouter();
   const style = notificationTypeStyles[notification.type];
   const Icon = icons[style.iconName];
+
+  async function openNotification() {
+    if (!notification.read) await onRead?.(notification.id);
+    if (notification.ticketId && ticketBaseHref) {
+      router.push(`${ticketBaseHref}/${notification.ticketId}`);
+    }
+  }
 
   return (
     <div className="group flex gap-4 p-3 bg-on-tertiary rounded-xl hover:bg-secondary-fixed-dim transition-colors">
@@ -24,7 +41,7 @@ export function NotificationItem({ notification, onDelete, onRead }: Notificatio
       </div>
       <button
         type="button"
-        onClick={() => !notification.read && onRead?.(notification.id)}
+        onClick={openNotification}
         className="flex-1 min-w-0 cursor-pointer text-left"
       >
         <div className="flex justify-between items-start gap-2">
@@ -52,10 +69,16 @@ export function NotificationItem({ notification, onDelete, onRead }: Notificatio
 interface NotificationListProps {
   notifications: AppNotification[];
   onDelete?: (id: string) => void;
-  onRead?: (id: string) => void;
+  onRead?: (id: string) => void | Promise<void>;
+  ticketBaseHref?: string;
 }
 
-export function NotificationList({ notifications, onDelete, onRead }: NotificationListProps) {
+export function NotificationList({
+  notifications,
+  onDelete,
+  onRead,
+  ticketBaseHref,
+}: NotificationListProps) {
   const groups = groupByDay(notifications);
 
   if (groups.length === 0) {
@@ -80,6 +103,7 @@ export function NotificationList({ notifications, onDelete, onRead }: Notificati
                 notification={notification}
                 onDelete={onDelete}
                 onRead={onRead}
+                ticketBaseHref={ticketBaseHref}
               />
             ))}
           </div>

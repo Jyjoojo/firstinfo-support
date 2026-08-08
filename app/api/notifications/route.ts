@@ -6,6 +6,7 @@ import { getNotifications } from "@/lib/notifications-api";
 const querySchema = z.object({
   non_lues: z.enum(["true", "false"]).optional(),
   page: z.coerce.number().int().positive().optional(),
+  categorie: z.string().trim().min(1).max(64).optional(),
 }).strict();
 
 export async function GET(request: Request) {
@@ -21,6 +22,7 @@ export async function GET(request: Request) {
     const notifications = await getNotifications({
       unreadOnly: query.data.non_lues === "true",
       page: query.data.page,
+      category: query.data.categorie,
     });
     return NextResponse.json(notifications);
   } catch (error) {

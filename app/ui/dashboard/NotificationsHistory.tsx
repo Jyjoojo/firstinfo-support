@@ -6,35 +6,30 @@ import {
   notificationsResponseSchema,
   toAppNotification,
   type LaravelNotification,
+  type NotificationCategory,
   type NotificationsResponse,
-  type NotificationType,
 } from "@/lib/notifications";
 import { NotificationList } from "@/app/ui/dashboard/NotificationList";
 import ConfirmDialog from "@/app/ui/dashboard/ConfirmDialog";
 
-type FilterKey = "all" | "unread" | NotificationType;
-
-const filters: { key: FilterKey; label: string }[] = [
-  { key: "all", label: "Tout" },
-  { key: "unread", label: "Non lues" },
-  { key: "ticket", label: "Tickets" },
-  { key: "info", label: "Système" },
-  { key: "contract", label: "Contrats" },
-];
-
 export default function NotificationsHistory({
   initialNotifications,
   initialReferenceTime,
+  ticketBaseHref,
+  categories,
 }: {
   initialNotifications: NotificationsResponse;
   initialReferenceTime: string;
+  ticketBaseHref: string;
+  categories: NotificationCategory[];
 }) {
-  const [filter, setFilter] = useState<FilterKey>("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [unreadOnly, setUnreadOnly] = useState(false);
   const [notifications, setNotifications] = useState<LaravelNotification[]>(initialNotifications.data);
   const [unreadCount, setUnreadCount] = useState(initialNotifications.total_non_lues);
   const [nextPage, setNextPage] = useState(
-    initialNotifications.current_page < initialNotifications.last_page
-      ? initialNotifications.current_page + 1
+    initialNotifications.meta.current_page < initialNotifications.meta.last_page
+      ? initialNotifications.meta.current_page + 1
       : null,
   );
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
@@ -51,27 +46,25 @@ export default function NotificationsHistory({
   }, []);
 
   const visible = useMemo(() => notifications
-    .map((notification) => toAppNotification(notification, new Date(referenceTime)))
-    .filter((notification) => {
-      if (filter === "all") return true;
-      if (filter === "unread") return !notification.read;
-      return notification.type === filter;
-    }), [filter, notifications, referenceTime]);
+    .map((notification) => toAppNotification(notification, new Date(referenceTime))), [notifications, referenceTime]);
 
-  async function changeFilter(nextFilter: FilterKey) {
-    setFilter(nextFilter);
-    const needsReload = nextFilter === "unread" || filter === "unread";
-    if (!needsReload) return;
-
+  async function changeFilters(nextCategory: string, nextUnreadOnly: boolean) {
+    setCategoryFilter(nextCategory);
+    setUnreadOnly(nextUnreadOnly);
     setIsFiltering(true);
     try {
-      const query = nextFilter === "unread" ? "?non_lues=true" : "";
+      const searchParams = new URLSearchParams();
+      if (nextCategory !== "all") searchParams.set("categorie", nextCategory);
+      if (nextUnreadOnly) searchParams.set("non_lues", "true");
+      const query = searchParams.size ? `?${searchParams.toString()}` : "";
       const response = await fetch(`/api/notifications${query}`);
       const parsed = notificationsResponseSchema.safeParse(await response.json().catch(() => null));
       if (!response.ok || !parsed.success) return;
       setNotifications(parsed.data.data);
       setUnreadCount(parsed.data.total_non_lues);
-      setNextPage(parsed.data.current_page < parsed.data.last_page ? parsed.data.current_page + 1 : null);
+      setNextPage(parsed.data.meta.current_page < parsed.data.meta.last_page
+        ? parsed.data.meta.current_page + 1
+        : null);
     } finally {
       setIsFiltering(false);
     }
@@ -79,13 +72,13 @@ export default function NotificationsHistory({
 
   async function markAsRead(id: string) {
     const notification = notifications.find((item) => item.id === id);
-    if (!notification || notification.read_at) return;
+    if (!notification || notification.lu) return;
 
     const response = await fetch(`/api/notifications/${id}/lire`, { method: "PATCH" });
     if (!response.ok) return;
 
     setNotifications((items) => items.map((item) => (
-      item.id === id ? { ...item, read_at: new Date().toISOString() } : item
+      item.id === id ? { ...item, lu: true, lu_le: new Date().toISOString() } : item
     )));
     setUnreadCount((count) => Math.max(0, count - 1));
   }
@@ -97,7 +90,11 @@ export default function NotificationsHistory({
       const response = await fetch("/api/notifications/tout-lire", { method: "POST" });
       if (!response.ok) return;
       const readAt = new Date().toISOString();
-      setNotifications((items) => items.map((item) => ({ ...item, read_at: item.read_at ?? readAt })));
+      setNotifications((items) => items.map((item) => ({
+        ...item,
+        lu: true,
+        lu_le: item.lu_le ?? readAt,
+      })));
       setUnreadCount(0);
     } finally {
       setIsUpdating(false);
@@ -110,7 +107,7 @@ export default function NotificationsHistory({
 
     const deleted = notifications.find((notification) => notification.id === id);
     setNotifications((items) => items.filter((notification) => notification.id !== id));
-    if (deleted && !deleted.read_at) setUnreadCount((count) => Math.max(0, count - 1));
+    if (deleted && !deleted.lu) setUnreadCount((count) => Math.max(0, count - 1));
   }
 
   async function deleteVisible() {
@@ -125,7 +122,7 @@ export default function NotificationsHistory({
       );
       const deletedIds = new Set(results.filter((result) => result.ok).map((result) => result.id));
       const deletedUnread = notifications.filter(
-        (notification) => deletedIds.has(notification.id) && !notification.read_at,
+        (notification) => deletedIds.has(notification.id) && !notification.lu,
       ).length;
       setNotifications((items) => items.filter((notification) => !deletedIds.has(notification.id)));
       setUnreadCount((count) => Math.max(0, count - deletedUnread));
@@ -139,14 +136,18 @@ export default function NotificationsHistory({
     if (!nextPage || isLoadingMore) return;
     setIsLoadingMore(true);
     try {
-      const unreadQuery = filter === "unread" ? "&non_lues=true" : "";
-      const response = await fetch(`/api/notifications?page=${nextPage}${unreadQuery}`);
+      const searchParams = new URLSearchParams({ page: String(nextPage) });
+      if (categoryFilter !== "all") searchParams.set("categorie", categoryFilter);
+      if (unreadOnly) searchParams.set("non_lues", "true");
+      const response = await fetch(`/api/notifications?${searchParams.toString()}`);
       const parsed = notificationsResponseSchema.safeParse(await response.json().catch(() => null));
       if (!response.ok || !parsed.success) return;
 
       setNotifications((items) => [...items, ...parsed.data.data]);
       setUnreadCount(parsed.data.total_non_lues);
-      setNextPage(parsed.data.current_page < parsed.data.last_page ? parsed.data.current_page + 1 : null);
+      setNextPage(parsed.data.meta.current_page < parsed.data.meta.last_page
+        ? parsed.data.meta.current_page + 1
+        : null);
     } finally {
       setIsLoadingMore(false);
     }
@@ -183,25 +184,53 @@ export default function NotificationsHistory({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        {filters.map(({ key, label }) => (
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <button
+          onClick={() => changeFilters(categoryFilter, !unreadOnly)}
+          disabled={isFiltering}
+          className={`px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
+            unreadOnly
+              ? "bg-primary text-white"
+              : "bg-white border border-outline-variant/40 text-on-surface-variant"
+          }`}
+        >
+          Non lues ({unreadCount})
+        </button>
+        <span className="mx-1 h-6 w-px bg-outline-variant/30" aria-hidden="true" />
+        <button
+          onClick={() => changeFilters("all", unreadOnly)}
+          disabled={isFiltering}
+          className={`px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
+            categoryFilter === "all"
+              ? "bg-tertiary text-white"
+              : "bg-white border border-outline-variant/40 text-on-surface-variant"
+          }`}
+        >
+          Toutes les catégories
+        </button>
+        {categories.map(({ valeur, libelle }) => (
           <button
-            key={key}
-            onClick={() => changeFilter(key)}
+            key={valeur}
+            onClick={() => changeFilters(valeur, unreadOnly)}
             disabled={isFiltering}
             className={`px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
-              filter === key
+              categoryFilter === valeur
                 ? "bg-tertiary text-white"
                 : "bg-white border border-outline-variant/40 text-on-surface-variant"
             }`}
           >
-            {label}{key === "unread" ? ` (${unreadCount})` : ""}
+            {libelle}
           </button>
         ))}
       </div>
 
       <div className="bg-surface-container-low/60 rounded-xl overflow-hidden">
-        <NotificationList notifications={visible} onRead={markAsRead} onDelete={deleteOne} />
+        <NotificationList
+          notifications={visible}
+          onRead={markAsRead}
+          onDelete={deleteOne}
+          ticketBaseHref={ticketBaseHref}
+        />
       </div>
 
       {nextPage && (

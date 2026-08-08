@@ -2,10 +2,13 @@ import { Search } from "lucide-react";
 import NotificationsBell from "./NotificationBell";
 import MailBox from "./MailBox";
 import { getAuthenticatedUser } from "@/lib/auth";
-import { getNotifications } from "@/lib/notifications-api";
+import { getNotificationMessages, getNotifications } from "@/lib/notifications-api";
 import { emptyNotificationsResponse } from "@/lib/notifications-api";
 import { ApiError } from "@/lib/api";
-import { createNotificationReferenceTime } from "@/lib/notifications";
+import {
+  createNotificationReferenceTime,
+  type LaravelNotification,
+} from "@/lib/notifications";
 
 function getInitials(firstName?: string, lastName?: string) {
   const firstInitial = firstName?.trim().charAt(0) ?? "";
@@ -26,18 +29,28 @@ export default async function TopBar() {
         ? "Admin entreprise"
         : "Compte utilisateur";
   const initials = getInitials(user?.prenom, user?.nom);
-  let notifications;
+  let notifications = emptyNotificationsResponse();
+  let messages: LaravelNotification[] = [];
   try {
     notifications = await getNotifications();
   } catch (error) {
     if (!(error instanceof ApiError)) throw error;
-    notifications = emptyNotificationsResponse();
+  }
+  try {
+    messages = await getNotificationMessages();
+  } catch (error) {
+    if (!(error instanceof ApiError)) throw error;
   }
   const historyHref = role === "technicien"
     ? "/dashboard/technicien/notifications"
     : role === "admin" || role === "administrateur"
       ? "/dashboard/admin/notifications"
       : "/dashboard/client/notifications";
+  const ticketBaseHref = role === "technicien"
+    ? "/dashboard/technicien/tickets"
+    : role === "admin" || role === "administrateur"
+      ? "/dashboard/admin/tickets"
+      : "/dashboard/client/tickets";
   const notificationReferenceTime = createNotificationReferenceTime();
 
   return (
@@ -56,10 +69,11 @@ export default async function TopBar() {
         </div>
       </div>
       <div className="flex items-center gap-3 ml-8">
-        <MailBox />
+        <MailBox initialMessages={messages} ticketBaseHref={ticketBaseHref} />
         <NotificationsBell
           initialNotifications={notifications}
           historyHref={historyHref}
+          ticketBaseHref={ticketBaseHref}
           initialReferenceTime={notificationReferenceTime}
         />
         <div className="h-6 w-px bg-outline-variant/30" />
