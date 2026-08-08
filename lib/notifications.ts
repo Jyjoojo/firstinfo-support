@@ -29,6 +29,10 @@ export const notificationsResponseSchema = z.object({
 export type LaravelNotification = z.infer<typeof laravelNotificationSchema>;
 export type NotificationsResponse = z.infer<typeof notificationsResponseSchema>;
 
+export function createNotificationReferenceTime() {
+  return new Date().toISOString();
+}
+
 export interface AppNotification {
   id: string;
   type: NotificationType;

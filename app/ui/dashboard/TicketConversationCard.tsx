@@ -2,7 +2,7 @@
 
 import { type FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, LoaderCircle, Paperclip, Send, XCircle } from "lucide-react";
+import { CheckCircle2, Clock3, LoaderCircle, Paperclip, Send, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -226,6 +226,23 @@ export default function TicketConversationCard({
                 <div className={`flex max-w-[82%] flex-col ${isClient ? "items-end" : "items-start"}`}>
                   {!isClient && <span className="mb-2 px-1 text-sm font-medium text-on-surface">{message.authorName}</span>}
                   <div className={`px-4 py-3 text-body-md leading-relaxed ${isClient ? "rounded-2xl rounded-br-sm bg-primary-container text-surface" : "rounded-2xl rounded-bl-sm bg-surface-container-low text-on-surface"}`}>
+                    {message.isSolution && (
+                      <div className="mb-3">
+                        {message.solutionValidated ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                            <CheckCircle2 size={14} /> Solution acceptée
+                          </span>
+                        ) : message.solutionRejected ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700">
+                            <XCircle size={14} /> Solution rejetée
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
+                            <Clock3 size={14} /> Solution proposée
+                          </span>
+                        )}
+                      </div>
+                    )}
                     <p className="whitespace-pre-wrap">{message.content}</p>
                     {isPendingSolution && (
                       <div className="mt-4 border-t border-outline-variant/40 pt-4">
@@ -243,7 +260,7 @@ export default function TicketConversationCard({
                       </div>
                     )}
                   </div>
-                  <span className="mt-1 px-1 text-[11px] text-on-surface-variant opacity-70">{isClient ? `${message.authorName} · ${message.date}` : message.date}</span>
+                  <span className="mt-1 px-1 text-[11px] text-on-surface-variant opacity-70">{isClient ? `Vous · ${message.date}` : message.date}</span>
                 </div>
               </div>
             );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Bell, X, CheckCheck } from "lucide-react";
 import {
@@ -13,11 +13,13 @@ import { NotificationList } from "@/app/ui/dashboard/NotificationList";
 type NotificationsBellProps = {
   initialNotifications: NotificationsResponse;
   historyHref: string;
+  initialReferenceTime: string;
 };
 
 export default function NotificationsBell({
   initialNotifications,
   historyHref,
+  initialReferenceTime,
 }: NotificationsBellProps) {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "unread">("all");
@@ -25,13 +27,22 @@ export default function NotificationsBell({
   const [unreadCount, setUnreadCount] = useState(initialNotifications.total_non_lues);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
+  const [referenceTime, setReferenceTime] = useState(initialReferenceTime);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setReferenceTime(new Date().toISOString());
+    }, 30_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const visible = useMemo(() => {
-    const mapped = notifications.map((notification) => toAppNotification(notification));
+    const now = new Date(referenceTime);
+    const mapped = notifications.map((notification) => toAppNotification(notification, now));
     return filter === "unread"
       ? mapped.filter((notification) => !notification.read)
       : mapped;
-  }, [filter, notifications]);
+  }, [filter, notifications, referenceTime]);
 
   async function changeFilter(nextFilter: "all" | "unread") {
     setFilter(nextFilter);

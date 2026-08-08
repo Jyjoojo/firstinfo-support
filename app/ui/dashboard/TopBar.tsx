@@ -5,6 +5,7 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { getNotifications } from "@/lib/notifications-api";
 import { emptyNotificationsResponse } from "@/lib/notifications-api";
 import { ApiError } from "@/lib/api";
+import { createNotificationReferenceTime } from "@/lib/notifications";
 
 function getInitials(firstName?: string, lastName?: string) {
   const firstInitial = firstName?.trim().charAt(0) ?? "";
@@ -37,6 +38,7 @@ export default async function TopBar() {
     : role === "admin" || role === "administrateur"
       ? "/dashboard/admin/notifications"
       : "/dashboard/client/notifications";
+  const notificationReferenceTime = createNotificationReferenceTime();
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-outline-variant/20 px-6 py-3.5 flex items-center justify-between">
@@ -58,6 +60,7 @@ export default async function TopBar() {
         <NotificationsBell
           initialNotifications={notifications}
           historyHref={historyHref}
+          initialReferenceTime={notificationReferenceTime}
         />
         <div className="h-6 w-px bg-outline-variant/30" />
         <div className="flex items-center gap-2.5 pl-1">

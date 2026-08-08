@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCheck, Loader2, Trash2 } from "lucide-react";
 import {
   notificationsResponseSchema,
@@ -24,8 +24,10 @@ const filters: { key: FilterKey; label: string }[] = [
 
 export default function NotificationsHistory({
   initialNotifications,
+  initialReferenceTime,
 }: {
   initialNotifications: NotificationsResponse;
+  initialReferenceTime: string;
 }) {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [notifications, setNotifications] = useState<LaravelNotification[]>(initialNotifications.data);
@@ -39,14 +41,22 @@ export default function NotificationsHistory({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
+  const [referenceTime, setReferenceTime] = useState(initialReferenceTime);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setReferenceTime(new Date().toISOString());
+    }, 30_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const visible = useMemo(() => notifications
-    .map((notification) => toAppNotification(notification))
+    .map((notification) => toAppNotification(notification, new Date(referenceTime)))
     .filter((notification) => {
       if (filter === "all") return true;
       if (filter === "unread") return !notification.read;
       return notification.type === filter;
-    }), [filter, notifications]);
+    }), [filter, notifications, referenceTime]);
 
   async function changeFilter(nextFilter: FilterKey) {
     setFilter(nextFilter);
