@@ -1,415 +1,373 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
-import { Camera, PencilLine, BadgeCheck, EyeOffIcon, EyeIcon, CheckIcon, XIcon } from "lucide-react"
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { BadgeCheck, CheckIcon, EyeIcon, EyeOffIcon, XIcon } from "lucide-react";
 import { motion } from "motion/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import { Field, FieldGroup } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 
-const requirements = [
-    { regex: /.{8,}/, text: "Au moins 8 caractères" },
-    { regex: /[0-9]/, text: "Au moins 1 chiffre" },
-    { regex: /[a-z]/, text: "Au moins 1 lettre miniscule" },
-    { regex: /[A-Z]/, text: "Au moins 1 lettre majuscule" },
+type ClientDetails = {
+  entreprise?: string | null;
+  secteur?: string | null;
+  adresse?: string | null;
+  pays?: string | null;
+  est_client_officiel?: boolean;
+};
+
+type ProfileUser = {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone?: string | null;
+  role: string;
+  actif: boolean;
+  client?: ClientDetails | null;
+};
+
+type ProfileFields = Pick<ProfileUser, "nom" | "prenom" | "email"> & {
+  telephone: string;
+};
+
+type ProfileUpdatePayload = Partial<Omit<ProfileFields, "telephone">> & {
+  telephone?: string | null;
+};
+
+type PasswordFields = {
+  ancien_mot_de_passe: string;
+  nouveau_mot_de_passe: string;
+  confirmation_mot_de_passe: string;
+};
+
+type FieldErrors = Partial<Record<keyof ProfileFields | keyof PasswordFields, string[]>>;
+
+type ApiErrorPayload = {
+  message?: string;
+  errors?: FieldErrors;
+};
+
+const passwordRequirements = [
+  { regex: /.{8,}/, text: "Au moins 8 caractères" },
+  { regex: /[a-z]/, text: "Au moins une lettre minuscule" },
+  { regex: /[A-Z]/, text: "Au moins une lettre majuscule" },
+  { regex: /[0-9]/, text: "Au moins un chiffre" },
 ];
 
-const fadeUp = {
-    hidden: {
-        opacity: 0,
-        y: 20,
-    },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: {
-            duration: 0.4,
-            ease: "easeOut" as const,
-        },
-    },
+const panelAnimation = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" as const } },
 };
 
-const slideFromLeft = {
-    hidden: {
-        opacity: 0,
-        x: -22,
-    },
-    visible: {
-        opacity: 1,
-        x: 0,
-        transition: {
-            duration: 0.42,
-            ease: "easeOut" as const,
-        },
-    },
-};
+function initials(user: ProfileUser) {
+  return `${user.prenom.trim().charAt(0)}${user.nom.trim().charAt(0)}`.toUpperCase() || "?";
+}
 
-const slideFromRight = {
-    hidden: {
-        opacity: 0,
-        x: 22,
-    },
-    visible: {
-        opacity: 1,
-        x: 0,
-        transition: {
-            duration: 0.42,
-            ease: "easeOut" as const,
-        },
-    },
-};
+function roleLabel(user: ProfileUser) {
+  if (user.role.toLowerCase() !== "client") return user.role;
+  return user.client?.est_client_officiel ? "Client officiel" : "Client";
+}
+
+function firstError(errors: FieldErrors, field: keyof FieldErrors) {
+  return errors[field]?.[0];
+}
+
+function FieldError({ message }: { message?: string }) {
+  return message ? <p className="text-xs text-destructive">{message}</p> : null;
+}
+
+async function readResponse(response: Response) {
+  return response.json().catch(() => ({})) as Promise<ApiErrorPayload & { user?: ProfileUser }>;
+}
 
 export default function ParametrePage() {
-    const id = useId();
-    const [password, setPassword] = useState("");
-    const [isVisible, setIsVisible] = useState(false);
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [isConfirmVisible, setIsConfirmVisible] = useState(false);
-    const passwordsMatch = useMemo(() => {
-        return password === confirmPassword;
-    }, [password, confirmPassword]);
-    const strength = requirements.map((req) => ({
-        met: req.regex.test(password),
-        text: req.text,
-    }));
-    const strengthScore = useMemo(() => {
-        return strength.filter((req) => req.met).length;
-    }, [strength]);
-    const getStrengthColor = (score: number) => {
-        if (score === 0) return "bg-border";
-        if (score <= 1) return "bg-red-500";
-        if (score <= 2) return "bg-orange-500";
-        if (score === 3) return "bg-amber-500";
-        return "bg-emerald-500";
-    };
-    const getStrengthText = (score: number) => {
-        if (score === 0) return "Entrer un mot de passe";
-        if (score <= 2) return "Mot de passe faible";
-        if (score === 3) return "Mot de passe moyen";
-        return "Mot de passe fort";
-    };
+  const router = useRouter();
+  const [user, setUser] = useState<ProfileUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<ProfileFields>({ nom: "", prenom: "", email: "", telephone: "" });
+  const [profileErrors, setProfileErrors] = useState<FieldErrors>({});
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [passwords, setPasswords] = useState<PasswordFields>({
+    ancien_mot_de_passe: "",
+    nouveau_mot_de_passe: "",
+    confirmation_mot_de_passe: "",
+  });
+  const [passwordErrors, setPasswordErrors] = useState<FieldErrors>({});
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<keyof PasswordFields, boolean>>({
+    ancien_mot_de_passe: false,
+    nouveau_mot_de_passe: false,
+    confirmation_mot_de_passe: false,
+  });
 
-    return (
-        <div className="p-6 lg:p-8 max-w-7xl mx-auto w-full">
-            <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{
-                    once: true,
-                    amount: 0.4,
-                }}
-                variants={slideFromLeft}
-                className="mb-6"
-            >
-                <h2 className="text-xl lg:text-2xl font-bold text-on-surface">Paramètres</h2>
-                <p className="text-on-surface-variant mt-1 text-sm">
-                    Gèrez tes informations personnelles et les détails de ton compte.
-                </p>
-            </motion.div>
-            <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{
-                    once: true,
-                    amount: 0.5,
-                }}
-                variants={fadeUp}
-                className="flex items-center gap-3 flex-row mb-4"
-            >
-                <h2 className="text-lg lg:text-xl font-medium text-on-surface ps-2">Mon Profil</h2>
-            </motion.div>
-            <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{
-                    once: true,
-                    amount: 0.25,
-                }}
-                variants={fadeUp}
-                whileHover={{
-                    y: -3,
-                }}
-                className="flex flex-wrap items-center mb-5 gap-6 md:gap-10 bg-surface-container-lowest py-6 ps-10 rounded-xl border border-outline-variant/20"
-            >
-                <div className="relative w-fit">
-                    <Avatar className="h-24 w-24 border-2 border-white">
-                        {/* Remplacez par l'URL de l'image de l'utilisateur */}
-                        <AvatarImage src="https://github.com/shadcn.png" alt="Avatar de l'utilisateur" />
-                        <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                    <label htmlFor="photo-upload" className="absolute bottom-0 right-0 w-8 h-8 bg-surface rounded-full flex items-center justify-center border-2 border-surface-container-lowest hover:bg-primary-container/80 transition-colors cursor-pointer">
-                        <Camera size={16} className="text-on-primary-container" />
-                        <input id="photo-upload" type="file" className="sr-only" />
-                        <span className="sr-only">Changer la photo de profil</span>
-                    </label>
-                </div>
-                <div className="flex-1">
-                    <h3 className="text-lg font-medium mb-1 flex items-center gap-1.5">
-                        Jean KOUASSI <BadgeCheck size={16} className="text-green-600 shrink-0" />
-                    </h3>
-                    <p className="text-sm text-on-surface-variant mb-1">Directeur RH</p>
-                    <p className="text-sm text-on-surface-variant">Abidjan, Côte d&apos;Ivoire</p>
-                </div>
-            </motion.div>
-            <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{
-                    once: true,
-                    amount: 0.2,
-                }}
-                variants={slideFromLeft}
-                className="flex flex-wrap items-center md:gap-10 mb-5 bg-surface-container-lowest py-6 ps-10 pe-6 rounded-xl border border-outline-variant/20"
-            >
-                <div className="flex w-full items-center justify-between border-b-2 border-outline-variant/20 pb-4">
-                    <p className="font-medium text-lg text-on-surface">Information Personnelle</p>
-                    <Dialog>
-                        <form>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" size="sm" className="gap-1.5 cursor-pointer bg-primary-container text-surface-container-lowest hover:bg-primary-container/80 hover:text-surface-container-lowest transition-colors">Editer <PencilLine size={8} /></Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
-                                <DialogHeader>
-                                    <DialogTitle className="text-lg font-medium">Editer Informations Personnelles</DialogTitle>
-                                    <DialogDescription>
-                                        Modifiez vos informations ici. Cliquez sur Enregistrer lorsque vous avez terminé.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <FieldGroup>
-                                    <Field>
-                                        <Label htmlFor="nom">Nom</Label>
-                                        <Input id="nom" name="nom" defaultValue="KOUASSI" className="focus-visible:ring-primary-container" />
-                                    </Field>
-                                    <Field>
-                                        <Label htmlFor="prenoms">Prénoms</Label>
-                                        <Input id="prenoms" name="prenoms" defaultValue="Jean Navié" className="focus-visible:ring-primary-container" />
-                                    </Field>
-                                    <Field>
-                                        <Label htmlFor="email">Email</Label>
-                                        <Input id="email" name="email" type="email" defaultValue="jeankouassi@gmail.com" className="focus-visible:ring-primary-container" />
-                                    </Field>
-                                    <Field>
-                                        <Label htmlFor="contact">Contact</Label>
-                                        <Input id="contact" name="contact" defaultValue="(+225) 0102471820" className="focus-visible:ring-primary-container" />
-                                    </Field>
-                                </FieldGroup>
-                                <DialogFooter>
-                                    <DialogClose asChild>
-                                        <Button variant="outline">Annuler</Button>
-                                    </DialogClose>
-                                    <Button type="submit" className="bg-primary-container">Enregistrer</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </form>
-                    </Dialog>
-                </div>
-                <div className="grid grid-cols-3 gap-4 w-full">
-                    <div className="flex flex-col gap-2">
-                        <p className="text-sm text-on-surface-variant mb-1">Nom</p>
-                        <p className="text-[15px] font-medium">KOUASSI</p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <p className="text-sm text-on-surface-variant mb-1">Prénoms</p>
-                        <p className="text-[15px] font-medium">Jean Navié</p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <p className="text-sm text-on-surface-variant mb-1">Email adresse</p>
-                        <p className="text-[15px] font-medium">jeankouassi@gmail.com</p>
-                    </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3 w-full">
-                    <div className="flex flex-col gap-2">
-                        <p className="text-sm text-on-surface-variant mb-1">Contact</p>
-                        <p className="text-[15px] font-medium">(+225) 0102471820</p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <p className="text-sm text-on-surface-variant mb-1">Rôle</p>
-                        <p className="text-[15px] font-medium">Client officiel</p>
-                    </div>
-                </div>
-            </motion.div>
-            <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{
-                    once: true,
-                    amount: 0.2,
-                }}
-                variants={slideFromRight}
-                className="flex flex-wrap items-center md:gap-10 mb-5 bg-surface-container-lowest py-6 ps-10 pe-6 rounded-xl border border-outline-variant/20"
-            >
-                <div className="flex w-full items-center justify-between border-b-2 border-outline-variant/20 pb-4">
-                    <p className="font-medium text-lg text-on-surface">Supplémentaire</p>
-                    <Button variant="outline" size="sm" className="gap-1.5 cursor-pointer bg-on-surface-container-lowest text-on-surface-variant hover:bg-on-surface-container-lowest/80 hover:text-on-surface-variant transition-colors">Editer <PencilLine size={8} /></Button>
-                </div>
-                <div className="grid grid-cols-3 gap-4 w-full">
-                    <div className="flex flex-col gap-2">
-                        <p className="text-sm text-on-surface-variant mb-1">Entreprise</p>
-                        <p className="text-[15px] font-medium">MyTouchPoint</p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <p className="text-sm text-on-surface-variant mb-1">Secteur</p>
-                        <p className="text-[15px] font-medium">Finance et paiements</p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <p className="text-sm text-on-surface-variant mb-1">Adresse</p>
-                        <p className="text-[15px] font-medium">2 Plateau Dokui</p>
-                    </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3 w-full">
-                    <div className="flex flex-col gap-2">
-                        <p className="text-sm text-on-surface-variant mb-1">Pays</p>
-                        <p className="text-[15px] font-medium">Côte d&apos;Ivoire</p>
-                    </div>
-                </div>
-            </motion.div>
-            <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{
-                    once: true,
-                    amount: 0.12,
-                }}
-                variants={fadeUp}
-                className="flex flex-col flex-wrap md:gap-1 mb-5 bg-surface-container-lowest py-6 ps-10 pe-6 rounded-xl border border-outline-variant/20"
-            >
-                <h2 className="text-lg font-medium text-on-surface">Modifier mot de passe</h2>
-                <p className="text-on-surface-variant text-[15px] mb-6">
-                    Entrez un nouveau mot de passe pour protéger votre compte.
-                </p>
-                <form className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor={id}>Nouveau mot de passe</Label>
-                        <InputGroup className="w-lg">
-                            <InputGroupInput
-                                required
-                                aria-describedby={`${id}-description`}
-                                id={id}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Password"
-                                type={isVisible ? "text" : "password"}
-                                value={password}
-                                className="[&::-ms-reveal]:hidden [&::-webkit-reveal]:hidden"
-                            />
-                            <InputGroupAddon align="inline-end">
-                                <Button
-                                    aria-label={isVisible ? "Hide password" : "Show password"}
-                                    onClick={() => setIsVisible(!isVisible)}
-                                    size="icon-xs"
-                                    variant="ghost"
-                                >
-                                    {isVisible ? (
-                                        <EyeOffIcon aria-hidden="true" />
-                                    ) : (
-                                        <EyeIcon aria-hidden="true" />
-                                    )}
-                                </Button>
-                            </InputGroupAddon>
-                        </InputGroup>
-                    </div>
-                    <div
-                        aria-label="Password strength"
-                        aria-valuemax={4}
-                        aria-valuemin={0}
-                        aria-valuenow={strengthScore}
-                        className="h-1 w-lg overflow-hidden rounded-full bg-border"
-                        role="progressbar"
-                        tabIndex={-1}
-                    >
-                        <div
-                            className={`h-full ${getStrengthColor(strengthScore)} transition-all duration-500 ease-out`}
-                            style={{ width: `${(strengthScore / 4) * 100}%` }}
-                        />
-                    </div>
-                    <p
-                        className="font-medium text-foreground text-sm"
-                        id={`${id}-description`}
-                    >
-                        {getStrengthText(strengthScore)}. Doit contenir:
-                    </p>
-                    <ul aria-label="Password requirements" className="flex flex-col gap-1.5">
-                        {strength.map((req) => (
-                            <li className="flex items-center gap-2" key={req.text}>
-                                {req.met ? (
-                                    <CheckIcon
-                                        aria-hidden="true"
-                                        className="size-4 text-emerald-500"
-                                    />
-                                ) : (
-                                    <XIcon
-                                        aria-hidden="true"
-                                        className="size-4 text-muted-foreground/80"
-                                    />
-                                )}
-                                <span
-                                    className={`text-xs ${req.met ? "text-emerald-600" : "text-muted-foreground"}`}
-                                >
-                                    {req.text}
-                                    <span className="sr-only">
-                                        {req.met ? " - Requirement met" : " - Requirement not met"}
-                                    </span>
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                    <div className="flex flex-col gap-2 mt-4">
-                        <Label htmlFor={`${id}-confirm`}>Confirmation du mot de passe</Label>
+  useEffect(() => {
+    let cancelled = false;
+    async function loadProfile() {
+      try {
+        const response = await fetch("/api/auth/me", { headers: { Accept: "application/json" } });
+        const payload = await readResponse(response);
+        if (!response.ok) throw new Error(payload.message ?? "Impossible de charger votre profil.");
+        const nextUser = payload as ProfileUser;
+        if (!cancelled) {
+          setUser(nextUser);
+          setProfile({
+            nom: nextUser.nom ?? "",
+            prenom: nextUser.prenom ?? "",
+            email: nextUser.email ?? "",
+            telephone: nextUser.telephone ?? "",
+          });
+        }
+      } catch (error) {
+        if (!cancelled) setLoadError(error instanceof Error ? error.message : "Impossible de charger votre profil.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void loadProfile();
+    return () => { cancelled = true; };
+  }, []);
 
-                        <InputGroup className="w-lg">
-                            <InputGroupInput
-                                required
-                                id={`${id}-confirm`}
-                                placeholder="Confirmer le mot de passe"
-                                type={isConfirmVisible ? "text" : "password"}
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="[&::-ms-reveal]:hidden [&::-webkit-reveal]:hidden"
-                            />
+  const strength = useMemo(() => passwordRequirements.map((requirement) => ({
+    ...requirement,
+    met: requirement.regex.test(passwords.nouveau_mot_de_passe),
+  })), [passwords.nouveau_mot_de_passe]);
+  const strengthScore = strength.filter((requirement) => requirement.met).length;
+  function updateProfile(field: keyof ProfileFields, value: string) {
+    setProfile((current) => ({ ...current, [field]: value }));
+    setProfileErrors((current) => ({ ...current, [field]: undefined }));
+    setProfileMessage(null);
+  }
 
-                            <InputGroupAddon align="inline-end">
-                                <Button
-                                    type="button"
-                                    aria-label={isConfirmVisible ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                                    onClick={() => setIsConfirmVisible(!isConfirmVisible)}
-                                    size="icon-xs"
-                                    variant="ghost"
-                                >
-                                    {isConfirmVisible ? (
-                                        <EyeOffIcon aria-hidden="true" />
-                                    ) : (
-                                        <EyeIcon aria-hidden="true" />
-                                    )}
-                                </Button>
-                            </InputGroupAddon>
-                        </InputGroup>
-                    </div>
-                    {confirmPassword && !passwordsMatch && (
-                        <p className="text-sm text-red-600">
-                            Les mots de passe ne correspondent pas.
-                        </p>
-                    )}
-                    <Button
-                        type="submit"
-                        className="mt-6 w-lg bg-primary-container hover:bg-primary-container/90"
-                        disabled={!passwordsMatch || strengthScore < 4}
-                    >
-                        Enregistrer
-                    </Button>
-                </form>
-            </motion.div>
+  function updatePassword(field: keyof PasswordFields, value: string) {
+    setPasswords((current) => ({ ...current, [field]: value }));
+    setPasswordErrors((current) => ({ ...current, [field]: undefined }));
+    setPasswordMessage(null);
+  }
+
+  async function submitProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!user) return;
+
+    const payload: ProfileUpdatePayload = {};
+    if (profile.nom.trim() !== user.nom) payload.nom = profile.nom.trim();
+    if (profile.prenom.trim() !== user.prenom) payload.prenom = profile.prenom.trim();
+    if (profile.email.trim() !== user.email) payload.email = profile.email.trim();
+    if (profile.telephone.trim() !== (user.telephone ?? "")) payload.telephone = profile.telephone.trim() || null;
+
+    if (Object.keys(payload).length === 0) {
+      setProfileMessage("Aucune modification à enregistrer.");
+      return;
+    }
+
+    setSavingProfile(true);
+    setProfileErrors({});
+    setProfileMessage(null);
+    try {
+      const response = await fetch("/api/auth/profil", {
+        method: "PATCH",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await readResponse(response);
+      if (!response.ok) {
+        setProfileErrors(result.errors ?? {});
+        throw new Error(result.message ?? "La mise à jour du profil a échoué.");
+      }
+      if (!result.user) throw new Error("La réponse de mise à jour du profil est invalide.");
+
+      setUser((current) => ({ ...current, ...result.user } as ProfileUser));
+      setProfile({
+        nom: result.user.nom,
+        prenom: result.user.prenom,
+        email: result.user.email,
+        telephone: result.user.telephone ?? "",
+      });
+      setProfileMessage(result.message ?? "Profil mis à jour.");
+      router.refresh();
+    } catch (error) {
+      if (!(error instanceof Error)) setProfileMessage("La mise à jour du profil a échoué.");
+      else if (!profileErrors || Object.keys(profileErrors).length === 0) setProfileMessage(error.message);
+    } finally {
+      setSavingProfile(false);
+    }
+  }
+
+  async function submitPassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPasswordErrors({});
+    setPasswordMessage(null);
+
+    setSavingPassword(true);
+    try {
+      const response = await fetch("/api/auth/profil", {
+        method: "PATCH",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(passwords),
+      });
+      const result = await readResponse(response);
+      if (!response.ok) {
+        setPasswordErrors(result.errors ?? {});
+        setPasswordMessage(result.message ?? "La modification du mot de passe a échoué.");
+        return;
+      }
+
+      setPasswords({ ancien_mot_de_passe: "", nouveau_mot_de_passe: "", confirmation_mot_de_passe: "" });
+      setPasswordMessage(result.message ?? "Mot de passe mis à jour.");
+      if (result.user) setUser((current) => ({ ...current, ...result.user } as ProfileUser));
+    } catch {
+      setPasswordMessage("Le service est momentanément indisponible.");
+    } finally {
+      setSavingPassword(false);
+    }
+  }
+
+  if (loading) {
+    return <div className="flex flex-1 items-center justify-center"><Spinner aria-label="Chargement du profil" className="size-8 text-primary" /></div>;
+  }
+
+  if (loadError || !user) {
+    return <div role="alert" className="m-6 rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive">{loadError ?? "Profil introuvable."}</div>;
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-6xl space-y-6 p-6 lg:p-8">
+      <div>
+        <h1 className="text-2xl font-bold text-on-surface">Paramètres</h1>
+        <p className="mt-1 text-sm text-on-surface-variant">Gérez vos informations personnelles et la sécurité de votre compte.</p>
+      </div>
+
+      <motion.section initial="hidden" animate="visible" variants={panelAnimation} className="flex items-center gap-5 rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-6">
+        <Avatar className="size-20 border-2 border-white shadow-sm">
+          <AvatarFallback className="bg-primary/10 text-xl font-bold text-primary">{initials(user)}</AvatarFallback>
+        </Avatar>
+        <div>
+          <h2 className="flex items-center gap-2 text-xl font-semibold text-on-surface">
+            {user.prenom} {user.nom}
+            {user.actif && <BadgeCheck aria-label="Compte actif" className="size-5 text-emerald-600" />}
+          </h2>
+          <p className="mt-1 text-sm text-on-surface-variant">{roleLabel(user)}</p>
+          {user.client?.entreprise && <p className="text-sm text-on-surface-variant">{user.client.entreprise}</p>}
         </div>
-    );
+      </motion.section>
+
+      <motion.section initial="hidden" animate="visible" variants={panelAnimation} className="rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-6">
+        <div className="mb-5 border-b border-outline-variant/20 pb-4">
+          <h2 className="text-lg font-semibold text-on-surface">Informations personnelles</h2>
+          <p className="mt-1 text-sm text-on-surface-variant">Modifiez uniquement les informations que vous souhaitez actualiser.</p>
+        </div>
+        <form onSubmit={submitProfile} className="grid gap-5 md:grid-cols-2">
+          {(["nom", "prenom", "email", "telephone"] as const).map((field) => {
+            const labels = { nom: "Nom", prenom: "Prénom", email: "Adresse e-mail", telephone: "Téléphone" };
+            return (
+              <div key={field} className="space-y-2">
+                <Label htmlFor={`profile-${field}`}>{labels[field]}</Label>
+                <Input
+                  id={`profile-${field}`}
+                  type={field === "email" ? "email" : field === "telephone" ? "tel" : "text"}
+                  value={profile[field]}
+                  maxLength={field === "email" ? 254 : field === "telephone" ? 20 : 100}
+                  onChange={(event) => updateProfile(field, event.target.value)}
+                  aria-invalid={Boolean(firstError(profileErrors, field))}
+                />
+                <FieldError message={firstError(profileErrors, field)} />
+              </div>
+            );
+          })}
+          <div className="flex items-center gap-4 md:col-span-2">
+            <Button type="submit" disabled={savingProfile} className="bg-primary-container hover:bg-primary-container/90">
+              {savingProfile && <Spinner aria-hidden="true" className="mr-2" />}
+              Enregistrer les informations
+            </Button>
+            {profileMessage && <p role="status" className="text-sm text-on-surface-variant">{profileMessage}</p>}
+          </div>
+        </form>
+      </motion.section>
+
+      {user.client && (
+        <motion.section initial="hidden" animate="visible" variants={panelAnimation} className="rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-6">
+          <h2 className="mb-5 border-b border-outline-variant/20 pb-4 text-lg font-semibold text-on-surface">Informations de l’entreprise</h2>
+          <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["Entreprise", user.client.entreprise],
+              ["Secteur", user.client.secteur],
+              ["Adresse", user.client.adresse],
+              ["Pays", user.client.pays],
+            ].map(([label, value]) => (
+              <div key={label ?? ""}>
+                <dt className="text-sm text-on-surface-variant">{label}</dt>
+                <dd className="mt-1 font-medium text-on-surface">{value || "Non renseigné"}</dd>
+              </div>
+            ))}
+          </dl>
+        </motion.section>
+      )}
+
+      <motion.section initial="hidden" animate="visible" variants={panelAnimation} className="rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-6">
+        <div className="mb-5 border-b border-outline-variant/20 pb-4">
+          <h2 className="text-lg font-semibold text-on-surface">Modifier le mot de passe</h2>
+          <p className="mt-1 text-sm text-on-surface-variant">Saisissez votre mot de passe actuel puis choisissez le nouveau.</p>
+        </div>
+        <form onSubmit={submitPassword} className="max-w-xl space-y-5">
+          {([
+            ["ancien_mot_de_passe", "Mot de passe actuel"],
+            ["nouveau_mot_de_passe", "Nouveau mot de passe"],
+            ["confirmation_mot_de_passe", "Confirmation du nouveau mot de passe"],
+          ] as const).map(([field, label]) => (
+            <div key={field} className="space-y-2">
+              <Label htmlFor={field}>{label}</Label>
+              <div className="relative">
+                <Input
+                  id={field}
+                  type={visiblePasswords[field] ? "text" : "password"}
+                  value={passwords[field]}
+                  onChange={(event) => updatePassword(field, event.target.value)}
+                  autoComplete={field === "ancien_mot_de_passe" ? "current-password" : "new-password"}
+                  className="pr-10"
+                  aria-invalid={Boolean(firstError(passwordErrors, field))}
+                  required
+                />
+                <button
+                  type="button"
+                  aria-label={visiblePasswords[field] ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  onClick={() => setVisiblePasswords((current) => ({ ...current, [field]: !current[field] }))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {visiblePasswords[field] ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+                </button>
+              </div>
+              <FieldError message={firstError(passwordErrors, field)} />
+            </div>
+          ))}
+
+          <div className="space-y-3 rounded-lg bg-surface-container-low p-4">
+            <div className="h-1.5 overflow-hidden rounded-full bg-border" role="progressbar" aria-label="Robustesse du nouveau mot de passe" aria-valuemin={0} aria-valuemax={4} aria-valuenow={strengthScore}>
+              <div className={`h-full transition-all ${strengthScore < 2 ? "bg-red-500" : strengthScore < 4 ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${(strengthScore / 4) * 100}%` }} />
+            </div>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {strength.map((requirement) => (
+                <li key={requirement.text} className={`flex items-center gap-2 text-xs ${requirement.met ? "text-emerald-700" : "text-muted-foreground"}`}>
+                  {requirement.met ? <CheckIcon className="size-4" /> : <XIcon className="size-4" />}
+                  {requirement.text}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Button type="submit" disabled={savingPassword} className="bg-primary-container hover:bg-primary-container/90">
+              {savingPassword && <Spinner aria-hidden="true" className="mr-2" />}
+              Modifier le mot de passe
+            </Button>
+            {passwordMessage && <p role="status" className="text-sm text-on-surface-variant">{passwordMessage}</p>}
+          </div>
+        </form>
+      </motion.section>
+    </div>
+  );
 }
