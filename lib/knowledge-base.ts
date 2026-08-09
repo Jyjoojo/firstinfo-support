@@ -13,6 +13,7 @@ export interface KnowledgeBaseArticle {
 export interface MyResolution {
   id: string;
   ticketId: string;
+  ticketReference: string;
   title: string;
   summary: string;
   module: string;
@@ -31,9 +32,9 @@ export const KNOWLEDGE_BASE_PUBLIC: KnowledgeBaseArticle[] = [
 ];
 
 export const MY_RESOLUTIONS: MyResolution[] = [
-  { id: "res-1", ticketId: "TKT-2026-042", title: "Problème d'impression des bulletins de paie", summary: "Le service d'impression a été redémarré.", module: "Sage Paie & RH", resolvedDate: "15 Mai 2026", technician: "Support Niveau 2", breadcrumb: ["Mes Résolutions", "Sage Paie & RH", "Impression"] },
-  { id: "res-2", ticketId: "TK-2026-0831", title: "Bulletins de paie non imprimables", summary: "Le pilote d'impression par défaut était corrompu.", module: "Sage Paie & RH", resolvedDate: "6 mai 2026", technician: "Traoré M.", breadcrumb: ["Base de connaissances", "Sage Paie & RH", "Impression bulletins"] },
-  { id: "res-3", ticketId: "TK-2026-0812", title: "DSN mensuelle rejetée S40.001", summary: "Le numéro SIRET a été corrigé.", module: "Sage Paie & RH", resolvedDate: "20 avr. 2026", technician: "Traoré M.", breadcrumb: ["Base de connaissances", "Sage Paie & RH", "DSN"] },
+  { id: "res-1", ticketId: "res-1-ticket", ticketReference: "TKT-2026-042", title: "Problème d'impression des bulletins de paie", summary: "Le service d'impression a été redémarré.", module: "Sage Paie & RH", resolvedDate: "15 Mai 2026", technician: "Support Niveau 2", breadcrumb: ["Mes Résolutions", "Sage Paie & RH", "Impression"] },
+  { id: "res-2", ticketId: "res-2-ticket", ticketReference: "TK-2026-0831", title: "Bulletins de paie non imprimables", summary: "Le pilote d'impression par défaut était corrompu.", module: "Sage Paie & RH", resolvedDate: "6 mai 2026", technician: "Traoré M.", breadcrumb: ["Base de connaissances", "Sage Paie & RH", "Impression bulletins"] },
+  { id: "res-3", ticketId: "res-3-ticket", ticketReference: "TK-2026-0812", title: "DSN mensuelle rejetée S40.001", summary: "Le numéro SIRET a été corrigé.", module: "Sage Paie & RH", resolvedDate: "20 avr. 2026", technician: "Traoré M.", breadcrumb: ["Base de connaissances", "Sage Paie & RH", "DSN"] },
 ];
 
 export type ArticleStatus = "draft" | "published" | "archived";

@@ -4,14 +4,17 @@ import { ArrowLeft, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { KNOWLEDGE_BASE_PUBLIC } from "@/lib/knowledge-base";
+import { ApiError } from "@/lib/api";
+import { getPublicArticle } from "@/lib/knowledge-base-api";
 
 export default async function ArticleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const article = KNOWLEDGE_BASE_PUBLIC.find((item) => item.id === id);
-
-  if (!article) {
-    notFound();
+  let article;
+  try {
+    article = await getPublicArticle(id);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) notFound();
+    throw error;
   }
 
   return (
@@ -26,7 +29,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/dashboard/client/base-connaissances">{article.module}</Link>
+              <Link href="/dashboard/client/base-connaissances">{article.category}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -39,7 +42,6 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
       <div className="bg-white border border-border rounded-xl p-6 md:p-8 shadow-sm">
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <Badge>{article.category}</Badge>
-          <Badge variant="secondary">{article.module}</Badge>
           <span className="text-xs text-muted-foreground flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />{article.readTime} de lecture
           </span>

@@ -4,11 +4,12 @@ import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { MY_RESOLUTIONS } from "@/lib/knowledge-base";
+import { getClientResolutions } from "@/lib/knowledge-base-api";
 
 export default async function ResolutionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const resolution = MY_RESOLUTIONS.find(r => r.id === id);
+  const resolutions = await getClientResolutions();
+  const resolution = resolutions.find(r => r.id === id);
 
   if (!resolution) {
     notFound();
@@ -29,7 +30,7 @@ export default async function ResolutionDetailPage({ params }: { params: Promise
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>{resolution.ticketId}</BreadcrumbPage>
+            <BreadcrumbPage>{resolution.ticketReference}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -46,7 +47,7 @@ export default async function ResolutionDetailPage({ params }: { params: Promise
         <h1 className="text-3xl font-bold mb-6 text-foreground">{resolution.title}</h1>
 
         <div className="p-5 bg-muted/50 rounded-xl text-foreground text-sm leading-relaxed mb-8 border border-border">
-          <h3 className="font-semibold mb-2">Résumé de l'intervention :</h3>
+          <h3 className="font-semibold mb-2">Résumé de l&apos;intervention :</h3>
           {resolution.summary}
         </div>
 
@@ -59,7 +60,7 @@ export default async function ResolutionDetailPage({ params }: { params: Promise
 
           <Button variant="link" asChild className="text-muted-foreground">
             <Link href={`/dashboard/client/tickets/${resolution.ticketId}`}>
-              Voir le ticket d'origine
+              Voir le ticket d&apos;origine
             </Link>
           </Button>
         </div>

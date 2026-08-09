@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, FileText, CheckCircle2, Clock, ChevronRight } from "lucide-react";
@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { KNOWLEDGE_BASE_PUBLIC, KnowledgeBaseArticle, MY_RESOLUTIONS, MyResolution } from "@/lib/knowledge-base";
+import { Spinner } from "@/components/ui/spinner";
+import type { KnowledgeBaseArticle, MyResolution } from "@/lib/knowledge-base";
 import {
   Pagination,
   PaginationContent,
@@ -44,6 +45,10 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
 }
 
 export default function KnowledgeBasePage() {
+  const [articles, setArticles] = useState<KnowledgeBaseArticle[]>([]);
+  const [resolutions, setResolutions] = useState<MyResolution[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<KbTab>("public");
   const [category, setCategory] = useState<string | null>(null);
@@ -51,10 +56,48 @@ export default function KnowledgeBasePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadKnowledgeBase() {
+      try {
+        const [articlesResponse, resolutionsResponse] = await Promise.all([
+          fetch("/api/articles", { headers: { Accept: "application/json" } }),
+          fetch("/api/client/resolutions", { headers: { Accept: "application/json" } }),
+        ]);
+
+        if (!articlesResponse.ok || !resolutionsResponse.ok) {
+          const failedResponse = !articlesResponse.ok ? articlesResponse : resolutionsResponse;
+          const payload = await failedResponse.json().catch(() => null) as { message?: string } | null;
+          throw new Error(payload?.message ?? "Impossible de charger la base de connaissances.");
+        }
+
+        const [nextArticles, nextResolutions] = await Promise.all([
+          articlesResponse.json() as Promise<KnowledgeBaseArticle[]>,
+          resolutionsResponse.json() as Promise<MyResolution[]>,
+        ]);
+
+        if (!cancelled) {
+          setArticles(nextArticles);
+          setResolutions(nextResolutions);
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : "Impossible de charger la base de connaissances.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void loadKnowledgeBase();
+    return () => { cancelled = true; };
+  }, []);
+
   const categories = useMemo(() =>
-    Array.from(new Set(KNOWLEDGE_BASE_PUBLIC.map(a => a.category))), []);
+    Array.from(new Set(articles.map(a => a.category))), [articles]);
   const resModules = useMemo(() =>
-    Array.from(new Set(MY_RESOLUTIONS.map(r => r.module))), []);
+    Array.from(new Set(resolutions.map(r => r.module))), [resolutions]);
 
   const handleTabChange = (t: string) => {
     setActiveTab(t as KbTab);
@@ -84,19 +127,21 @@ export default function KnowledgeBasePage() {
   };
 
   const filteredPublic = useMemo(() =>
-    KNOWLEDGE_BASE_PUBLIC.filter(a =>
+    articles.filter(a =>
       (a.title.toLowerCase().includes(search.toLowerCase()) ||
         a.module.toLowerCase().includes(search.toLowerCase()) ||
         a.category.toLowerCase().includes(search.toLowerCase())) &&
       (!category || a.category === category)
-    ), [search, category]);
+    ), [articles, search, category]);
 
   const filteredRes = useMemo(() =>
-    MY_RESOLUTIONS.filter(r =>
+    resolutions.filter(r =>
       (r.title.toLowerCase().includes(search.toLowerCase()) ||
-        r.module.toLowerCase().includes(search.toLowerCase())) &&
+        r.module.toLowerCase().includes(search.toLowerCase()) ||
+        r.ticketReference.toLowerCase().includes(search.toLowerCase()) ||
+        r.technician.toLowerCase().includes(search.toLowerCase())) &&
       (!module || r.module === module)
-    ), [search, module]);
+    ), [resolutions, search, module]);
 
   const currentList = activeTab === "public" ? filteredPublic : filteredRes;
   const totalPages = Math.ceil(currentList.length / itemsPerPage);
@@ -152,7 +197,7 @@ export default function KnowledgeBasePage() {
           value={search}
           onChange={handleSearchChange}
           placeholder={activeTab === "public"
-            ? "Rechercher un article, un module Sage, une catégorie..."
+            ? "Rechercher un article ou une catégorie..."
             : "Rechercher dans mes résolutions..."}
           className="pl-10 h-11 bg-white"
         />
@@ -170,14 +215,14 @@ export default function KnowledgeBasePage() {
             className="flex flex-wrap items-center gap-2 pb-1 mb-4 -mx-1 px-1">
             {activeTab === "public" ? (
               <>
-                <FilterChip label={`Toutes (${KNOWLEDGE_BASE_PUBLIC.length})`} active={!category} onClick={() => handleCategoryChange(null)} />
+                <FilterChip label={`Toutes (${articles.length})`} active={!category} onClick={() => handleCategoryChange(null)} />
                 {categories.map(c => (
                   <FilterChip key={c} label={c} active={category === c} onClick={() => handleCategoryChange(category === c ? null : c)} />
                 ))}
               </>
             ) : (
               <>
-                <FilterChip label={`Tous modules (${MY_RESOLUTIONS.length})`} active={!module} onClick={() => handleModuleChange(null)} />
+                <FilterChip label={`Toutes catégories (${resolutions.length})`} active={!module} onClick={() => handleModuleChange(null)} />
                 {resModules.map(m => (
                   <FilterChip key={m} label={m} active={module === m} onClick={() => handleModuleChange(module === m ? null : m)} />
                 ))}
@@ -188,7 +233,15 @@ export default function KnowledgeBasePage() {
 
         <TabsContent value="public" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {displayedItems.length === 0 && (
+            {loading && (
+              <div className="col-span-full flex justify-center py-10">
+                <Spinner aria-label="Chargement des articles" className="size-7 text-primary" />
+              </div>
+            )}
+            {error && (
+              <p role="alert" className="text-sm text-destructive col-span-full py-8 text-center">{error}</p>
+            )}
+            {!loading && !error && displayedItems.length === 0 && (
               <p className="text-sm text-muted-foreground col-span-full py-8 text-center">Aucun article trouvé.</p>
             )}
             {displayedItems.map((item, i) => { const article = item as KnowledgeBaseArticle; return (
@@ -205,7 +258,6 @@ export default function KnowledgeBasePage() {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm group-hover:text-primary-container mb-1 text-foreground">{article.title}</h3>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <Badge variant="secondary" className="font-normal">{article.module}</Badge>
                       <Badge variant="outline" className="font-normal">{article.category}</Badge>
                       <span><Clock className="w-3 h-3 inline mr-1" />{article.readTime}</span>
                     </div>
@@ -219,7 +271,15 @@ export default function KnowledgeBasePage() {
 
         <TabsContent value="resolutions" className="mt-0">
           <div className="space-y-3">
-            {displayedItems.length === 0 && (
+            {loading && (
+              <div className="flex justify-center py-10">
+                <Spinner aria-label="Chargement des résolutions" className="size-7 text-primary" />
+              </div>
+            )}
+            {error && (
+              <p role="alert" className="text-sm text-destructive py-8 text-center">{error}</p>
+            )}
+            {!loading && !error && displayedItems.length === 0 && (
               <p className="text-sm text-muted-foreground py-8 text-center">Aucune résolution trouvée.</p>
             )}
             {displayedItems.map((item, i) => { const res = item as MyResolution; return (
@@ -234,7 +294,9 @@ export default function KnowledgeBasePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm group-hover:text-emerald-700 mb-1 text-foreground">{res.title}</h3>
-                    <p className="text-xs text-muted-foreground">Ticket {res.ticketId} • Résolu le {res.resolvedDate}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Ticket {res.ticketReference} Résolu le {res.resolvedDate} • {res.technician}
+                    </p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-emerald-600 transition-transform group-hover:translate-x-1" />
                 </Link>
