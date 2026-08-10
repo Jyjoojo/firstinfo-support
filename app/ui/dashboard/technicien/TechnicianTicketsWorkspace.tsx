@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import {
@@ -39,28 +40,38 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import CreateTicketDialog from "@/app/ui/dashboard/CreateTicketDialog";
-import { priorityStyles, statusStyles } from "@/lib/styles";
-import type { Ticket } from "@/lib/tickets";
+import {
+  priorityStyles,
+  statusStyles,
+  ticketPriorityLabels,
+  ticketStatusLabels,
+} from "@/lib/styles";
+import type {
+  ClientTicket,
+  TicketPriority,
+  TicketStatus,
+} from "@/lib/ticket-contracts";
 
 type TicketView = "mine" | "unassigned";
 
 const PAGE_SIZE = 8;
 
-const statusOptions: Array<Ticket["statut"]> = [
+const statusOptions: TicketStatus[] = [
   "nouveau",
-  "en cours",
-  "résolu",
-  "fermé",
+  "en_cours",
+  "en_attente",
+  "resolu",
+  "ferme",
 ];
 
-const priorityOptions: Array<Ticket["priorite"]> = [
+const priorityOptions: TicketPriority[] = [
   "basse",
   "normale",
   "haute",
   "urgente",
 ];
 
-const priorityTextColors: Record<Ticket["priorite"], string> = {
+const priorityTextColors: Record<TicketPriority, string> = {
   basse: "text-emerald-700",
   normale: "text-sky-700",
   haute: "text-amber-700",
@@ -68,14 +79,17 @@ const priorityTextColors: Record<Ticket["priorite"], string> = {
 };
 
 type TechnicianTicketsWorkspaceProps = {
-  myTickets: Ticket[];
-  unassignedTickets: Ticket[];
+  myTickets: ClientTicket[];
+  unassignedTickets: ClientTicket[];
 };
 
 export default function TechnicianTicketsWorkspace({
   myTickets,
   unassignedTickets,
 }: TechnicianTicketsWorkspaceProps) {
+  const router = useRouter();
+  const [assignedTickets, setAssignedTickets] = useState(myTickets);
+  const [availableTickets, setAvailableTickets] = useState(unassignedTickets);
   const [activeView, setActiveView] = useState<TicketView>("mine");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
@@ -84,14 +98,16 @@ export default function TechnicianTicketsWorkspace({
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [dateDialogOpen, setDateDialogOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const [ticketToClaim, setTicketToClaim] = useState<Ticket | null>(null);
+  const [ticketToClaim, setTicketToClaim] = useState<ClientTicket | null>(null);
 
   const sourceTickets =
-    activeView === "mine" ? myTickets : unassignedTickets;
+    activeView === "mine" ? assignedTickets : availableTickets;
 
   const categories = useMemo(
     () =>
-      [...new Set(sourceTickets.map((ticket) => ticket.categorie))].sort(),
+      [...new Set(sourceTickets.map(
+        (ticket) => ticket.categorie?.libelle ?? "Sans catégorie",
+      ))].sort(),
     [sourceTickets],
   );
 
@@ -99,27 +115,28 @@ export default function TechnicianTicketsWorkspace({
     () =>
       [
         ...new Set(
-          [...myTickets, ...unassignedTickets].map(
-            (ticket) => ticket.categorie,
+          [...assignedTickets, ...availableTickets].map(
+            (ticket) => ticket.categorie?.libelle ?? "Sans catégorie",
           ),
         ),
       ].sort(),
-    [myTickets, unassignedTickets],
+    [assignedTickets, availableTickets],
   );
 
   const filteredTickets = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("fr-FR");
 
     return sourceTickets.filter((ticket) => {
-      const ticketDate = new Date(ticket.dateCreation);
+      const ticketDate = new Date(ticket.created_at.replace(" ", "T"));
+      const categoryLabel = ticket.categorie?.libelle ?? "Sans catégorie";
       const matchesSearch =
         !query
-        || [ticket.id, ticket.titre, ticket.contenu, ticket.categorie]
+        || [ticket.reference, ticket.titre, ticket.description, categoryLabel]
           .join(" ")
           .toLocaleLowerCase("fr-FR")
           .includes(query);
       const matchesCategory =
-        category === "all" || ticket.categorie === category;
+        category === "all" || categoryLabel === category;
       const matchesPriority =
         priority === "all" || ticket.priorite === priority;
       const matchesStatus =
@@ -192,13 +209,13 @@ export default function TechnicianTicketsWorkspace({
           <TabsTrigger value="mine">
             Mes tickets
             <span className="rounded-full bg-primary-container/20 px-2 py-0.5 text-xs text-primary">
-              {myTickets.length}
+              {assignedTickets.length}
             </span>
           </TabsTrigger>
           <TabsTrigger value="unassigned">
             Ouverts non assignés
             <span className="rounded-full bg-primary-container/20 px-2 py-0.5 text-xs text-primary">
-              {unassignedTickets.length}
+              {availableTickets.length}
             </span>
           </TabsTrigger>
         </TabsList>
@@ -263,7 +280,7 @@ export default function TechnicianTicketsWorkspace({
                     <SelectItem value="all">Tous les statuts</SelectItem>
                     {statusOptions.map((item) => (
                       <SelectItem key={item} value={item}>
-                        {item}
+                        {ticketStatusLabels[item]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -282,9 +299,9 @@ export default function TechnicianTicketsWorkspace({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Toutes les priorités</SelectItem>
-                  {priorityOptions.map((item) => (
-                    <SelectItem key={item} value={item}>
-                      {item}
+                    {priorityOptions.map((item) => (
+                      <SelectItem key={item} value={item}>
+                        {ticketPriorityLabels[item]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -372,7 +389,7 @@ export default function TechnicianTicketsWorkspace({
             <Calendar
               mode="range"
               selected={dateRange}
-              onSelect={(range) => {
+              onSelect={(range: DateRange | undefined) => {
                 setDateRange(range);
                 setPage(1);
               }}
@@ -393,6 +410,19 @@ export default function TechnicianTicketsWorkspace({
       <ClaimTicketDialog
         ticket={ticketToClaim}
         onOpenChange={(open) => !open && setTicketToClaim(null)}
+        onClaimed={(ticket) => {
+          const claimedTicket = { ...ticket, statut: "en_cours" as const };
+          setAvailableTickets((tickets) =>
+            tickets.filter((item) => item.id !== ticket.id),
+          );
+          setAssignedTickets((tickets) => [
+            claimedTicket,
+            ...tickets.filter((item) => item.id !== ticket.id),
+          ]);
+          setPage(1);
+          setTicketToClaim(null);
+          router.refresh();
+        }}
       />
     </>
   );
@@ -403,9 +433,9 @@ function TicketsTable({
   mode,
   onClaim,
 }: {
-  tickets: Ticket[];
+  tickets: ClientTicket[];
   mode: TicketView;
-  onClaim?: (ticket: Ticket) => void;
+  onClaim?: (ticket: ClientTicket) => void;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -437,24 +467,24 @@ function TicketsTable({
                 className="hover:bg-surface-container-low/70"
               >
                 <td className="px-5 py-4 font-semibold text-tertiary">
-                  {ticket.id}
+                  {ticket.reference}
                 </td>
                 <td className="max-w-72 px-4 py-4">
                   <p className="truncate font-semibold text-on-surface">
                     {ticket.titre}
                   </p>
                   <p className="mt-0.5 line-clamp-1 text-xs text-on-surface-variant">
-                    {ticket.contenu}
+                    {ticket.description}
                   </p>
                 </td>
                 <td className="px-4 py-4 text-on-surface">
-                  {ticket.categorie}
+                  {ticket.categorie?.libelle ?? "Sans catégorie"}
                 </td>
                 <td className="px-4 py-4">
                   <span
                     className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[ticket.statut].base}`}
                   >
-                    {ticket.statut}
+                    {ticketStatusLabels[ticket.statut]}
                   </span>
                 </td>
                 <td className="px-4 py-4">
@@ -462,23 +492,23 @@ function TicketsTable({
                     className={`inline-flex items-center gap-1.5 text-xs font-semibold ${priorityTextColors[ticket.priorite]}`}
                   >
                     {PriorityIcon && <PriorityIcon size={14} />}
-                    {ticket.priorite}
+                    {ticketPriorityLabels[ticket.priorite]}
                   </span>
                 </td>
                 {mode === "mine" && (
                   <td className="px-4 py-4 font-medium text-on-surface">
-                    Vous
+                    {ticket.technicien_assigne?.nom_complet ?? "Vous"}
                   </td>
                 )}
                 <td className="px-4 py-4 whitespace-nowrap text-on-surface-variant">
-                  {new Date(ticket.dateCreation).toLocaleDateString("fr-FR")}
+                  {new Date(ticket.created_at.replace(" ", "T")).toLocaleDateString("fr-FR")}
                 </td>
                 <td className="px-5 py-4 text-right">
                   {mode === "mine" ? (
                     <Link
                       href={`/dashboard/technicien/tickets/${ticket.id}`}
                       title="Voir les détails"
-                      aria-label={`Voir les détails du ticket ${ticket.id}`}
+                      aria-label={`Voir les détails du ticket ${ticket.reference}`}
                       className="inline-flex size-9 items-center justify-center rounded-lg text-primary hover:bg-primary/10"
                     >
                       <Eye size={17} />
@@ -518,9 +548,11 @@ function TicketsTable({
 function ClaimTicketDialog({
   ticket,
   onOpenChange,
+  onClaimed,
 }: {
-  ticket: Ticket | null;
+  ticket: ClientTicket | null;
   onOpenChange: (open: boolean) => void;
+  onClaimed: (ticket: ClientTicket) => void;
 }) {
   const [pending, setPending] = useState(false);
 
@@ -532,31 +564,33 @@ function ClaimTicketDialog({
     setPending(true);
 
     try {
-      /*
-       * TODO: activer l'appel lorsque l'API d'auto-assignation sera disponible.
-       *
-       * const response = await fetch(
-       *   `/api/tickets/${ticket.id}/auto-assigner`,
-       *   {
-       *     method: "POST",
-       *     headers: {
-       *       Accept: "application/json",
-       *     },
-       *   },
-       * );
-       *
-       * if (!response.ok) {
-       *   throw new Error("Impossible de vous assigner ce ticket.");
-       * }
-       *
-       * toast.success("Ticket assigné", {
-       *   description: `Le ticket ${ticket.id} vous a bien été assigné.`,
-       * });
-       */
-      toast.info("Assignation en attente de l’API", {
-        description: `L’appel POST /api/tickets/${ticket.id}/auto-assigner est prêt à être activé.`,
+      const response = await fetch(
+        `/api/tickets/${encodeURIComponent(ticket.id)}/auto-assigner`,
+        {
+          method: "POST",
+          headers: { Accept: "application/json" },
+        },
+      );
+      const result = await response.json().catch(() => null) as
+        | { message?: string; errors?: Record<string, string[]> }
+        | null;
+
+      if (!response.ok) {
+        const validationMessage = result?.errors
+          ? Object.values(result.errors).flat()[0]
+          : undefined;
+        throw new Error(
+          validationMessage
+          ?? result?.message
+          ?? "Impossible de vous assigner ce ticket.",
+        );
+      }
+
+      toast.success("Ticket assigné", {
+        description: result?.message
+          ?? `Le ticket ${ticket.reference} vous a bien été assigné.`,
       });
-      onOpenChange(false);
+      onClaimed(ticket);
     } catch (error) {
       toast.error("Échec de l’assignation", {
         description:
@@ -575,7 +609,7 @@ function ClaimTicketDialog({
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">Prendre en charge ce ticket ?</DialogTitle>
           <DialogDescription className="text-base">
-            Le ticket {ticket?.id} vous sera assigné et apparaîtra ensuite dans
+            Le ticket {ticket?.reference} vous sera assigné et apparaîtra ensuite dans
             l&apos;onglet Mes tickets.
           </DialogDescription>
         </DialogHeader>

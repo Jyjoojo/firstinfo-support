@@ -46,7 +46,9 @@ export const clientTicketSchema = z.object({
   updated_at: z.string(),
   categorie: ticketCategorySummarySchema.nullable(),
   client: ticketClientSchema.nullable(),
-  technicien_assigne: assignedTechnicianSchema.nullable(),
+  // TicketResource omet cette clé lorsque la relation assignationActive
+  // n'est pas chargée (notamment sur GET /tickets/non-assignes).
+  technicien_assigne: assignedTechnicianSchema.nullable().optional().default(null),
 });
 
 export const ticketCommentSchema = z.object({

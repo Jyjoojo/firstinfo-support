@@ -1,12 +1,14 @@
 import TechnicianTicketsWorkspace from "@/app/ui/dashboard/technicien/TechnicianTicketsWorkspace";
-import { tickets } from "@/lib/tickets";
-import { getDemoTechnicianTickets } from "@/lib/technician-tickets";
+import {
+  getTechnicianTickets,
+  getUnassignedTickets,
+} from "@/lib/technician-tickets";
 
-export default function TechnicianTicketsPage() {
-  const myTickets = getDemoTechnicianTickets(tickets);
-  const unassignedTickets = tickets.filter(
-    (ticket) => ticket.statut === "nouveau" && ticket.assigneA === null,
-  );
+export default async function TechnicianTicketsPage() {
+  const [myTickets, unassignedTickets] = await Promise.all([
+    getTechnicianTickets(),
+    getUnassignedTickets(),
+  ]);
 
   return (
     <div className="w-full max-w-7xl p-6 lg:p-8">
