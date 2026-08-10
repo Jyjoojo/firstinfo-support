@@ -119,6 +119,18 @@ export const categorySchema = z.object({
 
 export const categoriesResponseSchema = z.array(categorySchema);
 
+export const clientSelectionSchema = z.object({
+  id: z.string().min(1),
+  nom_complet: z.string(),
+  entreprise: z.string().nullable(),
+  email: z.string().email(),
+});
+
+export const clientsSelectionResponseSchema = z.union([
+  z.array(clientSelectionSchema),
+  z.object({ data: z.array(clientSelectionSchema) }),
+]);
+
 export type ClientTicket = z.infer<typeof clientTicketSchema>;
 export type TicketComment = z.infer<typeof ticketCommentSchema>;
 export type TicketAttachment = z.infer<typeof ticketAttachmentSchema>;
@@ -127,6 +139,7 @@ export type TicketStatus = z.infer<typeof ticketStatusSchema>;
 export type TicketPriority = z.infer<typeof ticketPrioritySchema>;
 export type TicketsResponse = z.infer<typeof ticketsResponseSchema>;
 export type ApiCategory = z.infer<typeof categorySchema>;
+export type ClientSelection = z.infer<typeof clientSelectionSchema>;
 
 export type TicketFilters = {
   search?: string;

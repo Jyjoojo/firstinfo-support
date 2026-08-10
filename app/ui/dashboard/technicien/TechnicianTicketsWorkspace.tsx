@@ -47,6 +47,7 @@ import {
   ticketStatusLabels,
 } from "@/lib/styles";
 import type {
+  ApiCategory,
   ClientTicket,
   TicketPriority,
   TicketStatus,
@@ -81,11 +82,13 @@ const priorityTextColors: Record<TicketPriority, string> = {
 type TechnicianTicketsWorkspaceProps = {
   myTickets: ClientTicket[];
   unassignedTickets: ClientTicket[];
+  categories: ApiCategory[];
 };
 
 export default function TechnicianTicketsWorkspace({
   myTickets,
   unassignedTickets,
+  categories: ticketCategories,
 }: TechnicianTicketsWorkspaceProps) {
   const router = useRouter();
   const [assignedTickets, setAssignedTickets] = useState(myTickets);
@@ -109,18 +112,6 @@ export default function TechnicianTicketsWorkspace({
         (ticket) => ticket.categorie?.libelle ?? "Sans catégorie",
       ))].sort(),
     [sourceTickets],
-  );
-
-  const creationCategories = useMemo(
-    () =>
-      [
-        ...new Set(
-          [...assignedTickets, ...availableTickets].map(
-            (ticket) => ticket.categorie?.libelle ?? "Sans catégorie",
-          ),
-        ),
-      ].sort(),
-    [assignedTickets, availableTickets],
   );
 
   const filteredTickets = useMemo(() => {
@@ -240,7 +231,14 @@ export default function TechnicianTicketsWorkspace({
               </div>
 
               <CreateTicketDialog
-                categories={creationCategories}
+                categories={ticketCategories}
+                onCreated={(ticket) => {
+                  setAvailableTickets((tickets) => [
+                    ticket,
+                    ...tickets.filter((item) => item.id !== ticket.id),
+                  ]);
+                  setPage(1);
+                }}
               />
             </div>
 

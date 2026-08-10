@@ -3,11 +3,13 @@ import {
   getTechnicianTickets,
   getUnassignedTickets,
 } from "@/lib/technician-tickets";
+import { getCategories } from "@/lib/tickets-api";
 
 export default async function TechnicianTicketsPage() {
-  const [myTickets, unassignedTickets] = await Promise.all([
+  const [myTickets, unassignedTickets, categories] = await Promise.all([
     getTechnicianTickets(),
     getUnassignedTickets(),
+    getCategories(),
   ]);
 
   return (
@@ -22,6 +24,7 @@ export default async function TechnicianTicketsPage() {
       <TechnicianTicketsWorkspace
         myTickets={myTickets}
         unassignedTickets={unassignedTickets}
+        categories={categories}
       />
     </div>
   );
