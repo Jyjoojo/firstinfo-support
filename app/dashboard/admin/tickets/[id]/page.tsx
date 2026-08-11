@@ -20,9 +20,9 @@ export default async function AdminTicketDetailPage({ params }: { params: Promis
   const PriorityIcon = priorityStyles[ticket.priorite].icon;
   const categories = [...new Set(tickets.map((item) => item.categorie))];
   const messageRows = [
-    { author: "Client", time: "09:18", text: ticket.contenu, client: true },
-    { author: ticket.assigneA ?? "Équipe support", time: "10:45", text: "Bien reçu. Je procède à l'analyse de la demande et je reviens vers vous avec une première solution.", client: false },
-    { author: "Client", time: "11:02", text: "Merci. Je reste disponible si vous avez besoin d'informations complémentaires.", client: true },
+    { id: "demo-client-1", author: "Client", time: "09:18", text: ticket.contenu, client: true },
+    { id: "demo-support-1", author: ticket.assigneA ?? "Équipe support", time: "10:45", text: "Bien reçu. Je procède à l'analyse de la demande et je reviens vers vous avec une première solution.", client: false },
+    { id: "demo-client-2", author: "Client", time: "11:02", text: "Merci. Je reste disponible si vous avez besoin d'informations complémentaires.", client: true },
   ];
 
   return (

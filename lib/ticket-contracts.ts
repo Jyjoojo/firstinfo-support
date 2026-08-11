@@ -131,6 +131,19 @@ export const clientsSelectionResponseSchema = z.union([
   z.object({ data: z.array(clientSelectionSchema) }),
 ]);
 
+export const technicianSelectionSchema = z.object({
+  id: z.string().uuid(),
+  nom_complet: z.string(),
+  email: z.string().email(),
+  specialite: z.string().nullable(),
+  tickets_en_cours: z.coerce.number().int().nonnegative(),
+});
+
+export const techniciansSelectionResponseSchema = z.union([
+  z.array(technicianSelectionSchema),
+  z.object({ data: z.array(technicianSelectionSchema) }),
+]);
+
 export type ClientTicket = z.infer<typeof clientTicketSchema>;
 export type TicketComment = z.infer<typeof ticketCommentSchema>;
 export type TicketAttachment = z.infer<typeof ticketAttachmentSchema>;
@@ -140,6 +153,7 @@ export type TicketPriority = z.infer<typeof ticketPrioritySchema>;
 export type TicketsResponse = z.infer<typeof ticketsResponseSchema>;
 export type ApiCategory = z.infer<typeof categorySchema>;
 export type ClientSelection = z.infer<typeof clientSelectionSchema>;
+export type TechnicianSelection = z.infer<typeof technicianSelectionSchema>;
 
 export type TicketFilters = {
   search?: string;

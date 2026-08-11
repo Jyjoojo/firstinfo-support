@@ -1,8 +1,9 @@
 "use client";
 
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   Download,
+  Eye,
   FileText,
   ImageIcon,
   LoaderCircle,
@@ -18,27 +19,30 @@ type Attachment = {
   name: string;
   size?: string;
   url?: string;
+  viewUrl?: string;
 };
 
 const acceptedExtensions = ["pdf", "doc", "docx", "xls", "xlsx", "png", "jpg", "jpeg", "zip"];
 const MAX_CONTENT_LENGTH = 10 * 1024 * 1024;
 
 function normalizeAttachment(item: Record<string, unknown>): Attachment {
+  const id = String(item.id ?? item.uuid ?? item.pieces_jointe_id ?? item.nom_fichier ?? crypto.randomUUID());
   return {
-    id: String(item.id ?? item.uuid ?? item.pieces_jointe_id ?? item.nom_fichier ?? crypto.randomUUID()),
+    id,
     name: String(item.nom_fichier ?? item.name ?? item.filename ?? "Fichier joint"),
     size: item.taille ? String(item.taille) : item.size ? String(item.size) : undefined,
-    url: typeof item.url === "string" ? item.url : typeof item.chemin === "string" ? item.chemin : undefined,
+    url: `/api/pieces-jointes/${encodeURIComponent(id)}/telecharger`,
+    viewUrl: `/api/pieces-jointes/${encodeURIComponent(id)}/afficher`,
   };
 }
 
-export default function TicketAttachments({ ticketId }: { ticketId: string }) {
+export default function TicketAttachments({ ticketId, canEdit = true }: { ticketId: string; canEdit?: boolean }) {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const loadAttachments = async () => {
+  const loadAttachments = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/tickets/${ticketId}/pieces-jointes`, {
@@ -62,7 +66,7 @@ export default function TicketAttachments({ ticketId }: { ticketId: string }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [ticketId]);
 
   useEffect(() => {
     const loadTimer = window.setTimeout(() => {
@@ -70,12 +74,12 @@ export default function TicketAttachments({ ticketId }: { ticketId: string }) {
     }, 0);
 
     return () => window.clearTimeout(loadTimer);
-  }, [ticketId]);
+  }, [loadAttachments]);
 
   const uploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
-    if (!file) return;
+    if (!file || !canEdit) return;
 
     const extension = file.name.split(".").pop()?.toLowerCase();
     if (!extension || !acceptedExtensions.includes(extension)) {
@@ -109,7 +113,7 @@ export default function TicketAttachments({ ticketId }: { ticketId: string }) {
 
   const deleteAttachment = async (attachment: Attachment) => {
     try {
-      const response = await fetch(`/api/tickets/${ticketId}/pieces-jointes/${attachment.id}`, {
+      const response = await fetch(`/api/pieces-jointes/${attachment.id}`, {
         method: "DELETE",
         headers: { Accept: "application/json" },
       });
@@ -132,11 +136,11 @@ export default function TicketAttachments({ ticketId }: { ticketId: string }) {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={uploading}
+          disabled={uploading || !canEdit}
           className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           {uploading ? <LoaderCircle size={16} className="animate-spin" /> : <Plus size={16} />}
-          Ajouter
+          {canEdit ? "Ajouter" : "Ajout indisponible"}
         </button>
         <input
           ref={inputRef}
@@ -162,16 +166,17 @@ export default function TicketAttachments({ ticketId }: { ticketId: string }) {
                 <p className="mt-2 truncate pr-7 font-semibold">{attachment.name}</p>
                 {attachment.size && <p className="text-xs text-on-surface-variant">{attachment.size}</p>}
                 <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  {attachment.viewUrl && <a href={attachment.viewUrl} target="_blank" rel="noreferrer" title="Afficher" className="inline-flex h-7 w-7 items-center justify-center rounded-md text-primary hover:bg-primary/10"><Eye size={15} /></a>}
                   {attachment.url && <a href={attachment.url} target="_blank" rel="noreferrer" title="Télécharger" className="inline-flex h-7 w-7 items-center justify-center rounded-md text-primary hover:bg-primary/10"><Download size={15} /></a>}
-                  <button type="button" title="Supprimer" onClick={() => deleteAttachment(attachment)} className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-red-600 hover:bg-red-50"><Trash2 size={15} /></button>
+                  {canEdit && <button type="button" title="Supprimer" onClick={() => deleteAttachment(attachment)} className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-red-600 hover:bg-red-50"><Trash2 size={15} /></button>}
                 </div>
               </article>
             );
           })
         ) : (
-          <button type="button" onClick={() => inputRef.current?.click()} className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-outline-variant/30 text-sm text-on-surface-variant hover:bg-surface-container-low">
+          <button type="button" disabled={!canEdit} onClick={() => inputRef.current?.click()} className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-outline-variant/30 text-sm text-on-surface-variant hover:bg-surface-container-low disabled:cursor-not-allowed disabled:opacity-50">
             <Upload size={22} />
-            <span className="mt-2">Ajouter un fichier</span>
+            <span className="mt-2">{canEdit ? "Ajouter un fichier" : "Aucune pièce jointe"}</span>
           </button>
         )}
       </div>
