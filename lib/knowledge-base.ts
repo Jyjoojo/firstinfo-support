@@ -60,3 +60,18 @@ export const knowledgeArticles: KnowledgeArticle[] = [
   { id: "KB-2025-018", title: "Créer un exercice comptable", content: "Étapes pour créer et paramétrer un nouvel exercice comptable.", category: "Comptabilité", author: "Jean Dupont", keywords: ["Exercice", "Comptabilité"], views: 756, status: "published", updatedAt: "2025-11-04T08:20:00.000Z" },
   { id: "KB-2025-030", title: "Vérifier la sauvegarde quotidienne", content: "Checklist de vérification des sauvegardes quotidiennes de l'infrastructure.", category: "Infrastructure", author: null, keywords: ["Sauvegarde", "Serveur"], views: 0, status: "draft", updatedAt: "2026-07-20T16:10:00.000Z" },
 ];
+
+export type TechnicianArticleStatus =
+  | "brouillon"
+  | "a_corriger"
+  | "en_attente_validation"
+  | "publie"
+  | "archive";
+
+export type TechnicianKnowledgeArticle = Omit<KnowledgeArticle, "status"> & {
+  reference: string;
+  status: TechnicianArticleStatus;
+  isMine: boolean;
+  refusalReason?: string;
+  categoryId?: string | null;
+};
