@@ -20,8 +20,11 @@ type StatusFilter = "all" | TechnicianArticleStatus;
 type CategoryOption = { id: string; label: string };
 type Identity = { id: string; fullName: string };
 type UnknownRecord = Record<string, unknown>;
+type PaginationMeta = { currentPage: number; lastPage: number; from: number; to: number; total: number };
+type KnowledgeMetrics = { drafts: number; corrections: number; pending: number; published: number };
 
-const PAGE_SIZE = 20;
+const DEFAULT_ARTICLES_PER_PAGE = 10;
+const PAGE_SIZE_OPTIONS = [6, 10, 20, 50, 100];
 const myStatusFilters: StatusFilter[] = ["all", "brouillon", "a_corriger", "en_attente_validation", "publie"];
 const systemStatusFilters: StatusFilter[] = ["all", "publie"];
 
@@ -86,6 +89,18 @@ function articleRecord(payload: unknown) {
   return isRecord(payload) ? payload : null;
 }
 
+function paginationMeta(payload: unknown): PaginationMeta {
+  if (!isRecord(payload)) return { currentPage: 1, lastPage: 1, from: 0, to: 0, total: 0 };
+  const numberOr = (value: unknown, fallback: number) => typeof value === "number" && Number.isFinite(value) ? value : fallback;
+  return {
+    currentPage: numberOr(payload.current_page, 1),
+    lastPage: numberOr(payload.last_page, 1),
+    from: numberOr(payload.from, 0),
+    to: numberOr(payload.to, 0),
+    total: numberOr(payload.total, 0),
+  };
+}
+
 function normalizeIdentity(payload: unknown): Identity {
   const user = articleRecord(payload);
   const id = text(user?.id) ?? "";
@@ -143,6 +158,24 @@ function normalizeArticle(payload: unknown, identity: Identity): TechnicianKnowl
   };
 }
 
+async function loadGlobalMetrics(identity: Identity): Promise<KnowledgeMetrics> {
+  const statuses: TechnicianArticleStatus[] = ["brouillon", "a_corriger", "en_attente_validation", "publie"];
+  const payloads = await Promise.all(statuses.map((status) => (
+    fetch(`/api/articles?espace=technicien&statut=${status}&perPage=100`, { headers: { Accept: "application/json" } }).then(readJson)
+  )));
+  const [drafts, corrections, pending, published] = payloads;
+  const mineCount = (payload: unknown) => listItems(payload)
+    .map((article) => normalizeArticle(article, identity))
+    .filter((article) => article.isMine).length;
+
+  return {
+    drafts: mineCount(drafts),
+    corrections: mineCount(corrections),
+    pending: mineCount(pending),
+    published: paginationMeta(published).total,
+  };
+}
+
 export default function TechnicianKnowledgeBaseManager() {
   const [items, setItems] = useState<TechnicianKnowledgeArticle[]>([]);
   const [categories, setCategories] = useState<CategoryOption[]>([]);
@@ -151,6 +184,10 @@ export default function TechnicianKnowledgeBaseManager() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [openingArticleId, setOpeningArticleId] = useState<string | null>(null);
+  const [pageLoading, setPageLoading] = useState(false);
+  const [pagination, setPagination] = useState<PaginationMeta>({ currentPage: 1, lastPage: 1, from: 0, to: 0, total: 0 });
+  const [perPage, setPerPage] = useState(DEFAULT_ARTICLES_PER_PAGE);
+  const [knowledgeMetrics, setKnowledgeMetrics] = useState<KnowledgeMetrics>({ drafts: 0, corrections: 0, pending: 0, published: 0 });
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [myStatuses, setMyStatuses] = useState<Set<StatusFilter>>(new Set(["all"]));
@@ -159,12 +196,13 @@ export default function TechnicianKnowledgeBaseManager() {
   const [drawer, setDrawer] = useState<DrawerState | null>(null);
   const [pendingSubmission, setPendingSubmission] = useState<TechnicianKnowledgeArticle | null>(null);
 
-  const loadData = useCallback(async (showLoader = true) => {
+  const loadData = useCallback(async (page = 1, showLoader = true, refreshMetrics = showLoader, requestedPerPage = perPage) => {
     if (showLoader) setLoading(true);
+    else setPageLoading(true);
     setLoadError(null);
     try {
       const [articlesPayload, categoriesPayload, identityPayload] = await Promise.all([
-        fetch("/api/articles?espace=technicien&perPage=100", { headers: { Accept: "application/json" } }).then(readJson),
+        fetch(`/api/articles?espace=technicien&page=${page}&perPage=${requestedPerPage}`, { headers: { Accept: "application/json" } }).then(readJson),
         fetch("/api/categories", { headers: { Accept: "application/json" } }).then(readJson),
         fetch("/api/auth/me", { headers: { Accept: "application/json" } }).then(readJson),
       ]);
@@ -172,16 +210,19 @@ export default function TechnicianKnowledgeBaseManager() {
       setIdentity(nextIdentity);
       setCategories(normalizeCategories(categoriesPayload));
       setItems(listItems(articlesPayload).map((article) => normalizeArticle(article, nextIdentity)));
+      setPagination(paginationMeta(articlesPayload));
+      if (refreshMetrics) setKnowledgeMetrics(await loadGlobalMetrics(nextIdentity));
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : "Impossible de charger les articles.");
     } finally {
       setLoading(false);
+      setPageLoading(false);
     }
-  }, []);
+  }, [perPage]);
 
   useEffect(() => {
     let active = true;
-    void Promise.resolve().then(() => active ? loadData(false) : undefined);
+    void Promise.resolve().then(() => active ? loadData(1, true) : undefined);
     return () => { active = false; };
   }, [loadData]);
 
@@ -231,7 +272,7 @@ export default function TechnicianKnowledgeBaseManager() {
     try {
       await fetch(`/api/articles/${encodeURIComponent(article.id)}/soumettre`, { method: "POST", headers: { Accept: "application/json" } }).then(readJson);
       setPendingSubmission(null);
-      await loadData(false);
+      await loadData(pagination.currentPage, false, true);
       toast.success("Article soumis", { description: "L’article est désormais en attente de validation et n’est plus modifiable." });
     } catch (error) {
       toast.error("La soumission a échoué", { description: error instanceof Error ? error.message : undefined });
@@ -258,7 +299,7 @@ export default function TechnicianKnowledgeBaseManager() {
         toast.success("Article créé en brouillon", { description: "Vous en êtes l’auteur." });
       }
       setDrawer(null);
-      await loadData(false);
+      await loadData(pagination.currentPage, false, true);
     } catch (error) {
       toast.error("L’enregistrement a échoué", { description: error instanceof Error ? error.message : undefined });
     } finally {
@@ -315,10 +356,10 @@ export default function TechnicianKnowledgeBaseManager() {
   }
 
   const metrics = [
-    { label: "Mes brouillons", value: items.filter((article) => article.isMine && article.status === "brouillon").length, icon: File, accent: false },
-    { label: "À corriger", value: items.filter((article) => article.isMine && article.status === "a_corriger").length, icon: TriangleAlert, accent: true },
-    { label: "En attente", value: items.filter((article) => article.isMine && article.status === "en_attente_validation").length, icon: Clock, accent: false },
-    { label: "Publiés (Équipe)", value: items.filter((article) => article.status === "publie").length, icon: BookOpen, accent: false },
+    { label: "Mes brouillons", value: knowledgeMetrics.drafts, icon: File, accent: false },
+    { label: "À corriger", value: knowledgeMetrics.corrections, icon: TriangleAlert, accent: true },
+    { label: "En attente", value: knowledgeMetrics.pending, icon: Clock, accent: false },
+    { label: "Publiés (Équipe)", value: knowledgeMetrics.published, icon: BookOpen, accent: false },
   ];
 
   return (
@@ -345,10 +386,10 @@ export default function TechnicianKnowledgeBaseManager() {
       </div>
 
       <TabsContent value="mine">
-        <ArticleTable articles={myArticles} variant="mine" toolbar={toolbarFor("mine")} openingArticleId={openingArticleId} onView={(article) => void openArticle(article, "view")} onEdit={(article) => void openArticle(article, "edit")} onSubmit={setPendingSubmission} />
+        <ArticleTable articles={myArticles} variant="mine" toolbar={toolbarFor("mine")} openingArticleId={openingArticleId} pageLoading={pageLoading} pagination={pagination} perPage={perPage} onPerPageChange={setPerPage} onPageChange={(page) => void loadData(page, false)} onView={(article) => void openArticle(article, "view")} onEdit={(article) => void openArticle(article, "edit")} onSubmit={setPendingSubmission} />
       </TabsContent>
       <TabsContent value="system">
-        <ArticleTable articles={systemArticles} variant="system" toolbar={toolbarFor("system")} openingArticleId={openingArticleId} onView={(article) => void openArticle(article, "view")} onEdit={(article) => void openArticle(article, "edit")} onSubmit={(article) => void submitForValidation(article)} />
+        <ArticleTable articles={systemArticles} variant="system" toolbar={toolbarFor("system")} openingArticleId={openingArticleId} pageLoading={pageLoading} pagination={pagination} perPage={perPage} onPerPageChange={setPerPage} onPageChange={(page) => void loadData(page, false)} onView={(article) => void openArticle(article, "view")} onEdit={(article) => void openArticle(article, "edit")} onSubmit={(article) => void submitForValidation(article)} />
       </TabsContent>
 
       {drawer && <ArticleDrawer drawer={drawer} categories={categories} saving={saving} onClose={() => setDrawer(null)} onSave={saveArticle} />}
@@ -376,21 +417,19 @@ export default function TechnicianKnowledgeBaseManager() {
   );
 }
 
-function ArticleTable({ articles, variant, toolbar, openingArticleId, onView, onEdit, onSubmit }: { articles: TechnicianKnowledgeArticle[]; variant: "mine" | "system"; toolbar: ReactNode; openingArticleId: string | null; onView: (article: TechnicianKnowledgeArticle) => void; onEdit: (article: TechnicianKnowledgeArticle) => void; onSubmit: (article: TechnicianKnowledgeArticle) => void }) {
-  const [page, setPage] = useState(1);
-  const pageCount = Math.max(1, Math.ceil(articles.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount);
-  const visibleArticles = articles.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+function ArticleTable({ articles, variant, toolbar, openingArticleId, pageLoading, pagination, perPage, onPerPageChange, onPageChange, onView, onEdit, onSubmit }: { articles: TechnicianKnowledgeArticle[]; variant: "mine" | "system"; toolbar: ReactNode; openingArticleId: string | null; pageLoading: boolean; pagination: PaginationMeta; perPage: number; onPerPageChange: (value: number) => void; onPageChange: (page: number) => void; onView: (article: TechnicianKnowledgeArticle) => void; onEdit: (article: TechnicianKnowledgeArticle) => void; onSubmit: (article: TechnicianKnowledgeArticle) => void }) {
+  const pages = Array.from({ length: pagination.lastPage }, (_, index) => index + 1);
   return (
     <section className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-white shadow-sm">
       {toolbar}
-      <div className="overflow-x-auto">
+      <div className={`relative overflow-x-auto ${pageLoading ? "min-h-48" : ""}`}>
+        {pageLoading && <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/75"><Spinner aria-label="Chargement de la page" className="size-6 text-primary" /></div>}
         <table className={`w-full text-left ${variant === "system" ? "min-w-[1060px]" : "min-w-[820px]"}`}>
           <thead className="bg-surface-container-low text-xs uppercase tracking-wider text-on-surface-variant">
             <tr><th className="px-6 py-4 font-semibold">Titre</th><th className="px-4 py-4 font-semibold">Catégorie</th><th className="px-4 py-4 font-semibold">{variant === "mine" ? "Auteur (Vous)" : "Auteur"}</th>{variant === "system" && <th className="px-4 py-4 font-semibold">Mots-clés</th>}{variant === "system" && <th className="px-4 py-4 font-semibold">Vues</th>}<th className="px-4 py-4 font-semibold">Statut</th><th className="px-4 py-4 font-semibold">Dernière mise à jour</th><th className="px-5 py-4 text-right font-semibold">Actions</th></tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/15">
-            {visibleArticles.map((article) => (
+            {articles.map((article) => (
               <tr key={article.reference} className="transition-colors hover:bg-surface-container-low/70">
                 <td className="px-6 py-4"><p className="max-w-72 font-semibold text-on-surface">{article.title}</p><p className="mt-1 text-xs text-on-surface-variant">Réf. {article.reference}</p></td>
                 <td className="px-4 py-4 text-sm text-on-surface-variant">{article.category ?? "—"}</td>
@@ -407,11 +446,20 @@ function ArticleTable({ articles, variant, toolbar, openingArticleId, onView, on
         </table>
       </div>
       <div className="flex flex-col gap-3 border-t border-outline-variant/20 px-6 py-4 text-sm text-on-surface-variant sm:flex-row sm:items-center sm:justify-between">
-        <span>Affichage {articles.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-{Math.min(currentPage * PAGE_SIZE, articles.length)} sur {articles.length} articles</span>
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1} className="inline-flex size-8 items-center justify-center rounded-lg border border-outline-variant/30 disabled:opacity-40" aria-label="Page précédente"><ChevronLeft size={17} /></button>
-          <span>Page {currentPage} / {pageCount}</span>
-          <button type="button" onClick={() => setPage((value) => Math.min(pageCount, value + 1))} disabled={currentPage === pageCount} className="inline-flex size-8 items-center justify-center rounded-lg border border-outline-variant/30 disabled:opacity-40" aria-label="Page suivante"><ChevronRight size={17} /></button>
+        <div className="flex flex-wrap items-center gap-4">
+          <span>Affichage {pagination.from}-{pagination.to} sur {pagination.total} articles</span>
+          <div className="flex items-center gap-2">
+            <Label htmlFor={`articles-per-page-${variant}`} className="whitespace-nowrap text-xs font-normal text-on-surface-variant">Lignes par page</Label>
+            <Select value={String(perPage)} onValueChange={(value) => onPerPageChange(Number(value))} disabled={pageLoading}>
+              <SelectTrigger id={`articles-per-page-${variant}`} className="h-8 w-20 bg-white"><SelectValue /></SelectTrigger>
+              <SelectContent>{PAGE_SIZE_OPTIONS.map((value) => <SelectItem key={value} value={String(value)}>{value}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => onPageChange(pagination.currentPage - 1)} disabled={pageLoading || pagination.currentPage === 1} className="inline-flex size-8 items-center justify-center rounded-lg border border-outline-variant/30 disabled:opacity-40" aria-label="Page précédente"><ChevronLeft size={17} /></button>
+          {pages.map((page) => <button key={page} type="button" onClick={() => onPageChange(page)} disabled={pageLoading} aria-current={page === pagination.currentPage ? "page" : undefined} className={`inline-flex size-8 items-center justify-center rounded-lg border text-xs font-semibold ${page === pagination.currentPage ? "border-primary-container bg-primary-container text-on-primary-container" : "border-outline-variant/30 bg-white hover:bg-surface-container-low"}`}>{page}</button>)}
+          <button type="button" onClick={() => onPageChange(pagination.currentPage + 1)} disabled={pageLoading || pagination.currentPage === pagination.lastPage} className="inline-flex size-8 items-center justify-center rounded-lg border border-outline-variant/30 disabled:opacity-40" aria-label="Page suivante"><ChevronRight size={17} /></button>
         </div>
       </div>
     </section>
