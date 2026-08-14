@@ -5,7 +5,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardPanel,
+  CardContent,
   CardTitle,
 } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -19,7 +19,7 @@ export default function Particle() {
         <CardTitle>Login to your account</CardTitle>
         <CardDescription>Enter email and password to login</CardDescription>
       </CardHeader>
-      <CardPanel>
+      <CardContent>
         <Form className="flex w-full flex-col gap-4">
           <Field>
             <FieldLabel>Email</FieldLabel>
@@ -33,7 +33,7 @@ export default function Particle() {
             Login
           </Button>
         </Form>
-      </CardPanel>
+      </CardContent>
       <CardFooter className="border-t">
         <div className="flex gap-1 text-muted-foreground text-xs">
           <ShieldAlertIcon className="size-3 h-lh shrink-0" />
