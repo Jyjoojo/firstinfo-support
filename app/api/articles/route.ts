@@ -12,7 +12,7 @@ function errorResponse(error: ApiError) {
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    if (url.searchParams.get("espace") === "technicien") {
+    if (["technicien", "admin"].includes(url.searchParams.get("espace") ?? "")) {
       url.searchParams.delete("espace");
       const query = url.searchParams.toString();
       const data = await apiFetch<unknown>(`/api/articles${query ? `?${query}` : ""}`, {

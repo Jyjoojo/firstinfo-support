@@ -1,5 +1,4 @@
 import KnowledgeBaseManager from "@/app/ui/dashboard/admin/KnowledgeBaseManager";
-import { knowledgeArticles, knowledgeCategories } from "@/lib/knowledge-base";
 
 export default function KnowledgeBasePage() {
   return (
@@ -10,7 +9,7 @@ export default function KnowledgeBasePage() {
           Centralisez les procédures et les réponses utiles à vos utilisateurs.
         </p>
       </div>
-      <KnowledgeBaseManager articles={knowledgeArticles} categories={knowledgeCategories} />
+      <KnowledgeBaseManager />
     </div>
   );
 }

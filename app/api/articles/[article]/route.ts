@@ -15,7 +15,7 @@ export async function GET(
 ) {
   try {
     const { article } = await params;
-    if (new URL(request.url).searchParams.get("espace") === "technicien") {
+    if (["technicien", "admin"].includes(new URL(request.url).searchParams.get("espace") ?? "")) {
       const data = await apiFetch<unknown>(`/api/articles/${encodeURIComponent(article)}`, {
         redirectOnUnauthorized: false,
       });
@@ -54,6 +54,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ arti
     const { article } = await params;
     const data = await updateArticle(request, article, "PUT");
     return NextResponse.json(data ?? { message: "Article mis à jour." });
+  } catch (error) {
+    if (error instanceof ApiError) return errorResponse(error);
+    throw error;
+  }
+}
+
+export async function DELETE(_request: Request, { params }: { params: Promise<{ article: string }> }) {
+  try {
+    const { article } = await params;
+    const data = await apiFetch<unknown>(`/api/articles/${encodeURIComponent(article)}`, {
+      method: "DELETE",
+      redirectOnUnauthorized: false,
+    });
+    return NextResponse.json(data ?? { message: "Article archivé." });
   } catch (error) {
     if (error instanceof ApiError) return errorResponse(error);
     throw error;
